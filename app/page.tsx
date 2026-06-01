@@ -2,179 +2,620 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Activity, Shield, Phone, AlertTriangle, Heart, Users, ChevronRight } from 'lucide-react';
-import { isAuthenticated, plansApi } from '@/lib/api';
+import { isAuthenticated } from '@/lib/api';
+import {
+  Shield,
+  Activity,
+  MapPin,
+  QrCode,
+  Nfc,
+  Lock,
+  Smartphone,
+  Database,
+  RefreshCw,
+  HardHat,
+  ChevronDown,
+  ChevronUp,
+  MessageCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Cross,
+  User,
+  Phone,
+  FileText,
+} from 'lucide-react';
 
-const FEATURES = [
-  { icon: Shield, title: 'Datos Médicos', desc: 'Almacena tu tipo de sangre, alergias y condiciones' },
-  { icon: Phone, title: 'Contactos de Emergencia', desc: 'Notifica a tus familiares instantly' },
-  { icon: AlertTriangle, title: 'Alertas GPS', desc: 'Comparte tu ubicación en emergencias' },
-  { icon: Heart, title: 'Donador de Órganos', desc: 'Indica tu preferencia para donación' },
-];
+const WHATSAPP_NUMBER = '525530541062';
+const WHATSAPP_MESSAGE = encodeURIComponent('Hola, quiero comprar mi paquete HelpMe 🏍️');
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+
+function FloatingWhatsAppButton() {
+  return (
+    <a
+      href={WHATSAPP_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300"
+      aria-label="Contactar por WhatsApp"
+    >
+      <MessageCircle className="w-7 h-7 text-white" />
+    </a>
+  );
+}
+
+function Header() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = [
+    { href: '#problema', label: 'Problema' },
+    { href: '#solucion', label: 'Solución' },
+    { href: '#como-funciona', label: 'Cómo Funciona' },
+    { href: '#beneficios', label: 'Beneficios' },
+    { href: '#precio', label: 'Precio' },
+    { href: '#faq', label: 'FAQ' },
+  ];
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <a href="#" className="flex items-center gap-2 group" aria-label="HelpMe - Inicio">
+          <div className="flex items-center justify-center w-9 h-9 bg-red-600 rounded-lg group-hover:bg-red-700 transition-colors">
+            <Cross className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xl font-bold text-gray-900">HelpMe</span>
+        </a>
+
+        <nav className="hidden lg:flex items-center gap-6" aria-label="Navegación principal">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium text-gray-600 hover:text-red-600 transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+          aria-label="Abrir menú"
+          aria-expanded={mobileOpen}
+        >
+          <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            {mobileOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {mobileOpen && (
+        <div className="lg:hidden bg-white border-t border-gray-100">
+          <nav className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-2" aria-label="Navegación móvil">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+}
+
+function HeroSection() {
+  return (
+    <section className="relative pt-28 pb-20 sm:pt-36 sm:pb-28 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 overflow-hidden">
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-red-500 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600/20 border border-red-500/30 rounded-full mb-8">
+          <AlertTriangle className="w-4 h-4 text-red-400" />
+          <span className="text-sm font-medium text-red-300">Identificación de emergencia para bikers</span>
+        </div>
+
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight">
+          En un accidente, los primeros
+          <span className="block text-red-500">minutos son vitales</span>
+        </h1>
+
+        <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+          HelpMe lleva tus datos médicos siempre contigo. Sin app. Sin registro. Solo escanea.
+        </p>
+
+        <a
+          href={WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 hover:scale-105 transition-all duration-200 shadow-lg shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+        >
+          <MessageCircle className="w-5 h-5" />
+          Quiero mi HelpMe
+        </a>
+
+        <div className="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto">
+          {[
+            { icon: Nfc, label: 'NFC' },
+            { icon: QrCode, label: 'QR' },
+            { icon: Shield, label: 'Cifrado' },
+          ].map(({ icon: Icon, label }) => (
+            <div key={label} className="flex flex-col items-center gap-2">
+              <div className="flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl">
+                <Icon className="w-6 h-6 text-red-400" />
+              </div>
+              <span className="text-sm font-medium text-gray-400">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProblemSection() {
+  return (
+    <section id="problema" className="py-20 sm:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6">
+            Estás inconsciente. El paramédico
+            <span className="text-red-600"> no sabe nada de ti.</span>
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            No saben tu tipo de sangre, a qué eres alérgico, qué medicamentos tomas ni a quién llamar. Cada segundo cuenta y la información no está disponible.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          {[
+            {
+              icon: Database,
+              title: 'Sin tipo de sangre registrado',
+            },
+            {
+              icon: Phone,
+              title: 'Sin contacto de emergencia localizable',
+            },
+            {
+              icon: FileText,
+              title: 'Sin historial médico disponible',
+            },
+          ].map(({ icon: Icon, title }) => (
+            <div
+              key={title}
+              className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 rounded-xl mb-6">
+                <Icon className="w-7 h-7 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SolutionSection() {
+  return (
+    <section id="solucion" className="py-20 sm:py-28 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-2xl mb-8">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6">
+            HelpMe lo resuelve en segundos
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Un paquete con tecnología NFC y QR que cualquier rescatista puede escanear para ver tus datos médicos al instante. Sin app, sin registro, sin internet.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-12 max-w-3xl mx-auto">
+          <h3 className="text-xl font-bold text-gray-900 mb-8 text-center">Contenido del paquete</h3>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {[
+              { icon: QrCode, text: 'Tarjeta NFC con QR impreso' },
+              { icon: HardHat, text: 'Pegatina NFC para tu casco' },
+              { icon: MapPin, text: 'Sticker de ubicación para el NFC' },
+              { icon: FileText, text: 'Tarjeta de instrucciones' },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg flex-shrink-0">
+                  <Icon className="w-5 h-5 text-red-600" />
+                </div>
+                <span className="font-medium text-gray-900">{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorksSection() {
+  const steps = [
+    {
+      number: 1,
+      icon: MessageCircle,
+      title: 'Escríbenos por WhatsApp',
+      description: 'Escríbenos por WhatsApp y coordina tu entrega en CDMX.',
+    },
+    {
+      number: 2,
+      icon: QrCode,
+      title: 'Escanea el QR',
+      description: 'Escanea el QR de tu tarjeta NFC.',
+    },
+    {
+      number: 3,
+      icon: Lock,
+      title: 'Crea tu PIN',
+      description: 'Crea tu PIN secreto y llena tus datos médicos.',
+    },
+    {
+      number: 4,
+      icon: Shield,
+      title: 'Listo',
+      description: 'Tu información viaja contigo siempre.',
+    },
+  ];
+
+  return (
+    <section id="como-funciona" className="py-20 sm:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+            Actívalo en 4 pasos
+          </h2>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, index) => (
+            <div key={step.number} className="relative">
+              {index < steps.length - 1 && (
+                <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
+              )}
+              <div className="relative bg-white border border-gray-200 rounded-2xl p-8 text-center hover:shadow-lg hover:border-red-200 transition-all duration-300">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-red-600 rounded-xl mb-6">
+                  <span className="text-lg font-bold text-white">{step.number}</span>
+                </div>
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-xl mb-4">
+                  <step.icon className="w-7 h-7 text-gray-700" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
+                <p className="text-gray-600">{step.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BenefitsSection() {
+  const benefits = [
+    {
+      icon: Smartphone,
+      title: 'Sin app',
+      description: 'Cualquier celular puede escanear tu NFC o QR.',
+    },
+    {
+      icon: Lock,
+      title: 'Datos cifrados',
+      description: 'Seguridad de nivel bancario AES-256.',
+    },
+    {
+      icon: Activity,
+      title: 'Acceso inmediato',
+      description: 'Paramédicos, policías, cualquier rescatista.',
+    },
+    {
+      icon: RefreshCw,
+      title: 'Siempre actualizable',
+      description: 'Cambia tus datos cuando quieras con tu PIN.',
+    },
+    {
+      icon: HardHat,
+      title: 'Resistente',
+      description: 'Materiales pensados para uso diario en moto.',
+    },
+    {
+      icon: Nfc,
+      title: 'Sin registro',
+      description: 'No necesitas crear cuenta. Solo escanea y listo.',
+    },
+  ];
+
+  return (
+    <section id="beneficios" className="py-20 sm:py-28 bg-gray-950">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+            ¿Por qué elegir HelpMe?
+          </h2>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {benefits.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-red-600/50 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300"
+            >
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-red-600/20 rounded-xl mb-4">
+                <Icon className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+              <p className="text-gray-400">{description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PricingSection() {
+  return (
+    <section id="precio" className="py-20 sm:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+            Todo lo que necesitas en un solo paquete
+          </h2>
+        </div>
+
+        <div className="max-w-lg mx-auto">
+          <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-3xl p-8 sm:p-10 text-white shadow-2xl shadow-red-600/30">
+            <div className="space-y-4 mb-8">
+              {[
+                'Tarjeta NFC con QR impreso',
+                'Pegatina NFC para casco',
+                'Sticker de ubicación',
+                'Tarjeta de instrucciones',
+                'Activación y soporte incluido',
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-red-200 flex-shrink-0" />
+                  <span className="font-medium">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-4 bg-white text-red-600 font-bold text-center text-lg rounded-xl hover:bg-gray-100 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/50"
+            >
+              Pedir por WhatsApp
+            </a>
+
+            <p className="mt-6 text-center text-sm text-red-200">
+              Entregas personales en CDMX · Coordinamos por WhatsApp
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TestimonialSection() {
+  return (
+    <section className="py-20 sm:py-28 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+            Por qué creé HelpMe
+          </h2>
+        </div>
+
+        <div className="max-w-3xl mx-auto">
+          <blockquote className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-12 shadow-sm">
+            <div className="flex items-center gap-1 mb-6">
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+            <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mb-8 italic">
+              &quot;Soy biker desde hace 5 años y he visto innumerables tipos de accidentes. Los que parecen leves pueden complicarse en segundos cuando el rescatista no tiene información. Vi esa necesidad de primera mano y creé HelpMe para que ningún biker esté desprotegido en la carretera.&quot;
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full">
+                <User className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">Fundador de HelpMe</p>
+                <p className="text-sm text-gray-500">CDMX</p>
+              </div>
+            </div>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      question: '¿Necesito descargar una app para que vean mis datos?',
+      answer: 'No. Cualquier celular con cámara o NFC puede acceder a tus datos. Sin apps, sin registro.',
+    },
+    {
+      question: '¿Qué pasa si olvido mi PIN?',
+      answer: 'Escríbenos por WhatsApp al 5530541062 y te ayudamos a recuperar el acceso.',
+    },
+    {
+      question: '¿Mis datos médicos están seguros?',
+      answer: 'Sí. Usamos cifrado AES-256, el mismo estándar de la banca. Nadie puede leer tu información sin tu PIN.',
+    },
+    {
+      question: '¿Funciona con cualquier celular?',
+      answer: 'El QR funciona con cualquier celular con cámara. El NFC funciona con la mayoría de smartphones modernos.',
+    },
+    {
+      question: '¿Cómo recibo mi paquete?',
+      answer: 'Las entregas son personales en CDMX. Coordinamos día, hora y punto de entrega por WhatsApp.',
+    },
+    {
+      question: '¿Puedo actualizar mis datos después?',
+      answer: 'Sí, cuantas veces quieras. Solo entra a tu enlace de configuración e ingresa tu PIN.',
+    },
+  ];
+
+  return (
+    <section id="faq" className="py-20 sm:py-28 bg-white">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+            Preguntas frecuentes
+          </h2>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 transition-colors"
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full flex items-center justify-between p-6 text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-inset"
+                aria-expanded={openIndex === index}
+              >
+                <span className="font-semibold text-gray-900 pr-4">{faq.question}</span>
+                {openIndex === index ? (
+                  <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                )}
+              </button>
+              {openIndex === index && (
+                <div className="px-6 pb-6">
+                  <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FinalCTASection() {
+  return (
+    <section className="py-20 sm:py-28 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-6">
+          No esperes a que pase algo
+        </h2>
+        <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+          Protege tu vida hoy. Tu información puede salvarla mañana.
+        </p>
+        <a
+          href={WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 hover:scale-105 transition-all duration-200 shadow-lg shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+        >
+          <MessageCircle className="w-5 h-5" />
+          Quiero mi HelpMe ahora
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  const router = useRouter();
+
+  return (
+    <footer className="bg-gray-950 border-t border-gray-800 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-8 h-8 bg-red-600 rounded-lg">
+              <Cross className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-lg font-bold text-white">HelpMe</span>
+          </div>
+
+          <div className="flex items-center gap-6 text-sm text-gray-400">
+            <a href="/aviso-de-privacidad" className="hover:text-white transition-colors">
+              Aviso de Privacidad
+            </a>
+            <span>·</span>
+            <a href="/terminos-y-condiciones" className="hover:text-white transition-colors">
+              Términos y Condiciones
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} HelpMe · Todos los derechos reservados · CDMX
+          </p>
+          <button
+            onClick={() => router.push('/login')}
+            className="text-sm text-gray-500 hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
+          >
+            Acceso Vendedores / Admin
+          </button>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 export default function LandingPage() {
   const router = useRouter();
-  const [plans, setPlans] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isAuthenticated()) {
       router.push('/dashboard');
-      return;
     }
-    loadPlans();
   }, [router]);
 
-  async function loadPlans() {
-    try {
-      const data = await plansApi.getPlans();
-      setPlans(data.plans || []);
-    } catch {
-      setPlans([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <header className="bg-white shadow-sm">
-        <nav className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-red-600 p-2 rounded-xl">
-              <Activity className="w-6 h-6 text-white" />
-            </div>
-            <span className="font-bold text-xl text-gray-900">HelpMe</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium">
-              Iniciar Sesión
-            </Link>
-            <Link href="/register" className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-              Crear Cuenta
-            </Link>
-          </div>
-        </nav>
-      </header>
-
+    <div className="min-h-screen bg-white">
+      <Header />
       <main>
-        <section className="max-w-6xl mx-auto px-4 py-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-bold mb-6">
-            <AlertTriangle className="w-4 h-4" />
-            Para motociclistas
-          </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
-            Tu Ficha Médica<br />
-            <span className="text-red-600">Siempre Contigo</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-            En caso de accidente, los servicios de emergencia podrán escanear tu código QR 
-            y acceder a tu información médica vital al instante.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all inline-flex items-center justify-center gap-2 shadow-lg shadow-red-600/20">
-              Crear Mi Ficha Gratis
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-            <Link href="/l/demo" className="bg-white hover:bg-gray-50 text-gray-700 px-8 py-4 rounded-xl font-bold text-lg transition-all border border-gray-200 inline-flex items-center justify-center gap-2">
-              Ver Demo
-            </Link>
-          </div>
-        </section>
-
-        <section className="bg-white py-20">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-4">¿Por qué HelpMe?</h2>
-              <p className="text-gray-600 max-w-xl mx-auto">
-                Diseñado específicamente para motociclistas que circulan por la ciudad
-              </p>
-            </div>
-            <div className="grid md:grid-cols-4 gap-8">
-              {FEATURES.map((f, i) => (
-                <div key={i} className="text-center p-6 rounded-2xl bg-gray-50 border border-gray-100">
-                  <div className="bg-red-100 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <f.icon className="w-7 h-7 text-red-600" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
-                  <p className="text-gray-600 text-sm">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Planes Simples</h2>
-              <p className="text-gray-600">Elige el plan que mejor se adapte a tus necesidades</p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {loading ? (
-                <div className="col-span-3 text-center py-12 text-gray-500">Cargando planes...</div>
-              ) : plans.length === 0 ? (
-                <>
-                  <div className="bg-white rounded-2xl p-8 border-2 border-gray-200">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Free</h3>
-                    <div className="text-4xl font-extrabold text-gray-900 mb-4">$0<span className="text-lg font-normal text-gray-500">/mes</span></div>
-                    <ul className="space-y-3 text-left mb-8">
-                      <li className="flex items-center gap-2 text-gray-600"><ChevronRight className="w-4 h-4 text-green-500" /> 1 ficha médica</li>
-                      <li className="flex items-center gap-2 text-gray-600"><ChevronRight className="w-4 h-4 text-green-500" /> Datos básicos</li>
-                    </ul>
-                    <Link href="/register" className="block text-center bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-bold transition-colors">
-                      Empezar Gratis
-                    </Link>
-                  </div>
-                </>
-              ) : (
-                plans.map((plan: any) => (
-                  <div key={plan.id} className={`bg-white rounded-2xl p-8 border-2 ${plan.popular ? 'border-red-600 shadow-xl shadow-red-600/10' : 'border-gray-200'}`}>
-                    {plan.popular && <span className="inline-block bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">Más Popular</span>}
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                    <div className="text-4xl font-extrabold text-gray-900 mb-4">${plan.price}<span className="text-lg font-normal text-gray-500">/mes</span></div>
-                    <ul className="space-y-3 text-left mb-8">
-                      <li className="flex items-center gap-2 text-gray-600"><ChevronRight className="w-4 h-4 text-green-500" /> {plan.linksLimit} fichas médicas</li>
-                      {plan.features?.map((feature: string, i: number) => (
-                        <li key={i} className="flex items-center gap-2 text-gray-600"><ChevronRight className="w-4 h-4 text-green-500" /> {feature}</li>
-                      ))}
-                    </ul>
-                    <Link href="/register" className={`block text-center px-6 py-3 rounded-xl font-bold transition-colors ${plan.popular ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-900 hover:bg-gray-800 text-white'}`}>
-                      Empezar
-                    </Link>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-red-600 py-20">
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <Users className="w-16 h-16 text-red-200 mx-auto mb-6" />
-            <h2 className="text-3xl font-extrabold text-white mb-4">¿Listo para protegerte?</h2>
-            <p className="text-red-100 text-lg mb-8">
-              Crea tu ficha médica en menos de 2 minutos y compártela con tus seres queridos.
-            </p>
-            <Link href="/register" className="inline-flex items-center gap-2 bg-white text-red-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-red-50 transition-colors">
-              Crear Mi Ficha Ahora
-            </Link>
-          </div>
-        </section>
+        <HeroSection />
+        <ProblemSection />
+        <SolutionSection />
+        <HowItWorksSection />
+        <BenefitsSection />
+        <PricingSection />
+        <TestimonialSection />
+        <FAQSection />
+        <FinalCTASection />
       </main>
-
-      <footer className="bg-gray-900 text-gray-400 py-12">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="bg-red-600 p-2 rounded-xl">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-xl text-white">HelpMe</span>
-          </div>
-          <p className="text-sm">© 2024 HelpMe. Todos los derechos reservados.</p>
-        </div>
-      </footer>
+      <Footer />
+      <FloatingWhatsAppButton />
     </div>
   );
 }
