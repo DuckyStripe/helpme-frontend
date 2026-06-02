@@ -67,6 +67,18 @@ export interface Seller {
   createdAt: string;
 }
 
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN';
+  createdAt: string;
+}
+
+export interface AdminsListResponse {
+  admins: AdminUser[];
+}
+
 export interface SellersListResponse {
   sellers: Seller[];
 }

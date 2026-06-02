@@ -278,6 +278,24 @@ export const usersApi = {
   },
 };
 
+export const adminsApi = {
+  async list() {
+    return api.get<{ admins: any[] }>('/users/admins');
+  },
+
+  async create(name: string, email: string, password: string) {
+    return api.post<any>('/users/admins', { name, email, password });
+  },
+
+  async update(id: string, data: { name?: string; email?: string }) {
+    return api.put<any>(`/users/admins/${id}`, data);
+  },
+
+  async remove(id: string) {
+    return api.delete<any>(`/users/admins/${id}`);
+  },
+};
+
 export const metricsApi = {
   async get(period: '7d' | '30d' | '90d' = '7d') {
     return api.get<{
