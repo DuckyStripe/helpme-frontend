@@ -323,10 +323,14 @@ export default function ConfigPage() {
   const [customGender, setCustomGender] = useState('');
   const [customReligion, setCustomReligion] = useState('');
   const [customUmf, setCustomUmf] = useState('');
-  const [hasAllergies, setHasAllergies] = useState<boolean | null>(null);
-  const [hereditaryCondition, setHereditaryCondition] = useState('');
-  const [customHereditaryCondition, setCustomHereditaryCondition] = useState('');
-  const [hereditaryLine, setHereditaryLine] = useState<'materna' | 'paterna' | 'ambas'>('materna');
+  const [allergyInput, setAllergyInput] = useState('');
+  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+  const [hereditaryInput, setHereditaryInput] = useState('');
+  const [selectedHereditary, setSelectedHereditary] = useState<{ name: string; line: 'materna' | 'paterna' | 'ambas'; isActive: boolean }[]>([]);
+  const [showAllergySelect, setShowAllergySelect] = useState(false);
+  const [showHereditarySelect, setShowHereditarySelect] = useState(false);
+  const [customAllergy, setCustomAllergy] = useState('');
+  const [customHereditary, setCustomHereditary] = useState('');
 
   useEffect(() => {
     loadTagStatus();
@@ -358,20 +362,25 @@ export default function ConfigPage() {
             setCustomUmf(json.data.medicalData.umf);
             updateMedicalField('umf', 'Otra');
           }
-          if (json.data.medicalData.allergies && json.data.medicalData.allergies !== 'Ninguna conocida') {
-            setHasAllergies(true);
-          } else if (json.data.medicalData.allergies === 'Ninguna conocida') {
-            setHasAllergies(false);
+          if (json.data.medicalData.allergies) {
+            if (json.data.medicalData.allergies === 'Ninguna conocida') {
+              setSelectedAllergies([]);
+            } else {
+              const allergies = json.data.medicalData.allergies.split('|').filter((a: string) => a.trim());
+              setSelectedAllergies(allergies);
+            }
           }
           if (json.data.medicalData.hereditaryConditions) {
-            const parts = json.data.medicalData.hereditaryConditions.split(' - ');
-            if (parts.length >= 2) {
-              setHereditaryCondition(parts[0]);
-              if (!hereditaryConditions.includes(parts[0])) {
-                setCustomHereditaryCondition(parts[0]);
-              }
-              setHereditaryLine(parts[1] as 'materna' | 'paterna' | 'ambas');
-            }
+            const items = json.data.medicalData.hereditaryConditions.split('|').filter((h: string) => h.trim());
+            const parsed = items.map((item: string) => {
+              const parts = item.split(' - ');
+              return {
+                name: parts[0] || '',
+                line: (parts[1] as 'materna' | 'paterna' | 'ambas') || 'materna',
+                isActive: parts[2] === 'si',
+              };
+            });
+            setSelectedHereditary(parsed);
           }
         }
         if (json.data.contacts && json.data.contacts.length > 0) {
@@ -878,57 +887,111 @@ export default function ConfigPage() {
                 <div className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Alergias</label>
-                    <div className="flex gap-2">
-                      {['Si', 'No'].map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => {
-                            if (opt === 'Si') {
-                              setHasAllergies(true);
-                              if (!medicalData.allergies || medicalData.allergies === 'Ninguna conocida') {
-                                updateMedicalField('allergies', '');
-                              }
-                            } else {
-                              setHasAllergies(false);
-                              updateMedicalField('allergies', 'Ninguna conocida');
-                            }
-                          }}
-                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
-                            (opt === 'Si' && hasAllergies === true) || (opt === 'No' && hasAllergies === false)
-                              ? opt === 'Si'
-                                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
-                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                    {hasAllergies === true && (
-                      <textarea
-                        value={medicalData.allergies === 'Ninguna conocida' ? '' : medicalData.allergies}
-                        onChange={(e) => updateMedicalField('allergies', e.target.value)}
-                        rows={2}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none mt-2"
-                        placeholder="Medicamentos, alimentos, picaduras, etc."
-                      />
-                    )}
-                    {hasAllergies === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
-                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">Ninguna alergia conocida</span>
+                    {selectedAllergies.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {selectedAllergies.map((allergy, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg text-sm font-medium"
+                          >
+                            {allergy}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = selectedAllergies.filter((_, i) => i !== idx);
+                                setSelectedAllergies(updated);
+                                updateMedicalField('allergies', updated.length > 0 ? updated.join('|') : 'Ninguna conocida');
+                              }}
+                              className="ml-0.5 text-amber-600 hover:text-amber-800 p-0.5 rounded"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        ))}
                       </div>
                     )}
+                    {showAllergySelect ? (
+                      <div className="space-y-2">
+                        <select
+                          value={allergyInput}
+                          onChange={(e) => {
+                            setAllergyInput(e.target.value);
+                            if (e.target.value && e.target.value !== 'custom') {
+                              const updated = [...selectedAllergies, e.target.value];
+                              setSelectedAllergies(updated);
+                              updateMedicalField('allergies', updated.join('|'));
+                              setAllergyInput('');
+                              setShowAllergySelect(false);
+                            }
+                          }}
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                          autoFocus
+                        >
+                          <option value="">Seleccionar alergia</option>
+                          <option value="Penicilina">Penicilina</option>
+                          <option value="Sulfas">Sulfas</option>
+                          <option value="Aspirina">Aspirina</option>
+                          <option value="Mariscos">Mariscos</option>
+                          <option value="Cacahuate">Cacahuate</option>
+                          <option value="Lacteos">Lacteos</option>
+                          <option value="Huevo">Huevo</option>
+                          <option value="Gluten">Gluten</option>
+                          <option value="Picaduras de abeja">Picaduras de abeja</option>
+                          <option value="Latex">Latex</option>
+                          <option value="Polen">Polen</option>
+                          <option value="custom">Otra (escribir)</option>
+                        </select>
+                        {allergyInput === 'custom' && (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={customAllergy}
+                              onChange={(e) => setCustomAllergy(e.target.value)}
+                              placeholder="Especifica la alergia"
+                              className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (customAllergy.trim()) {
+                                  const updated = [...selectedAllergies, customAllergy.trim()];
+                                  setSelectedAllergies(updated);
+                                  updateMedicalField('allergies', updated.join('|'));
+                                  setCustomAllergy('');
+                                  setShowAllergySelect(false);
+                                }
+                              }}
+                              className="h-12 px-4 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors"
+                            >
+                              Agregar
+                            </button>
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAllergySelect(false);
+                            setAllergyInput('');
+                            setCustomAllergy('');
+                          }}
+                          className="text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllergySelect(true)}
+                        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
+                      >
+                        <Plus className="w-4 h-4" />
+                        {selectedAllergies.length === 0 ? 'Agregar alergia' : 'Agregar otra alergia'}
+                      </button>
+                    )}
                   </div>
-                  <TextAreaField
-                    label="Condiciones Medicas"
-                    value={medicalData.conditions}
-                    onChange={(e) => updateMedicalField('conditions', e.target.value)}
-                    rows={2}
-                    placeholder="Diabetes, hipertension, asma..."
-                  />
+
                   <TextAreaField
                     label="Medicamentos Actuales"
                     value={medicalData.medications}
@@ -939,64 +1002,162 @@ export default function ConfigPage() {
 
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Antecedentes Heredofamiliares</label>
-                    <p className="text-xs text-gray-500 mb-2">Enfermedades hereditarias en tu familia</p>
-                    <select
-                      value={hereditaryConditions.includes(hereditaryCondition) ? hereditaryCondition : (hereditaryCondition ? 'Otra' : '')}
-                      onChange={(e) => {
-                        const selected = e.target.value;
-                        setHereditaryCondition(selected);
-                        if (selected !== 'Otra') {
-                          setCustomHereditaryCondition('');
-                          updateMedicalField('hereditaryConditions', selected ? `${selected} - ${hereditaryLine}` : '');
-                        }
-                      }}
-                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                    >
-                      <option value="">Seleccionar enfermedad</option>
-                      {hereditaryConditions.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                    {hereditaryCondition === 'Otra' && (
-                      <input
-                        type="text"
-                        value={customHereditaryCondition}
-                        onChange={(e) => {
-                          setCustomHereditaryCondition(e.target.value);
-                          updateMedicalField('hereditaryConditions', `${e.target.value} - ${hereditaryLine}`);
-                        }}
-                        placeholder="Especifica la enfermedad"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
-                      />
+                    <p className="text-xs text-gray-500 mb-2">Enfermedades en tu familia (agrega varias)</p>
+                    {selectedHereditary.length > 0 && (
+                      <div className="space-y-2 mb-2">
+                        {selectedHereditary.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                              item.isActive
+                                ? 'bg-red-50 border-red-200'
+                                : 'bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.isActive ? 'bg-red-500' : 'bg-gray-400'}`} />
+                              <div className="min-w-0">
+                                <span className={`text-sm font-medium ${item.isActive ? 'text-red-800' : 'text-gray-700'}`}>
+                                  {item.name}
+                                </span>
+                                <span className="text-xs text-gray-500 ml-1.5">Linea {item.line}</span>
+                                {item.isActive && (
+                                  <span className="ml-1.5 text-xs font-semibold text-red-600">Lo padezco</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...selectedHereditary];
+                                  updated[idx].isActive = !updated[idx].isActive;
+                                  setSelectedHereditary(updated);
+                                  const serialized = updated.map(h => `${h.name} - ${h.line} - ${h.isActive ? 'si' : 'no'}`).join('|');
+                                  updateMedicalField('hereditaryConditions', serialized);
+                                }}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                                  item.isActive
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                }`}
+                              >
+                                {item.isActive ? 'Lo padezco' : 'No lo padezco'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = selectedHereditary.filter((_, i) => i !== idx);
+                                  setSelectedHereditary(updated);
+                                  const serialized = updated.map(h => `${h.name} - ${h.line} - ${h.isActive ? 'si' : 'no'}`).join('|');
+                                  updateMedicalField('hereditaryConditions', serialized || '');
+                                }}
+                                className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
-                    {hereditaryCondition && (
-                      <div className="space-y-2 mt-2">
-                        <label className="block text-xs font-semibold text-gray-600">Linea familiar</label>
-                        <div className="flex gap-2">
-                          {([
-                            { value: 'materna', label: 'Materna' },
-                            { value: 'paterna', label: 'Paterna' },
-                            { value: 'ambas', label: 'Ambas' },
-                          ] as const).map((line) => (
+                    {showHereditarySelect ? (
+                      <div className="space-y-2">
+                        <select
+                          value={hereditaryInput}
+                          onChange={(e) => {
+                            setHereditaryInput(e.target.value);
+                            if (e.target.value && e.target.value !== 'custom') {
+                              const newItem = { name: e.target.value, line: 'materna' as const, isActive: false };
+                              const updated = [...selectedHereditary, newItem];
+                              setSelectedHereditary(updated);
+                              const serialized = updated.map(h => `${h.name} - ${h.line} - ${h.isActive ? 'si' : 'no'}`).join('|');
+                              updateMedicalField('hereditaryConditions', serialized);
+                              setHereditaryInput('');
+                              setShowHereditarySelect(false);
+                            }
+                          }}
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                          autoFocus
+                        >
+                          <option value="">Seleccionar enfermedad</option>
+                          {hereditaryConditions.filter(c => c !== 'Otra' && !selectedHereditary.find(h => h.name === c)).map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                          <option value="custom">Otra (escribir)</option>
+                        </select>
+                        {hereditaryInput === 'custom' && (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={customHereditary}
+                              onChange={(e) => setCustomHereditary(e.target.value)}
+                              placeholder="Especifica la enfermedad"
+                              className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                              autoFocus
+                            />
                             <button
-                              key={line.value}
                               type="button"
                               onClick={() => {
-                                setHereditaryLine(line.value);
-                                const condition = hereditaryCondition === 'Otra' ? customHereditaryCondition : hereditaryCondition;
-                                updateMedicalField('hereditaryConditions', `${condition} - ${line.value}`);
+                                if (customHereditary.trim()) {
+                                  const newItem = { name: customHereditary.trim(), line: 'materna' as const, isActive: false };
+                                  const updated = [...selectedHereditary, newItem];
+                                  setSelectedHereditary(updated);
+                                  const serialized = updated.map(h => `${h.name} - ${h.line} - ${h.isActive ? 'si' : 'no'}`).join('|');
+                                  updateMedicalField('hereditaryConditions', serialized);
+                                  setCustomHereditary('');
+                                  setShowHereditarySelect(false);
+                                }
                               }}
-                              className={`flex-1 h-10 rounded-lg text-xs font-medium transition-all border ${
-                                hereditaryLine === line.value
-                                  ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
-                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
-                              }`}
+                              className="h-12 px-4 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors"
                             >
-                              {line.label}
+                              Agregar
                             </button>
-                          ))}
-                        </div>
+                          </div>
+                        )}
+                        {hereditaryInput && hereditaryInput !== 'custom' && (
+                          <div className="flex gap-2">
+                            {(['materna', 'paterna', 'ambas'] as const).map((line) => (
+                              <button
+                                key={line}
+                                type="button"
+                                onClick={() => {
+                                  const newItem = { name: hereditaryInput, line, isActive: false };
+                                  const updated = [...selectedHereditary, newItem];
+                                  setSelectedHereditary(updated);
+                                  const serialized = updated.map(h => `${h.name} - ${h.line} - ${h.isActive ? 'si' : 'no'}`).join('|');
+                                  updateMedicalField('hereditaryConditions', serialized);
+                                  setHereditaryInput('');
+                                  setShowHereditarySelect(false);
+                                }}
+                                className="flex-1 h-10 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                              >
+                                {line.charAt(0).toUpperCase() + line.slice(1)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowHereditarySelect(false);
+                            setHereditaryInput('');
+                            setCustomHereditary('');
+                          }}
+                          className="text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          Cancelar
+                        </button>
                       </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowHereditarySelect(true)}
+                        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
+                      >
+                        <Plus className="w-4 h-4" />
+                        {selectedHereditary.length === 0 ? 'Agregar antecedente' : 'Agregar otro antecedente'}
+                      </button>
                     )}
                   </div>
                 </div>
