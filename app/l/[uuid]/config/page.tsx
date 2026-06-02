@@ -29,6 +29,7 @@ interface MedicalData {
   allergies: string;
   conditions: string;
   medications: string;
+  hereditaryConditions: string;
   curp: string;
   nss: string;
   pob: string;
@@ -46,6 +47,7 @@ const emptyMedicalData: MedicalData = {
   allergies: '',
   conditions: '',
   medications: '',
+  hereditaryConditions: '',
   curp: '',
   nss: '',
   pob: '',
@@ -89,6 +91,64 @@ const months = [
 ];
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
+const umfClinics = [
+  'UMF 1',
+  'UMF 2',
+  'UMF 3',
+  'UMF 4',
+  'UMF 5',
+  'UMF 6',
+  'UMF 7',
+  'UMF 8',
+  'UMF 9',
+  'UMF 10',
+  'UMF 11',
+  'UMF 12',
+  'UMF 13',
+  'UMF 14',
+  'UMF 15',
+  'UMF 16',
+  'UMF 17',
+  'UMF 18',
+  'UMF 19',
+  'UMF 20',
+  'UMF 21',
+  'UMF 22',
+  'UMF 23',
+  'UMF 24',
+  'UMF 25',
+  'UMF 26',
+  'UMF 27',
+  'UMF 28',
+  'UMF 29',
+  'UMF 30',
+  'UMF 31',
+  'UMF 32',
+  'UMF 33',
+  'UMF 34',
+  'UMF 35',
+  'Otra',
+];
+
+const hereditaryConditions = [
+  'Diabetes',
+  'Hipertension',
+  'Cancer',
+  'Asma',
+  'Epilepsia',
+  'Enfermedad cardiaca',
+  'Enfermedad renal',
+  'Artritis',
+  'Obesidad',
+  'Depresion',
+  'Alzheimer',
+  'Parkinson',
+  'Osteoporosis',
+  'Glaucoma',
+  'Hemofilia',
+  'Otra',
+];
 
 function PinInput({ length, value, onChange, showPin }: { length: number; value: string; onChange: (v: string) => void; showPin: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -262,6 +322,11 @@ export default function ConfigPage() {
   const [formTransition, setFormTransition] = useState(false);
   const [customGender, setCustomGender] = useState('');
   const [customReligion, setCustomReligion] = useState('');
+  const [customUmf, setCustomUmf] = useState('');
+  const [hasAllergies, setHasAllergies] = useState<boolean | null>(null);
+  const [hereditaryCondition, setHereditaryCondition] = useState('');
+  const [customHereditaryCondition, setCustomHereditaryCondition] = useState('');
+  const [hereditaryLine, setHereditaryLine] = useState<'materna' | 'paterna' | 'ambas'>('materna');
 
   useEffect(() => {
     loadTagStatus();
@@ -288,6 +353,25 @@ export default function ConfigPage() {
           if (json.data.medicalData.religion && !religions.includes(json.data.medicalData.religion)) {
             setCustomReligion(json.data.medicalData.religion);
             updateMedicalField('religion', 'Otra');
+          }
+          if (json.data.medicalData.umf && !umfClinics.includes(json.data.medicalData.umf)) {
+            setCustomUmf(json.data.medicalData.umf);
+            updateMedicalField('umf', 'Otra');
+          }
+          if (json.data.medicalData.allergies && json.data.medicalData.allergies !== 'Ninguna conocida') {
+            setHasAllergies(true);
+          } else if (json.data.medicalData.allergies === 'Ninguna conocida') {
+            setHasAllergies(false);
+          }
+          if (json.data.medicalData.hereditaryConditions) {
+            const parts = json.data.medicalData.hereditaryConditions.split(' - ');
+            if (parts.length >= 2) {
+              setHereditaryCondition(parts[0]);
+              if (!hereditaryConditions.includes(parts[0])) {
+                setCustomHereditaryCondition(parts[0]);
+              }
+              setHereditaryLine(parts[1] as 'materna' | 'paterna' | 'ambas');
+            }
           }
         }
         if (json.data.contacts && json.data.contacts.length > 0) {
@@ -755,25 +839,89 @@ export default function ConfigPage() {
                       value={medicalData.pob}
                       onChange={(e) => updateMedicalField('pob', e.target.value)}
                     />
-                    <InputField
-                      label="UMF"
-                      type="text"
-                      value={medicalData.umf}
-                      onChange={(e) => updateMedicalField('umf', e.target.value)}
-                    />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">UMF</label>
+                    <select
+                      value={umfClinics.includes(medicalData.umf) ? medicalData.umf : (medicalData.umf ? 'Otra' : '')}
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        updateMedicalField('umf', selected);
+                        if (selected !== 'Otra') {
+                          setCustomUmf('');
+                        }
+                      }}
+                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                    >
+                      <option value="">Seleccionar</option>
+                      {umfClinics.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    {medicalData.umf === 'Otra' && (
+                      <input
+                        type="text"
+                        value={customUmf}
+                        onChange={(e) => {
+                          setCustomUmf(e.target.value);
+                          updateMedicalField('umf', e.target.value);
+                        }}
+                        placeholder="Especifica tu UMF o clinica"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                      />
+                    )}
+                  </div>
                   </div>
                 </div>
               </SectionCard>
 
               <SectionCard icon={Stethoscope} title="Informacion Medica" defaultOpen={false}>
                 <div className="space-y-4">
-                  <TextAreaField
-                    label="Alergias"
-                    value={medicalData.allergies}
-                    onChange={(e) => updateMedicalField('allergies', e.target.value)}
-                    rows={2}
-                    placeholder="Medicamentos, alimentos, picaduras..."
-                  />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Alergias</label>
+                    <div className="flex gap-2">
+                      {['Si', 'No'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasAllergies(true);
+                              if (!medicalData.allergies || medicalData.allergies === 'Ninguna conocida') {
+                                updateMedicalField('allergies', '');
+                              }
+                            } else {
+                              setHasAllergies(false);
+                              updateMedicalField('allergies', 'Ninguna conocida');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                            (opt === 'Si' && hasAllergies === true) || (opt === 'No' && hasAllergies === false)
+                              ? opt === 'Si'
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasAllergies === true && (
+                      <textarea
+                        value={medicalData.allergies === 'Ninguna conocida' ? '' : medicalData.allergies}
+                        onChange={(e) => updateMedicalField('allergies', e.target.value)}
+                        rows={2}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none mt-2"
+                        placeholder="Medicamentos, alimentos, picaduras, etc."
+                      />
+                    )}
+                    {hasAllergies === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Ninguna alergia conocida</span>
+                      </div>
+                    )}
+                  </div>
                   <TextAreaField
                     label="Condiciones Medicas"
                     value={medicalData.conditions}
@@ -788,6 +936,69 @@ export default function ConfigPage() {
                     rows={2}
                     placeholder="Nombre, dosis, frecuencia..."
                   />
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Antecedentes Heredofamiliares</label>
+                    <p className="text-xs text-gray-500 mb-2">Enfermedades hereditarias en tu familia</p>
+                    <select
+                      value={hereditaryConditions.includes(hereditaryCondition) ? hereditaryCondition : (hereditaryCondition ? 'Otra' : '')}
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        setHereditaryCondition(selected);
+                        if (selected !== 'Otra') {
+                          setCustomHereditaryCondition('');
+                          updateMedicalField('hereditaryConditions', selected ? `${selected} - ${hereditaryLine}` : '');
+                        }
+                      }}
+                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                    >
+                      <option value="">Seleccionar enfermedad</option>
+                      {hereditaryConditions.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    {hereditaryCondition === 'Otra' && (
+                      <input
+                        type="text"
+                        value={customHereditaryCondition}
+                        onChange={(e) => {
+                          setCustomHereditaryCondition(e.target.value);
+                          updateMedicalField('hereditaryConditions', `${e.target.value} - ${hereditaryLine}`);
+                        }}
+                        placeholder="Especifica la enfermedad"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                      />
+                    )}
+                    {hereditaryCondition && (
+                      <div className="space-y-2 mt-2">
+                        <label className="block text-xs font-semibold text-gray-600">Linea familiar</label>
+                        <div className="flex gap-2">
+                          {([
+                            { value: 'materna', label: 'Materna' },
+                            { value: 'paterna', label: 'Paterna' },
+                            { value: 'ambas', label: 'Ambas' },
+                          ] as const).map((line) => (
+                            <button
+                              key={line.value}
+                              type="button"
+                              onClick={() => {
+                                setHereditaryLine(line.value);
+                                const condition = hereditaryCondition === 'Otra' ? customHereditaryCondition : hereditaryCondition;
+                                updateMedicalField('hereditaryConditions', `${condition} - ${line.value}`);
+                              }}
+                              className={`flex-1 h-10 rounded-lg text-xs font-medium transition-all border ${
+                                hereditaryLine === line.value
+                                  ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                              }`}
+                            >
+                              {line.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </SectionCard>
 
