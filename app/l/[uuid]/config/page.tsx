@@ -56,6 +56,40 @@ const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const genders = ['Masculino', 'Femenino', 'Otro'];
 
+const religions = [
+  'Catolica',
+  'Cristiana',
+  'Evangelica',
+  'Protestante',
+  'Judia',
+  'Musulmana',
+  'Hindu',
+  'Budista',
+  'Testigo de Jehova',
+  'Mormona',
+  'Atea',
+  'Agnostica',
+  'Otra',
+];
+
+const days = Array.from({ length: 31 }, (_, i) => i + 1);
+const months = [
+  { value: 1, label: 'Enero' },
+  { value: 2, label: 'Febrero' },
+  { value: 3, label: 'Marzo' },
+  { value: 4, label: 'Abril' },
+  { value: 5, label: 'Mayo' },
+  { value: 6, label: 'Junio' },
+  { value: 7, label: 'Julio' },
+  { value: 8, label: 'Agosto' },
+  { value: 9, label: 'Septiembre' },
+  { value: 10, label: 'Octubre' },
+  { value: 11, label: 'Noviembre' },
+  { value: 12, label: 'Diciembre' },
+];
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
 function PinInput({ length, value, onChange, showPin }: { length: number; value: string; onChange: (v: string) => void; showPin: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -226,6 +260,8 @@ export default function ConfigPage() {
   const [showPin, setShowPin] = useState(false);
   const [pinStep, setPinStep] = useState<'enter' | 'confirm'>('enter');
   const [formTransition, setFormTransition] = useState(false);
+  const [customGender, setCustomGender] = useState('');
+  const [customReligion, setCustomReligion] = useState('');
 
   useEffect(() => {
     loadTagStatus();
@@ -245,6 +281,14 @@ export default function ConfigPage() {
         }
         if (json.data.medicalData) {
           setMedicalData({ ...emptyMedicalData, ...json.data.medicalData });
+          if (json.data.medicalData.gender && !genders.includes(json.data.medicalData.gender)) {
+            setCustomGender(json.data.medicalData.gender);
+            updateMedicalField('gender', 'Otro');
+          }
+          if (json.data.medicalData.religion && !religions.includes(json.data.medicalData.religion)) {
+            setCustomReligion(json.data.medicalData.religion);
+            updateMedicalField('religion', 'Otra');
+          }
         }
         if (json.data.contacts && json.data.contacts.length > 0) {
           setContacts(json.data.contacts);
@@ -509,35 +553,89 @@ export default function ConfigPage() {
                     onChange={(e) => updateMedicalField('userName', e.target.value)}
                   />
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="Fecha Nacimiento"
-                      required
-                      type="text"
-                      value={medicalData.dob}
-                      onChange={(e) => updateMedicalField('dob', e.target.value)}
-                      placeholder="DD/MM/AAAA"
-                    />
-
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-semibold text-gray-700">Genero</label>
-                      <div className="flex gap-2 flex-wrap">
-                        {genders.map((g) => (
-                          <button
-                            key={g}
-                            type="button"
-                            onClick={() => updateMedicalField('gender', g)}
-                            className={`flex-1 min-w-[80px] h-11 rounded-xl text-sm font-medium transition-all border ${
-                              medicalData.gender === g
-                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
-                            }`}
-                          >
-                            {g}
-                          </button>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Fecha Nacimiento <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <select
+                        value={medicalData.dob ? parseInt(medicalData.dob.split('/')[0]) || '' : ''}
+                        onChange={(e) => {
+                          const day = e.target.value;
+                          const parts = medicalData.dob.split('/');
+                          const newDob = day ? `${day}/${parts[1] || '01'}/${parts[2] || '1990'}` : '';
+                          updateMedicalField('dob', newDob);
+                        }}
+                        className="h-12 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                      >
+                        <option value="">Dia</option>
+                        {days.map((d) => (
+                          <option key={d} value={d}>{d}</option>
                         ))}
-                      </div>
+                      </select>
+                      <select
+                        value={medicalData.dob ? parseInt(medicalData.dob.split('/')[1]) || '' : ''}
+                        onChange={(e) => {
+                          const month = e.target.value;
+                          const parts = medicalData.dob.split('/');
+                          const newDob = month ? `${parts[0] || '01'}/${month}/${parts[2] || '1990'}` : '';
+                          updateMedicalField('dob', newDob);
+                        }}
+                        className="h-12 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                      >
+                        <option value="">Mes</option>
+                        {months.map((m) => (
+                          <option key={m.value} value={m.value}>{m.label}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={medicalData.dob ? parseInt(medicalData.dob.split('/')[2]) || '' : ''}
+                        onChange={(e) => {
+                          const year = e.target.value;
+                          const parts = medicalData.dob.split('/');
+                          const newDob = year ? `${parts[0] || '01'}/${parts[1] || '01'}/${year}` : '';
+                          updateMedicalField('dob', newDob);
+                        }}
+                        className="h-12 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                      >
+                        <option value="">Año</option>
+                        {years.map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Genero</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {genders.map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => updateMedicalField('gender', g)}
+                          className={`flex-1 min-w-[80px] h-11 rounded-xl text-sm font-medium transition-all border ${
+                            medicalData.gender === g
+                              ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                          }`}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                    {medicalData.gender === 'Otro' && (
+                      <input
+                        type="text"
+                        value={customGender}
+                        onChange={(e) => {
+                          setCustomGender(e.target.value);
+                          updateMedicalField('gender', e.target.value);
+                        }}
+                        placeholder="Especifica tu genero"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                      />
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -563,12 +661,37 @@ export default function ConfigPage() {
                       </div>
                     </div>
 
-                    <InputField
-                      label="Religion"
-                      type="text"
-                      value={medicalData.religion}
-                      onChange={(e) => updateMedicalField('religion', e.target.value)}
-                    />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Religion</label>
+                    <select
+                      value={religions.includes(medicalData.religion) ? medicalData.religion : (medicalData.religion ? 'Otra' : '')}
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        updateMedicalField('religion', selected);
+                        if (selected !== 'Otra') {
+                          setCustomReligion('');
+                        }
+                      }}
+                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                    >
+                      <option value="">Seleccionar</option>
+                      {religions.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                    {medicalData.religion === 'Otra' && (
+                      <input
+                        type="text"
+                        value={customReligion}
+                        onChange={(e) => {
+                          setCustomReligion(e.target.value);
+                          updateMedicalField('religion', e.target.value);
+                        }}
+                        placeholder="Especifica tu religion"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                      />
+                    )}
+                  </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
