@@ -83,38 +83,7 @@ export default function ViewerPage() {
 
   function triggerScanRegistration() {
     const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : undefined;
-
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      scanApi.registerScan(uuid, { userAgent });
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        let city: string | undefined;
-        let country: string | undefined;
-        try {
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-            { headers: { 'Accept-Language': 'es' } }
-          );
-          if (geoRes.ok) {
-            const geoData = await geoRes.json();
-            city = geoData.address?.city || geoData.address?.town || geoData.address?.village || undefined;
-            country = geoData.address?.country || undefined;
-          }
-        } catch { /* ignore */ }
-
-        scanApi.registerScan(uuid, { latitude: lat, longitude: lng, city, country, userAgent });
-      },
-      () => {
-        scanApi.registerScan(uuid, { userAgent });
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-    );
+    scanApi.registerScan(uuid, { userAgent });
   }
 
   async function getLocation(): Promise<{ address: string; lat: number; lng: number } | null> {
