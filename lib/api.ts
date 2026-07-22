@@ -215,6 +215,14 @@ export const tagsApi = {
     return api.delete<any>(`/tags/${id}`);
   },
 
+  async resume(id: string) {
+    return api.post<any>(`/tags/${id}/resume`);
+  },
+
+  async bulkResume(tagIds: string[]) {
+    return api.post<any>('/tags/bulk/resume', { tagIds });
+  },
+
   async getViewer(uuid: string) {
     return api.getPublic<any>(`/tags/${uuid}/view`);
   },

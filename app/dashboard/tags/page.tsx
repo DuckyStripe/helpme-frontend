@@ -14,7 +14,7 @@ import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
 import { TableSkeleton, PageLoader } from '@/components/ui/Skeleton';
 import {
-  QrCode, Plus, Copy, ExternalLink, Ban, Loader2, Check,
+  QrCode, Plus, Copy, ExternalLink, Ban, Play, Loader2, Check,
   UserMinus, Hash, Calendar, Eye, ScanLine, Unlock,
 } from 'lucide-react';
 
@@ -144,6 +144,16 @@ export default function TagsPage() {
     }
   }
 
+  async function handleResume(id: string) {
+    try {
+      await tagsApi.resume(id);
+      toast.success('Tag reanudado');
+      loadTags();
+    } catch (err: any) {
+      toast.error(err.message || 'Error al reanudar tag');
+    }
+  }
+
   async function handleUnlockPin(id: string) {
     try {
       await tagsApi.unlockPin(id);
@@ -181,6 +191,17 @@ export default function TagsPage() {
       loadTags();
     } catch (err: any) {
       toast.error(err.message || 'Error al suspender tags');
+    }
+  }
+
+  async function handleBulkResume() {
+    try {
+      await tagsApi.bulkResume(Array.from(selected));
+      toast.success(`${selected.size} tag${selected.size > 1 ? 's' : ''} reanudados`);
+      setSelected(new Set());
+      loadTags();
+    } catch (err: any) {
+      toast.error(err.message || 'Error al reanudar tags');
     }
   }
 
@@ -289,6 +310,7 @@ export default function TagsPage() {
             selectedCount={selected.size}
             onAssign={() => setShowAssign(true)}
             onSuspend={handleBulkSuspend}
+            onResume={handleBulkResume}
             onClear={() => setSelected(new Set())}
           />
         </div>
@@ -399,6 +421,15 @@ export default function TagsPage() {
                           title="Suspender"
                         >
                           <Ban className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {isAdmin && tag.status === 'SUSPENDED' && (
+                        <button
+                          onClick={() => handleResume(tag.id)}
+                          className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                          title="Reanudar"
+                        >
+                          <Play className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>

@@ -9,7 +9,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { PageLoader } from '@/components/ui/Skeleton';
 import {
-  ArrowLeft, Copy, ExternalLink, Ban, Shield, Unlock,
+  ArrowLeft, Copy, ExternalLink, Ban, Play, Shield, Unlock,
   Calendar, MapPin, Smartphone, Eye, ScanLine, User as UserIcon,
 } from 'lucide-react';
 
@@ -79,6 +79,17 @@ export default function TagDetailPage() {
       loadData();
     } catch (err: any) {
       toast.error(err.message || 'Error al suspender tag');
+    }
+  }
+
+  async function handleResume() {
+    if (!confirm('¿Reanudar este tag? El tag volverá a estar activo.')) return;
+    try {
+      await tagsApi.resume(id);
+      toast.success('Tag reanudado');
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Error al reanudar tag');
     }
   }
 
@@ -221,6 +232,15 @@ export default function TagDetailPage() {
               >
                 <Ban className="w-4 h-4" />
                 Suspender Tag
+              </button>
+            )}
+            {tag.status === 'SUSPENDED' && isAdmin && (
+              <button
+                onClick={handleResume}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-emerald-500/10 text-emerald-400 font-medium rounded-lg hover:bg-emerald-500/20 transition-colors"
+              >
+                <Play className="w-4 h-4" />
+                Reanudar Tag
               </button>
             )}
           </div>

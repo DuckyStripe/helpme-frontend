@@ -1,16 +1,17 @@
 'use client';
 
-import { UserMinus, Ban, X } from 'lucide-react';
+import { UserMinus, Ban, Play, X } from 'lucide-react';
 
 interface BulkActionsBarProps {
   selectedCount: number;
   onAssign: () => void;
   onSuspend: () => void;
+  onResume: () => void;
   onClear: () => void;
   sellers?: Array<{ id: string; name: string }>;
 }
 
-export default function BulkActionsBar({ selectedCount, onAssign, onSuspend, onClear }: BulkActionsBarProps) {
+export default function BulkActionsBar({ selectedCount, onAssign, onSuspend, onResume, onClear }: BulkActionsBarProps) {
   if (selectedCount === 0) return null;
 
   return (
@@ -32,6 +33,13 @@ export default function BulkActionsBar({ selectedCount, onAssign, onSuspend, onC
         >
           <Ban className="w-4 h-4" />
           Suspender
+        </button>
+        <button
+          onClick={onResume}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors"
+        >
+          <Play className="w-4 h-4" />
+          Reanudar
         </button>
         <button
           onClick={onClear}
