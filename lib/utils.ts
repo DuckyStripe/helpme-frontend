@@ -1,6 +1,7 @@
-export function calculateAge(dob: string): number {
+export function calculateAge(dob?: string | null): number | null {
+  if (!dob) return null;
   const parts = dob.split('/');
-  if (parts.length !== 3) return 0;
+  if (parts.length !== 3) return null;
   
   const day = parseInt(parts[0], 10);
   const month = parseInt(parts[1], 10) - 1;

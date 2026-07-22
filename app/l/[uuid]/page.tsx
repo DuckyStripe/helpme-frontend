@@ -14,10 +14,10 @@ interface ViewerData {
   status: string;
   viewCount: number;
   medicalData: {
-    userName: string;
-    dob: string;
+    userName?: string;
+    dob?: string;
     bloodType: string;
-    emergencyPhone: string;
+    emergencyPhone?: string;
     allergies?: string;
     conditions?: string;
     medications?: string;
@@ -170,6 +170,7 @@ export default function ViewerPage() {
   }
 
   const age = calculateAge(md.dob);
+  const hasPersonalInfo = !!(md.userName || md.dob || md.religion || md.organDonor);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 font-sans flex items-start justify-center p-4 sm:items-center sm:p-6">
@@ -210,41 +211,45 @@ export default function ViewerPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              <span className="h-px bg-gray-200 flex-1"></span>
-              <span>Información Personal</span>
-              <span className="h-px bg-gray-200 flex-1"></span>
-            </h2>
+          {hasPersonalInfo && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <span className="h-px bg-gray-200 flex-1"></span>
+                <span>Información Personal</span>
+                <span className="h-px bg-gray-200 flex-1"></span>
+              </h2>
 
-            <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Nombre Completo</p>
-                  <p className="text-base font-extrabold text-gray-900 leading-tight">{md.userName}</p>
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Nombre Completo</p>
+                    <p className="text-base font-extrabold text-gray-900 leading-tight">{md.userName || 'No especificado'}</p>
+                  </div>
+                  {age !== null && (
+                    <div className="text-right whitespace-nowrap">
+                      <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Edad</p>
+                      <p className="text-base font-extrabold text-gray-900">{age} años</p>
+                    </div>
+                  )}
                 </div>
-                <div className="text-right whitespace-nowrap">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Edad</p>
-                  <p className="text-base font-extrabold text-gray-900">{age} años</p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Nacimiento</p>
-                  <p className="text-[11px] font-bold text-gray-800">{md.dob}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Religión</p>
-                  <p className="text-[11px] font-bold text-gray-800">{md.religion || 'N/A'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Donador</p>
-                  <p className="text-[11px] font-bold text-red-600">{md.organDonor || 'No'}</p>
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
+                  <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Nacimiento</p>
+                    <p className="text-[11px] font-bold text-gray-800">{md.dob || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Religión</p>
+                    <p className="text-[11px] font-bold text-gray-800">{md.religion || 'N/A'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Donador</p>
+                    <p className="text-[11px] font-bold text-red-600">{md.organDonor || 'No'}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {md.nss && (
             <div className="space-y-3">
