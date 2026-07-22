@@ -245,6 +245,19 @@ export const pinApi = {
     return api.post<{ token: string; status: string }>(`/tags/${uuid}/config/login`, { pin });
   },
 
+  async getConfigData(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/config/data`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data ?? json;
+  },
+
   async updateMedicalData(token: string, medicalData: any, contacts: any[]) {
     const res = await fetch(`${API_BASE}/tags/config/data`, {
       method: 'PUT',

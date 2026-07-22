@@ -479,6 +479,7 @@ export default function ConfigPage() {
       const loginRes = await pinApi.pinLogin(uuid, pin);
       setPinToken(loginRes.token);
       setStatus(loginRes.status as TagStatus);
+      await loadConfigData(loginRes.token);
       setTimeout(() => setFormTransition(true), 100);
     } catch (err: any) {
       toast.error(err.message || 'Error al crear el PIN');
@@ -499,11 +500,63 @@ export default function ConfigPage() {
       const res = await pinApi.pinLogin(uuid, pin);
       setPinToken(res.token);
       setStatus(res.status as TagStatus);
+      await loadConfigData(res.token);
       toast.success('Acceso concedido');
       setTimeout(() => setFormTransition(true), 100);
     } catch (err: any) {
       toast.error(err.message || 'PIN incorrecto');
       setPinError('PIN incorrecto');
+    }
+  }
+
+  async function loadConfigData(token: string) {
+    try {
+      const data = await pinApi.getConfigData(uuid, token);
+      if (data.medicalData) {
+        setMedicalData({ ...emptyMedicalData, ...data.medicalData });
+        if (data.medicalData.gender && !genders.includes(data.medicalData.gender)) {
+          setCustomGender(data.medicalData.gender);
+          updateMedicalField('gender', 'Otro');
+        }
+        if (data.medicalData.religion && !religions.includes(data.medicalData.religion)) {
+          setCustomReligion(data.medicalData.religion);
+          updateMedicalField('religion', 'Otra');
+        }
+        if (data.medicalData.umf && !umfClinics.includes(data.medicalData.umf)) {
+          setCustomUmf(data.medicalData.umf);
+          updateMedicalField('umf', 'Otra');
+        }
+        if (data.medicalData.allergies) {
+          if (data.medicalData.allergies === 'Ninguna conocida') {
+            setHasAllergies(false);
+            setSelectedAllergies([]);
+          } else {
+            setHasAllergies(true);
+            const allergies = data.medicalData.allergies.split('|').filter((a: string) => a.trim());
+            setSelectedAllergies(allergies);
+          }
+        }
+        if (data.medicalData.hereditaryConditions) {
+          const items = data.medicalData.hereditaryConditions.split('|').filter((h: string) => h.trim());
+          if (items.length > 0) {
+            setHasHereditary(true);
+            const parsed = items.map((item: string) => {
+              const parts = item.split(' - ');
+              return {
+                name: parts[0] || '',
+                line: (parts[1] as 'materna' | 'paterna' | 'ambas') || 'materna',
+                isActive: parts[2] === 'si',
+              };
+            });
+            setSelectedHereditary(parsed);
+          }
+        }
+      }
+      if (data.contacts && data.contacts.length > 0) {
+        setContacts(data.contacts);
+      }
+    } catch {
+      // Si falla, continuar con datos vacíos
     }
   }
 
