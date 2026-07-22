@@ -7,6 +7,7 @@ import { calculateAge } from '@/lib/utils';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
+  Heart,
 } from 'lucide-react';
 
 interface ViewerData {
@@ -26,7 +27,9 @@ interface ViewerData {
     gender?: string;
     religion?: string;
     organDonor?: string;
+    pob?: string;
     umf?: string;
+    hereditaryConditions?: string;
   } | null;
   contacts: {
     name: string;
@@ -170,7 +173,7 @@ export default function ViewerPage() {
   }
 
   const age = calculateAge(md.dob);
-  const hasPersonalInfo = !!(md.userName || md.dob || md.religion || md.organDonor);
+  const hasPersonalInfo = !!(md.userName || md.dob || md.religion || md.organDonor || md.gender || md.pob || md.emergencyPhone);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 font-sans flex items-start justify-center p-4 sm:items-center sm:p-6">
@@ -239,12 +242,27 @@ export default function ViewerPage() {
                     <p className="text-[11px] font-bold text-gray-800">{md.dob || 'N/A'}</p>
                   </div>
                   <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Género</p>
+                    <p className="text-[11px] font-bold text-gray-800">{md.gender || 'N/A'}</p>
+                  </div>
+                  <div>
                     <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Religión</p>
                     <p className="text-[11px] font-bold text-gray-800">{md.religion || 'N/A'}</p>
                   </div>
-                  <div className="text-right">
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
+                  <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">País Nacimiento</p>
+                    <p className="text-[11px] font-bold text-gray-800">{md.pob || 'N/A'}</p>
+                  </div>
+                  <div>
                     <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Donador</p>
                     <p className="text-[11px] font-bold text-red-600">{md.organDonor || 'No'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Tel. Emergencia</p>
+                    <p className="text-[11px] font-bold text-gray-800">{md.emergencyPhone || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -337,6 +355,28 @@ export default function ViewerPage() {
                   <p className="text-xs font-bold text-gray-900">{md.medications || 'No especificados'}</p>
                 </div>
               </div>
+              {md.hereditaryConditions && md.hereditaryConditions.trim() !== '' && (
+                <div className="bg-gray-50 flex items-center gap-3 p-3 rounded-xl border border-gray-100">
+                  <Heart className="w-4 h-4 text-gray-400" />
+                  <div className="w-full">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-1">Antecedentes Heredofamiliares</p>
+                    <p className="text-xs font-bold text-gray-900">
+                      {md.hereditaryConditions.split('|').map((item, idx) => {
+                        const parts = item.split(' - ');
+                        const name = parts[0] || '';
+                        const line = parts[1] || '';
+                        const isActive = parts[2] === 'si';
+                        return (
+                          <span key={idx} className="inline-flex items-center gap-1 mr-2">
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-red-500' : 'bg-gray-400'}`}></span>
+                            <span>{name} ({line}){isActive && ' - Lo padece'}</span>
+                          </span>
+                        );
+                      })}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
