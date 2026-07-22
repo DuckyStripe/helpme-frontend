@@ -7,7 +7,7 @@ import { calculateAge } from '@/lib/utils';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
-  Heart,
+  Heart, User, Calendar, Printer, PhoneCall,
 } from 'lucide-react';
 
 interface ViewerData {
@@ -106,7 +106,7 @@ export default function ViewerPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-red-600" />
       </div>
     );
   }
@@ -173,226 +173,326 @@ export default function ViewerPage() {
   }
 
   const age = calculateAge(md.dob);
-  const hasPersonalInfo = !!(md.userName || md.dob || md.religion || md.organDonor || md.gender || md.pob || md.emergencyPhone);
+  const hasAllergies = md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna';
+  const hasConditions = md.conditions && md.conditions.trim() !== '';
+  const hasMedications = md.medications && md.medications.trim() !== '';
+  const hasHereditary = md.hereditaryConditions && md.hereditaryConditions.trim() !== '';
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 font-sans flex items-start justify-center p-4 sm:items-center sm:p-6">
+    <div className="min-h-screen bg-gray-100 text-gray-900 flex items-start justify-center p-0 sm:p-4 sm:items-center">
       <style>{`
         @media print {
           body { background: white !important; }
           .no-print { display: none !important; }
-          main { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+          main { box-shadow: none !important; border: none !important; }
         }
       `}</style>
-      <main className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 relative z-10">
-        <header className="bg-gradient-to-br from-red-600 to-red-800 text-white text-center p-6 relative overflow-hidden">
-          <div className="relative mx-auto w-12 h-12 mb-3 flex items-center justify-center">
-            <div className="absolute inset-0 bg-white opacity-25 rounded-full animate-ping"></div>
-            <div className="relative z-10 bg-white text-red-600 p-2 rounded-full shadow-lg">
-              <Activity className="w-6 h-6" />
+      <main className="w-full max-w-md bg-white sm:rounded-3xl shadow-2xl overflow-hidden relative z-10 min-h-screen sm:min-h-0">
+        
+        {/* HERO - Información crítica inmediata */}
+        <header className="bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white px-5 pt-6 pb-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-100">Ficha Médica</p>
+                <p className="text-[9px] text-red-200 uppercase tracking-widest">Emergencia</p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.print()}
+              className="no-print p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
+              aria-label="Imprimir ficha"
+            >
+              <Printer className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Nombre y datos básicos */}
+          <div className="mb-4">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">
+              {md.userName || 'Paciente'}
+            </h1>
+            <div className="flex items-center gap-3 text-red-100 text-sm">
+              {age !== null && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {age} años
+                </span>
+              )}
+              {md.gender && (
+                <span className="flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" />
+                  {md.gender}
+                </span>
+              )}
             </div>
           </div>
-          <h1 className="text-xl font-extrabold tracking-tight mb-1">Ficha Médica</h1>
-          <p className="text-red-100 text-[10px] font-bold uppercase tracking-widest opacity-90">EMERGENCIA / EMERGENCY</p>
+
+          {/* Tipo de sangre - DESTACADO */}
+          <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-between border border-white/20">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2.5 rounded-xl shadow-lg">
+                <Droplet className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-100">Tipo de Sangre</p>
+                <p className="text-3xl font-black tracking-tight">{md.bloodType}</p>
+              </div>
+            </div>
+            {md.organDonor === 'Si' && (
+              <div className="bg-green-500/90 px-3 py-1.5 rounded-lg">
+                <p className="text-[10px] font-bold uppercase text-white">Donador</p>
+              </div>
+            )}
+          </div>
         </header>
 
-        <section className="p-5 space-y-6">
+        {/* ALERTAS CRÍTICAS - Inmediatamente visibles */}
+        <section className="px-5 -mt-3 relative z-10">
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-center shadow-sm">
-              <div className="flex items-center justify-center gap-1.5 text-red-600 font-bold text-[10px] uppercase mb-1">
-                <Droplet className="w-3.5 h-3.5" />
-                <label>Sangre</label>
+            {/* Alergias */}
+            <div className={`rounded-2xl p-4 border-2 shadow-lg ${
+              hasAllergies 
+                ? 'bg-amber-50 border-amber-300' 
+                : 'bg-green-50 border-green-200'
+            }`}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <AlertTriangle className={`w-4 h-4 ${hasAllergies ? 'text-amber-600' : 'text-green-600'}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-wide ${hasAllergies ? 'text-amber-700' : 'text-green-700'}`}>
+                  Alergias
+                </span>
               </div>
-              <p className="text-4xl font-black text-red-700 tracking-tighter">{md.bloodType}</p>
+              <p className={`text-sm font-bold leading-tight ${hasAllergies ? 'text-amber-900' : 'text-green-800'}`}>
+                {hasAllergies ? md.allergies : 'Ninguna'}
+              </p>
             </div>
-            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-center shadow-sm">
-              <div className="flex items-center justify-center gap-1.5 text-amber-700 font-bold text-[10px] uppercase mb-1">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                <label>Alergias</label>
-              </div>
-              <p className="text-sm font-bold text-amber-900 leading-tight">{md.allergies || 'Ninguna'}</p>
-            </div>
-          </div>
 
-          {hasPersonalInfo && (
-            <div className="space-y-3">
-              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                <span className="h-px bg-gray-200 flex-1"></span>
-                <span>Información Personal</span>
-                <span className="h-px bg-gray-200 flex-1"></span>
-              </h2>
-
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Nombre Completo</p>
-                    <p className="text-base font-extrabold text-gray-900 leading-tight">{md.userName || 'No especificado'}</p>
-                  </div>
-                  {age !== null && (
-                    <div className="text-right whitespace-nowrap">
-                      <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Edad</p>
-                      <p className="text-base font-extrabold text-gray-900">{age} años</p>
-                    </div>
-                  )}
+            {/* Teléfono de emergencia personal */}
+            {md.emergencyPhone && (
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Phone className="w-4 h-4 text-blue-600" />
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                    Tel. Personal
+                  </span>
                 </div>
-
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Nacimiento</p>
-                    <p className="text-[11px] font-bold text-gray-800">{md.dob || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Género</p>
-                    <p className="text-[11px] font-bold text-gray-800">{md.gender || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Religión</p>
-                    <p className="text-[11px] font-bold text-gray-800">{md.religion || 'N/A'}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">País Nacimiento</p>
-                    <p className="text-[11px] font-bold text-gray-800">{md.pob || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Donador</p>
-                    <p className="text-[11px] font-bold text-red-600">{md.organDonor || 'No'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">Tel. Emergencia</p>
-                    <p className="text-[11px] font-bold text-gray-800">{md.emergencyPhone || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {md.nss && (
-            <div className="space-y-3">
-              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                <span className="h-px bg-gray-200 flex-1"></span>
-                <span>Seguridad Social (IMSS)</span>
-                <span className="h-px bg-gray-200 flex-1"></span>
-              </h2>
-
-              <div className="bg-blue-600 rounded-2xl p-5 shadow-xl shadow-blue-600/20 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm shadow-inner">
-                    <ShieldPlus className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="w-full">
-                    <p className="text-[10px] text-blue-100 font-bold uppercase tracking-wider mb-0.5">NSS</p>
-                    <p className="text-2xl font-mono font-black text-white tracking-[0.1em]">{md.nss}</p>
-                  </div>
-                </div>
-                {md.curp && (
-                  <div className="flex justify-between items-end pt-3 border-t border-white/20">
-                    <div>
-                      <p className="text-[10px] text-blue-100 font-bold uppercase mb-0.5">CURP</p>
-                      <p className="text-xs font-mono font-bold text-blue-50">{md.curp}</p>
-                    </div>
-                    {md.umf && (
-                      <div className="text-right">
-                        <p className="text-[10px] text-blue-100 font-bold uppercase mb-0.5">UMF</p>
-                        <p className="text-xs font-bold text-blue-50">{md.umf}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              <span className="h-px bg-gray-200 flex-1"></span>
-              <span>Contactos de Emergencia</span>
-              <span className="h-px bg-gray-200 flex-1"></span>
-            </h2>
-
-            {data.contacts.map((contact, index) => (
-              <div key={index} className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-emerald-600 p-2 rounded-lg text-white">
-                    <Contact className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-emerald-900 leading-none mb-0.5">
-                      {contact.name}
-                      <span className="text-[9px] font-normal opacity-60 ml-1">({contact.relationship})</span>
-                    </p>
-                    <p className="text-[11px] font-bold text-emerald-700/70 font-mono tracking-wider">{contact.phone}</p>
-                  </div>
-                </div>
-                <a href={`tel:+${contact.phone.replace('+', '')}`} className="bg-emerald-600 text-white p-2.5 rounded-full shadow-lg shadow-emerald-600/20 active:scale-95 transition-transform">
-                  <Phone className="w-4 h-4" />
+                <a 
+                  href={`tel:+52${md.emergencyPhone}`}
+                  className="text-sm font-bold text-blue-900 font-mono tracking-wide hover:underline block"
+                >
+                  {md.emergencyPhone}
                 </a>
               </div>
-            ))}
+            )}
           </div>
+        </section>
 
-          <div className="space-y-3">
-            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              <span className="h-px bg-gray-200 flex-1"></span>
-              <span>Perfil Médico</span>
-              <span className="h-px bg-gray-200 flex-1"></span>
+        {/* CONTACTOS DE EMERGENCIA - Acción rápida */}
+        {data.contacts.length > 0 && (
+          <section className="px-5 pt-5">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <PhoneCall className="w-4 h-4" />
+              Contactos de Emergencia
             </h2>
-
-            <div className="space-y-2">
-              <div className="bg-gray-50 flex items-center gap-3 p-3 rounded-xl border border-gray-100">
-                <Stethoscope className="w-4 h-4 text-gray-400" />
-                <div className="w-full">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-1">Condiciones Crónicas</p>
-                  <p className="text-xs font-bold text-gray-900">{md.conditions || 'No especificadas'}</p>
-                </div>
-              </div>
-              <div className="bg-gray-50 flex items-center gap-3 p-3 rounded-xl border border-gray-100">
-                <Pill className="w-4 h-4 text-gray-400" />
-                <div className="w-full">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-1">Medicamentos Actuales</p>
-                  <p className="text-xs font-bold text-gray-900">{md.medications || 'No especificados'}</p>
-                </div>
-              </div>
-              {md.hereditaryConditions && md.hereditaryConditions.trim() !== '' && (
-                <div className="bg-gray-50 flex items-center gap-3 p-3 rounded-xl border border-gray-100">
-                  <Heart className="w-4 h-4 text-gray-400" />
-                  <div className="w-full">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-1">Antecedentes Heredofamiliares</p>
-                    <p className="text-xs font-bold text-gray-900">
-                      {md.hereditaryConditions.split('|').map((item, idx) => {
-                        const parts = item.split(' - ');
-                        const name = parts[0] || '';
-                        const line = parts[1] || '';
-                        const isActive = parts[2] === 'si';
-                        return (
-                          <span key={idx} className="inline-flex items-center gap-1 mr-2">
-                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-red-500' : 'bg-gray-400'}`}></span>
-                            <span>{name} ({line}){isActive && ' - Lo padece'}</span>
-                          </span>
-                        );
-                      })}
-                    </p>
+            <div className="space-y-2.5">
+              {data.contacts.map((contact, index) => (
+                <div 
+                  key={index} 
+                  className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-center justify-between shadow-sm"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="bg-emerald-600 p-2.5 rounded-xl text-white flex-shrink-0">
+                      <Contact className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-emerald-900 truncate">
+                        {contact.name}
+                      </p>
+                      <p className="text-[11px] text-emerald-600 font-medium">
+                        {contact.relationship}
+                      </p>
+                    </div>
                   </div>
+                  <a 
+                    href={`tel:+52${contact.phone.replace('+', '')}`} 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex-shrink-0 ml-3"
+                    aria-label={`Llamar a ${contact.name}`}
+                  >
+                    <Phone className="w-5 h-5" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* PERFIL MÉDICO */}
+        <section className="px-5 pt-5">
+          <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Stethoscope className="w-4 h-4" />
+            Perfil Médico
+          </h2>
+          
+          <div className="space-y-2.5">
+            {/* Condiciones crónicas */}
+            <div className={`rounded-xl p-4 border-2 flex items-start gap-3 ${
+              hasConditions 
+                ? 'bg-red-50 border-red-200' 
+                : 'bg-gray-50 border-gray-100'
+            }`}>
+              <Stethoscope className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasConditions ? 'text-red-500' : 'text-gray-400'}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${hasConditions ? 'text-red-700' : 'text-gray-500'}`}>
+                  Condiciones Crónicas
+                </p>
+                <p className={`text-sm font-semibold ${hasConditions ? 'text-red-900' : 'text-gray-500'}`}>
+                  {hasConditions ? md.conditions : 'Ninguna'}
+                </p>
+              </div>
+            </div>
+
+            {/* Medicamentos */}
+            <div className={`rounded-xl p-4 border-2 flex items-start gap-3 ${
+              hasMedications 
+                ? 'bg-purple-50 border-purple-200' 
+                : 'bg-gray-50 border-gray-100'
+            }`}>
+              <Pill className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasMedications ? 'text-purple-500' : 'text-gray-400'}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${hasMedications ? 'text-purple-700' : 'text-gray-500'}`}>
+                  Medicamentos Actuales
+                </p>
+                <p className={`text-sm font-semibold ${hasMedications ? 'text-purple-900' : 'text-gray-500'}`}>
+                  {hasMedications ? md.medications : 'Ninguno'}
+                </p>
+              </div>
+            </div>
+
+            {/* Antecedentes heredofamiliares */}
+            {hasHereditary && (
+              <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Heart className="w-5 h-5 text-orange-500" />
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700">
+                    Antecedentes Heredofamiliares
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {md.hereditaryConditions && md.hereditaryConditions.split('|').map((item, idx) => {
+                    const parts = item.split(' - ');
+                    const name = parts[0] || '';
+                    const line = parts[1] || '';
+                    const isActive = parts[2] === 'si';
+                    return (
+                      <span 
+                        key={idx} 
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                          isActive 
+                            ? 'bg-red-100 text-red-800 border border-red-200' 
+                            : 'bg-gray-100 text-gray-600 border border-gray-200'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-red-500' : 'bg-gray-400'}`}></span>
+                        {name} <span className="text-[10px] opacity-70">({line})</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* INFORMACIÓN PERSONAL - Detalles adicionales */}
+        <section className="px-5 pt-5">
+          <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <User className="w-4 h-4" />
+            Información Personal
+          </h2>
+          
+          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+            <div className="grid grid-cols-2 gap-3">
+              {md.dob && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Fecha Nacimiento</p>
+                  <p className="text-sm font-bold text-gray-900">{md.dob}</p>
+                </div>
+              )}
+              {md.pob && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Lugar Nacimiento</p>
+                  <p className="text-sm font-bold text-gray-900">{md.pob}</p>
+                </div>
+              )}
+              {md.religion && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Religión</p>
+                  <p className="text-sm font-bold text-gray-900">{md.religion}</p>
+                </div>
+              )}
+              {md.organDonor && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Donador de Órganos</p>
+                  <p className={`text-sm font-bold ${md.organDonor === 'Si' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {md.organDonor}
+                  </p>
                 </div>
               )}
             </div>
           </div>
         </section>
 
-        <section className="px-5 pb-6 space-y-3 no-print">
-          <button
-            onClick={() => window.print()}
-            className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-6 rounded-xl text-sm font-bold transition-all active:scale-95"
-          >
-            <span>Imprimir / Guardar PDF</span>
-          </button>
-        </section>
+        {/* SEGURIDAD SOCIAL */}
+        {md.nss && (
+          <section className="px-5 pt-5">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <ShieldPlus className="w-4 h-4" />
+              Seguridad Social
+            </h2>
+            
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-xl shadow-blue-600/20">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                  <ShieldPlus className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">NSS</p>
+                  <p className="text-xl font-mono font-black text-white tracking-wider">{md.nss}</p>
+                </div>
+              </div>
+              
+              {(md.curp || md.umf) && (
+                <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
+                  {md.curp && (
+                    <div>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
+                      <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+                    </div>
+                  )}
+                  {md.umf && (
+                    <div className="text-right">
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF</p>
+                      <p className="text-xs font-bold text-white">{md.umf}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
-        <footer className="bg-gray-50 border-t border-gray-100 p-4 flex flex-col items-center gap-2 text-gray-400">
-          <ShieldCheck className="w-5 h-5 opacity-50" />
-          <p className="text-xs font-medium text-center">Datos provistos por el paciente para primeros auxilios.</p>
+        {/* FOOTER */}
+        <footer className="bg-gray-50 border-t border-gray-200 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-green-500" />
+            <p className="text-xs font-medium">Datos verificados por el paciente</p>
+          </div>
+          <p className="text-[10px] text-gray-400 text-center">
+            Esta información es proporcionada por el paciente para fines de primeros auxilios.
+          </p>
         </footer>
       </main>
     </div>
