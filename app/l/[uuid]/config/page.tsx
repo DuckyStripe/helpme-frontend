@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { pinApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
@@ -74,23 +74,25 @@ const religions = [
   'Otra',
 ];
 
-const days = Array.from({ length: 31 }, (_, i) => i + 1);
-const months = [
-  { value: 1, label: 'Enero' },
-  { value: 2, label: 'Febrero' },
-  { value: 3, label: 'Marzo' },
-  { value: 4, label: 'Abril' },
-  { value: 5, label: 'Mayo' },
-  { value: 6, label: 'Junio' },
-  { value: 7, label: 'Julio' },
-  { value: 8, label: 'Agosto' },
-  { value: 9, label: 'Septiembre' },
-  { value: 10, label: 'Octubre' },
-  { value: 11, label: 'Noviembre' },
-  { value: 12, label: 'Diciembre' },
-];
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+// El backend/visor esperan la fecha en formato DD/MM/YYYY (ver lib/utils.ts calculateAge)
+function dobToInputValue(dob: string): string {
+  const parts = dob.split('/');
+  if (parts.length !== 3) return '';
+  const [d, m, y] = parts;
+  if (!d || !m || !y) return '';
+  return `${y.padStart(4, '0')}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
+
+function inputValueToDob(value: string): string {
+  const parts = value.split('-');
+  if (parts.length !== 3) return '';
+  const [y, m, d] = parts;
+  if (!y || !m || !d) return '';
+  return `${parseInt(d, 10)}/${parseInt(m, 10)}/${y}`;
+}
+
+const todayInputValue = new Date().toISOString().split('T')[0];
+const minDobInputValue = `${new Date().getFullYear() - 100}-01-01`;
 
 const umfClinics = [
   'UMF 1',
@@ -222,16 +224,24 @@ function SectionCard({
   title,
   children,
   defaultOpen = true,
+  complete,
+  highlight,
 }: {
   icon: React.ElementType;
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  complete?: boolean;
+  highlight?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+    <div
+      className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 ${
+        highlight ? 'border-red-400 ring-2 ring-red-400/40' : 'border-gray-100'
+      }`}
+    >
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -242,6 +252,9 @@ function SectionCard({
             <Icon className="w-5 h-5 text-red-600" />
           </div>
           <h3 className="text-base font-bold text-gray-900">{title}</h3>
+          {complete && (
+            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" aria-label="Seccion completa" />
+          )}
         </div>
         {open ? (
           <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
@@ -262,14 +275,14 @@ function SectionCard({
   );
 }
 
-function InputField({
-  label,
-  required,
-  ...props
-}: {
-  label: string;
-  required?: boolean;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+const InputField = React.forwardRef<
+  HTMLInputElement,
+  {
+    label: string;
+    required?: boolean;
+    error?: string;
+  } & React.InputHTMLAttributes<HTMLInputElement>
+>(function InputField({ label, required, error, ...props }, ref) {
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-semibold text-gray-700">
@@ -278,11 +291,23 @@ function InputField({
       </label>
       <input
         {...props}
-        className={`w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all ${props.className || ''}`}
+        ref={ref}
+        aria-invalid={!!error}
+        className={`w-full h-12 px-4 border rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+          error
+            ? 'border-red-400 focus:ring-red-500/30 focus:border-red-500'
+            : 'border-gray-200 focus:ring-red-500/30 focus:border-red-500'
+        } ${props.className || ''}`}
       />
+      {error && (
+        <div role="alert" className="flex items-center gap-1.5 text-red-600 text-xs font-medium pt-0.5">
+          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
-}
+});
 
 function TextAreaField({
   label,
@@ -333,6 +358,18 @@ export default function ConfigPage() {
   const [customHereditary, setCustomHereditary] = useState('');
   const [hasAllergies, setHasAllergies] = useState<boolean | null>(null);
   const [hasHereditary, setHasHereditary] = useState<boolean | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
+  const [personalOpenKey, setPersonalOpenKey] = useState(0);
+
+  const personalSectionRef = useRef<HTMLDivElement>(null);
+  const userNameRef = useRef<HTMLInputElement>(null);
+  const dobRef = useRef<HTMLInputElement>(null);
+  const emergencyPhoneRef = useRef<HTMLInputElement>(null);
+  const bloodTypeRef = useRef<HTMLDivElement>(null);
+
+  const requiredFields: (keyof MedicalData)[] = ['userName', 'dob', 'bloodType', 'emergencyPhone'];
+  const completedRequiredCount = requiredFields.filter((f) => !!medicalData[f]).length;
+  const progressPercent = Math.round((completedRequiredCount / requiredFields.length) * 100);
 
   useEffect(() => {
     loadTagStatus();
@@ -472,6 +509,14 @@ export default function ConfigPage() {
 
   function updateMedicalField(field: keyof MedicalData, value: string) {
     setMedicalData((prev) => ({ ...prev, [field]: value }));
+    if (field === 'userName' || field === 'dob' || field === 'bloodType' || field === 'emergencyPhone') {
+      setErrors((prev) => {
+        if (!prev[field]) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   }
 
   function addContact() {
@@ -493,8 +538,27 @@ export default function ConfigPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!medicalData.userName || !medicalData.dob || !medicalData.bloodType || !medicalData.emergencyPhone) {
-      toast.error('Completa los campos obligatorios: Nombre, Fecha de nacimiento, Tipo de sangre, Telefono de emergencia');
+    const newErrors: typeof errors = {};
+    if (!medicalData.userName.trim()) newErrors.userName = 'Ingresa el nombre completo';
+    if (!medicalData.dob) newErrors.dob = 'Selecciona la fecha de nacimiento';
+    if (!medicalData.bloodType) newErrors.bloodType = 'Selecciona el tipo de sangre';
+    if (!medicalData.emergencyPhone.trim()) newErrors.emergencyPhone = 'Ingresa un telefono de emergencia';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setPersonalOpenKey((k) => k + 1);
+      toast.error('Completa los campos marcados en rojo');
+      setTimeout(() => {
+        personalSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const firstErrorRef = newErrors.userName
+          ? userNameRef
+          : newErrors.dob
+          ? dobRef
+          : newErrors.bloodType
+          ? bloodTypeRef
+          : emergencyPhoneRef;
+        firstErrorRef.current?.focus();
+      }, 150);
       return;
     }
 
@@ -640,71 +704,52 @@ export default function ConfigPage() {
                   <span>Tag activo</span>
                 </div>
               )}
+
+              <div className="mt-4 max-w-xs mx-auto">
+                <div className="flex items-center justify-between text-xs text-red-100 mb-1.5">
+                  <span>Datos obligatorios</span>
+                  <span className="font-semibold">{completedRequiredCount}/{requiredFields.length}</span>
+                </div>
+                <div className="h-1.5 bg-white/20 rounded-full overflow-hidden" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
+                  <div
+                    className="h-full bg-white rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4">
-              <SectionCard icon={User} title="Informacion Personal" defaultOpen={true}>
+              <div ref={personalSectionRef}>
+              <SectionCard
+                key={personalOpenKey}
+                icon={User}
+                title="Informacion Personal"
+                defaultOpen={true}
+                highlight={Object.keys(errors).length > 0}
+              >
                 <div className="space-y-4">
                   <InputField
+                    ref={userNameRef}
                     label="Nombre Completo"
                     required
                     type="text"
                     value={medicalData.userName}
                     onChange={(e) => updateMedicalField('userName', e.target.value)}
+                    error={errors.userName}
                   />
 
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Fecha Nacimiento <span className="text-red-500">*</span>
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <select
-                        value={medicalData.dob ? parseInt(medicalData.dob.split('/')[0]) || '' : ''}
-                        onChange={(e) => {
-                          const day = e.target.value;
-                          const parts = medicalData.dob.split('/');
-                          const newDob = day ? `${day}/${parts[1] || '01'}/${parts[2] || '1990'}` : '';
-                          updateMedicalField('dob', newDob);
-                        }}
-                        className="h-12 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                      >
-                        <option value="">Dia</option>
-                        {days.map((d) => (
-                          <option key={d} value={d}>{d}</option>
-                        ))}
-                      </select>
-                      <select
-                        value={medicalData.dob ? parseInt(medicalData.dob.split('/')[1]) || '' : ''}
-                        onChange={(e) => {
-                          const month = e.target.value;
-                          const parts = medicalData.dob.split('/');
-                          const newDob = month ? `${parts[0] || '01'}/${month}/${parts[2] || '1990'}` : '';
-                          updateMedicalField('dob', newDob);
-                        }}
-                        className="h-12 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                      >
-                        <option value="">Mes</option>
-                        {months.map((m) => (
-                          <option key={m.value} value={m.value}>{m.label}</option>
-                        ))}
-                      </select>
-                      <select
-                        value={medicalData.dob ? parseInt(medicalData.dob.split('/')[2]) || '' : ''}
-                        onChange={(e) => {
-                          const year = e.target.value;
-                          const parts = medicalData.dob.split('/');
-                          const newDob = year ? `${parts[0] || '01'}/${parts[1] || '01'}/${year}` : '';
-                          updateMedicalField('dob', newDob);
-                        }}
-                        className="h-12 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                      >
-                        <option value="">Año</option>
-                        {years.map((y) => (
-                          <option key={y} value={y}>{y}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                  <InputField
+                    ref={dobRef}
+                    label="Fecha Nacimiento"
+                    required
+                    type="date"
+                    value={dobToInputValue(medicalData.dob)}
+                    max={todayInputValue}
+                    min={minDobInputValue}
+                    onChange={(e) => updateMedicalField('dob', inputValueToDob(e.target.value))}
+                    error={errors.dob}
+                  />
 
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Genero</label>
@@ -739,11 +784,11 @@ export default function ConfigPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5" ref={bloodTypeRef} tabIndex={-1}>
                       <label className="block text-sm font-semibold text-gray-700">
                         Tipo de Sangre <span className="text-red-500">*</span>
                       </label>
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className={`grid grid-cols-4 gap-2 rounded-xl ${errors.bloodType ? 'ring-2 ring-red-400 p-1.5 -m-1.5' : ''}`}>
                         {bloodTypes.map((bt) => (
                           <button
                             key={bt}
@@ -759,6 +804,12 @@ export default function ConfigPage() {
                           </button>
                         ))}
                       </div>
+                      {errors.bloodType && (
+                        <div role="alert" className="flex items-center gap-1.5 text-red-600 text-xs font-medium pt-0.5">
+                          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>{errors.bloodType}</span>
+                        </div>
+                      )}
                     </div>
 
                   <div className="space-y-1.5">
@@ -818,18 +869,28 @@ export default function ConfigPage() {
                     </div>
 
                     <InputField
+                      ref={emergencyPhoneRef}
                       label="Telefono Emergencia"
                       required
                       type="tel"
+                      inputMode="numeric"
                       value={medicalData.emergencyPhone}
-                      onChange={(e) => updateMedicalField('emergencyPhone', e.target.value)}
+                      onChange={(e) => updateMedicalField('emergencyPhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                       placeholder="10 digitos"
+                      maxLength={10}
+                      error={errors.emergencyPhone}
                     />
                   </div>
                 </div>
               </SectionCard>
+              </div>
 
-              <SectionCard icon={FileText} title="Datos IMSS" defaultOpen={false}>
+              <SectionCard
+                icon={FileText}
+                title="Datos IMSS"
+                defaultOpen={false}
+                complete={!!medicalData.curp || !!medicalData.nss}
+              >
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InputField
@@ -890,7 +951,12 @@ export default function ConfigPage() {
                 </div>
               </SectionCard>
 
-              <SectionCard icon={Stethoscope} title="Informacion Medica" defaultOpen={false}>
+              <SectionCard
+                icon={Stethoscope}
+                title="Informacion Medica"
+                defaultOpen={false}
+                complete={hasAllergies !== null && hasHereditary !== null}
+              >
                 <div className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Alergias</label>
@@ -1237,7 +1303,12 @@ export default function ConfigPage() {
                 </div>
               </SectionCard>
 
-              <SectionCard icon={Contact} title="Contactos de Emergencia" defaultOpen={false}>
+              <SectionCard
+                icon={Contact}
+                title="Contactos de Emergencia"
+                defaultOpen={false}
+                complete={contacts.some((c) => c.name && c.phone)}
+              >
                 <div className="space-y-3">
                   {contacts.map((contact, index) => (
                     <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
@@ -1277,9 +1348,11 @@ export default function ConfigPage() {
                       <InputField
                         label="Telefono"
                         type="tel"
+                        inputMode="numeric"
                         value={contact.phone}
-                        onChange={(e) => updateContact(index, 'phone', e.target.value)}
+                        onChange={(e) => updateContact(index, 'phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                         placeholder="10 digitos"
+                        maxLength={10}
                       />
                     </div>
                   ))}
