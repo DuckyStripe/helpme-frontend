@@ -7,7 +7,8 @@ import { calculateAge } from '@/lib/utils';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
-  Heart, User, Calendar, Printer, PhoneCall,
+  Heart, User, Calendar, Printer, PhoneCall, MessageCircle,
+  CheckCircle, Download,
 } from 'lucide-react';
 
 interface ViewerData {
@@ -45,9 +46,22 @@ export default function ViewerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [data, setData] = useState<ViewerData | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     loadViewer();
+    
+    // Capturar el evento beforeinstallprompt para PWA
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
 
@@ -101,6 +115,117 @@ export default function ViewerPage() {
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
     );
+  }
+
+  async function getLocation(): Promise<{ address: string; lat: number; lng: number } | null> {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          try {
+            const geoRes = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+              { headers: { 'Accept-Language': 'es' } }
+            );
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              const road = geoData.address?.road || '';
+              const houseNumber = geoData.address?.house_number || '';
+              const suburb = geoData.address?.suburb || '';
+              const city = geoData.address?.city || geoData.address?.town || geoData.address?.village || '';
+              const state = geoData.address?.state || '';
+              
+              let address = '';
+              if (road) {
+                address = road;
+                if (houseNumber) address += ` ${houseNumber}`;
+              }
+              if (suburb) address += `, ${suburb}`;
+              if (city) address += `, ${city}`;
+              if (state) address += `, ${state}`;
+              
+              if (!address) {
+                address = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+              }
+              
+              resolve({ address, lat, lng });
+            } else {
+              resolve({ address: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, lat, lng });
+            }
+          } catch {
+            resolve({ address: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, lat, lng });
+          }
+        },
+        () => {
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+  }
+
+  async function buildWhatsAppMessage(): Promise<string> {
+    if (!data?.medicalData) return '';
+    const md = data.medicalData;
+    const age = calculateAge(md.dob);
+    
+    let message = `🚨 *EMERGENCIA MÉDICA* 🚨\n\n`;
+    message += `*Paciente:* ${md.userName || 'No especificado'}\n`;
+    if (age !== null) message += `*Edad:* ${age} años\n`;
+    if (md.gender) message += `*Género:* ${md.gender}\n`;
+    message += `*Tipo de Sangre:* ${md.bloodType}\n`;
+    
+    if (md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna') {
+      message += `*Alergias:* ${md.allergies}\n`;
+    }
+    
+    if (md.conditions && md.conditions.trim()) {
+      message += `*Condiciones:* ${md.conditions}\n`;
+    }
+    
+    if (md.medications && md.medications.trim()) {
+      message += `*Medicamentos:* ${md.medications}\n`;
+    }
+    
+    if (md.emergencyPhone) {
+      message += `\n📞 *Tel. Personal:* ${md.emergencyPhone}\n`;
+    }
+    
+    // Obtener ubicación actual
+    const loc = await getLocation();
+    if (loc) {
+      message += `\n📍 *Ubicación:* ${loc.address}\n`;
+      message += `https://maps.google.com/?q=${loc.lat},${loc.lng}\n`;
+    }
+    
+    message += `\n_Mensaje enviado desde HelpMe Tag_`;
+    
+    return encodeURIComponent(message);
+  }
+
+  async function handleWhatsAppAlert() {
+    const message = await buildWhatsAppMessage();
+    const whatsappUrl = `https://wa.me/?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  }
+
+  async function handleInstallApp() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      // Fallback: mostrar instrucciones
+      alert('Para agregar esta página a tu pantalla de inicio:\n\n• En Android: Menú (⋮) → "Agregar a pantalla de inicio"\n• En iPhone: Compartir → "Agregar a pantalla de inicio"');
+    }
   }
 
   if (loading) {
@@ -290,41 +415,80 @@ export default function ViewerPage() {
           </div>
         </section>
 
-        {/* CONTACTOS DE EMERGENCIA - Acción rápida */}
-        {data.contacts.length > 0 && (
+        {/* INFORMACIÓN PERSONAL - Debajo de tipo de sangre */}
+        <section className="px-5 pt-5">
+          <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <User className="w-4 h-4" />
+            Información Personal
+          </h2>
+          
+          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+            <div className="grid grid-cols-2 gap-3">
+              {md.dob && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Fecha Nacimiento</p>
+                  <p className="text-sm font-bold text-gray-900">{md.dob}</p>
+                </div>
+              )}
+              {md.pob && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Lugar Nacimiento</p>
+                  <p className="text-sm font-bold text-gray-900">{md.pob}</p>
+                </div>
+              )}
+              {md.religion && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Religión</p>
+                  <p className="text-sm font-bold text-gray-900">{md.religion}</p>
+                </div>
+              )}
+              {md.organDonor && (
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Donador de Órganos</p>
+                  <p className={`text-sm font-bold ${md.organDonor === 'Si' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {md.organDonor}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* SEGURIDAD SOCIAL - Después de información personal */}
+        {md.nss && (
           <section className="px-5 pt-5">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <PhoneCall className="w-4 h-4" />
-              Contactos de Emergencia
+              <ShieldPlus className="w-4 h-4" />
+              Seguridad Social
             </h2>
-            <div className="space-y-2.5">
-              {data.contacts.map((contact, index) => (
-                <div 
-                  key={index} 
-                  className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-center justify-between shadow-sm"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="bg-emerald-600 p-2.5 rounded-xl text-white flex-shrink-0">
-                      <Contact className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-emerald-900 truncate">
-                        {contact.name}
-                      </p>
-                      <p className="text-[11px] text-emerald-600 font-medium">
-                        {contact.relationship}
-                      </p>
-                    </div>
-                  </div>
-                  <a 
-                    href={`tel:+52${contact.phone.replace('+', '')}`} 
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex-shrink-0 ml-3"
-                    aria-label={`Llamar a ${contact.name}`}
-                  >
-                    <Phone className="w-5 h-5" />
-                  </a>
+            
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-xl shadow-blue-600/20">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                  <ShieldPlus className="w-5 h-5 text-white" />
                 </div>
-              ))}
+                <div>
+                  <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">NSS</p>
+                  <p className="text-xl font-mono font-black text-white tracking-wider">{md.nss}</p>
+                </div>
+              </div>
+              
+              {(md.curp || md.umf) && (
+                <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
+                  {md.curp && (
+                    <div>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
+                      <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+                    </div>
+                  )}
+                  {md.umf && (
+                    <div className="text-right">
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF</p>
+                      <p className="text-xs font-bold text-white">{md.umf}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -371,33 +535,51 @@ export default function ViewerPage() {
               </div>
             </div>
 
-            {/* Antecedentes heredofamiliares */}
+            {/* Antecedentes heredofamiliares - Con indicador de si padece o no */}
             {hasHereditary && (
               <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-3">
                   <Heart className="w-5 h-5 text-orange-500" />
                   <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700">
                     Antecedentes Heredofamiliares
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-2">
                   {md.hereditaryConditions && md.hereditaryConditions.split('|').map((item, idx) => {
                     const parts = item.split(' - ');
                     const name = parts[0] || '';
                     const line = parts[1] || '';
                     const isActive = parts[2] === 'si';
                     return (
-                      <span 
+                      <div 
                         key={idx} 
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                        className={`flex items-center justify-between p-3 rounded-lg border-2 ${
                           isActive 
-                            ? 'bg-red-100 text-red-800 border border-red-200' 
-                            : 'bg-gray-100 text-gray-600 border border-gray-200'
+                            ? 'bg-red-100 border-red-300' 
+                            : 'bg-gray-100 border-gray-200'
                         }`}
                       >
-                        <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-red-500' : 'bg-gray-400'}`}></span>
-                        {name} <span className="text-[10px] opacity-70">({line})</span>
-                      </span>
+                        <div className="flex items-center gap-2">
+                          {isActive ? (
+                            <AlertTriangle className="w-4 h-4 text-red-600" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4 text-gray-500" />
+                          )}
+                          <div>
+                            <p className={`text-sm font-bold ${isActive ? 'text-red-900' : 'text-gray-700'}`}>
+                              {name}
+                            </p>
+                            <p className="text-[10px] text-gray-500 uppercase">Línea {line}</p>
+                          </div>
+                        </div>
+                        <div className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${
+                          isActive 
+                            ? 'bg-red-600 text-white' 
+                            : 'bg-gray-300 text-gray-600'
+                        }`}>
+                          {isActive ? 'Lo padece' : 'No lo padece'}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -406,83 +588,65 @@ export default function ViewerPage() {
           </div>
         </section>
 
-        {/* INFORMACIÓN PERSONAL - Detalles adicionales */}
-        <section className="px-5 pt-5">
-          <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <User className="w-4 h-4" />
-            Información Personal
-          </h2>
-          
-          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-            <div className="grid grid-cols-2 gap-3">
-              {md.dob && (
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Fecha Nacimiento</p>
-                  <p className="text-sm font-bold text-gray-900">{md.dob}</p>
-                </div>
-              )}
-              {md.pob && (
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Lugar Nacimiento</p>
-                  <p className="text-sm font-bold text-gray-900">{md.pob}</p>
-                </div>
-              )}
-              {md.religion && (
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Religión</p>
-                  <p className="text-sm font-bold text-gray-900">{md.religion}</p>
-                </div>
-              )}
-              {md.organDonor && (
-                <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Donador de Órganos</p>
-                  <p className={`text-sm font-bold ${md.organDonor === 'Si' ? 'text-green-600' : 'text-gray-600'}`}>
-                    {md.organDonor}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* SEGURIDAD SOCIAL */}
-        {md.nss && (
+        {/* CONTACTOS DE EMERGENCIA - Al final */}
+        {data.contacts.length > 0 && (
           <section className="px-5 pt-5">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <ShieldPlus className="w-4 h-4" />
-              Seguridad Social
+              <PhoneCall className="w-4 h-4" />
+              Contactos de Emergencia
             </h2>
-            
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-xl shadow-blue-600/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-                  <ShieldPlus className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">NSS</p>
-                  <p className="text-xl font-mono font-black text-white tracking-wider">{md.nss}</p>
-                </div>
-              </div>
-              
-              {(md.curp || md.umf) && (
-                <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
-                  {md.curp && (
-                    <div>
-                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
-                      <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+            <div className="space-y-2.5">
+              {data.contacts.map((contact, index) => (
+                <div 
+                  key={index} 
+                  className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-center justify-between shadow-sm"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="bg-emerald-600 p-2.5 rounded-xl text-white flex-shrink-0">
+                      <Contact className="w-5 h-5" />
                     </div>
-                  )}
-                  {md.umf && (
-                    <div className="text-right">
-                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF</p>
-                      <p className="text-xs font-bold text-white">{md.umf}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-emerald-900 truncate">
+                        {contact.name}
+                      </p>
+                      <p className="text-[11px] text-emerald-600 font-medium">
+                        {contact.relationship}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                  <a 
+                    href={`tel:+52${contact.phone.replace('+', '')}`} 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex-shrink-0 ml-3"
+                    aria-label={`Llamar a ${contact.name}`}
+                  >
+                    <Phone className="w-5 h-5" />
+                  </a>
                 </div>
-              )}
+              ))}
             </div>
           </section>
         )}
+
+        {/* BOTONES DE ACCIÓN */}
+        <section className="px-5 pt-5 space-y-3 no-print">
+          {/* Botón WhatsApp */}
+          <button
+            onClick={handleWhatsAppAlert}
+            className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span>Enviar Alerta por WhatsApp</span>
+          </button>
+
+          {/* Botón Agregar a pantalla de inicio */}
+          <button
+            onClick={handleInstallApp}
+            className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-600/30 active:scale-95 transition-all"
+          >
+            <Download className="w-6 h-6" />
+            <span>Agregar a Pantalla de Inicio</span>
+          </button>
+        </section>
 
         {/* FOOTER */}
         <footer className="bg-gray-50 border-t border-gray-200 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500">
