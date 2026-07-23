@@ -360,6 +360,9 @@ export default function ConfigPage() {
   const [hasHereditary, setHasHereditary] = useState<boolean | null>(null);
   const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
   const [personalOpenKey, setPersonalOpenKey] = useState(0);
+  const [isMinor, setIsMinor] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentError, setConsentError] = useState('');
 
   const personalSectionRef = useRef<HTMLDivElement>(null);
   const userNameRef = useRef<HTMLInputElement>(null);
@@ -615,6 +618,12 @@ export default function ConfigPage() {
       return;
     }
 
+    if (!consentAccepted) {
+      setConsentError('Debes aceptar el Aviso de Privacidad para guardar tus datos');
+      toast.error('Debes aceptar el Aviso de Privacidad para continuar');
+      return;
+    }
+
     if (!pinToken) {
       toast.error('No hay sesion activa');
       return;
@@ -622,7 +631,7 @@ export default function ConfigPage() {
 
     setSaving(true);
     try {
-      await pinApi.updateMedicalData(pinToken, medicalData, contacts);
+      await pinApi.updateMedicalData(pinToken, medicalData, contacts, { isMinor, consentAccepted });
       toast.success('Datos guardados exitosamente');
       setIsActive(true);
       setStatus('ACTIVE');
@@ -1419,6 +1428,54 @@ export default function ConfigPage() {
                   </button>
                 </div>
               </SectionCard>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isMinor}
+                    onChange={(e) => setIsMinor(e.target.checked)}
+                    className="mt-1 w-4 h-4 accent-red-600"
+                  />
+                  <span className="text-sm text-gray-700">
+                    Estos datos corresponden a un <strong>menor de edad</strong> y yo soy su
+                    madre, padre o tutor legal.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consentAccepted}
+                    onChange={(e) => {
+                      setConsentAccepted(e.target.checked);
+                      if (e.target.checked) setConsentError('');
+                    }}
+                    className="mt-1 w-4 h-4 accent-red-600"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {isMinor ? (
+                      <>En mi calidad de madre, padre o tutor legal, he leído el{' '}</>
+                    ) : (
+                      <>He leído el{' '}</>
+                    )}
+                    <a
+                      href="/aviso-de-privacidad"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-red-600 underline font-semibold"
+                    >
+                      Aviso de Privacidad
+                    </a>{' '}
+                    y otorgo mi consentimiento expreso para el tratamiento de estos datos
+                    sensibles, incluyendo su despliegue a cualquier persona que escanee este tag
+                    en caso de emergencia.
+                  </span>
+                </label>
+                {consentError && (
+                  <p className="text-sm text-red-600 font-medium">{consentError}</p>
+                )}
+              </div>
 
               <div className="pt-2">
                 <button

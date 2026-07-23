@@ -66,13 +66,27 @@ export default function AvisoPrivacidadPage() {
               <li>Tipo de sangre</li>
               <li>Alergias</li>
               <li>Medicamentos de uso regular</li>
-              <li>Condiciones médicas preexistentes</li>
+              <li>Condiciones médicas preexistentes y antecedentes heredofamiliares</li>
+              <li>Condición de donador de órganos</li>
               <li>Contactos de emergencia</li>
+            </ul>
+            <h3 className="font-semibold text-gray-900 mb-2">Otros datos sensibles y de identificación:</h3>
+            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+              <li>Fecha y lugar de nacimiento, género</li>
+              <li>Religión (dato sensible conforme al art. 3, fracción VI de la LFPDPPP)</li>
+              <li>CURP y número de seguridad social (NSS) / Unidad de Medicina Familiar (UMF)</li>
+            </ul>
+            <h3 className="font-semibold text-gray-900 mb-2">Datos de ubicación (de quien escanea el tag, no del titular):</h3>
+            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+              <li>Coordenadas de geolocalización, capturadas únicamente si la persona que asiste
+                en la emergencia otorga el permiso de ubicación de su navegador, con el fin de
+                ubicar el sitio del incidente al alertar a un contacto de emergencia</li>
             </ul>
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <p className="text-sm text-amber-800 leading-relaxed">
-                Estos datos son considerados <strong>datos sensibles</strong> conforme al artículo 3,
-                fracción VI de la LFPDPPP y reciben protección reforzada.
+                Los datos de salud, religión y los identificadores gubernamentales (CURP, NSS) son
+                considerados <strong>datos sensibles</strong> conforme al artículo 3, fracción VI de
+                la LFPDPPP y reciben protección reforzada.
               </p>
             </div>
           </section>
@@ -109,12 +123,26 @@ export default function AvisoPrivacidadPage() {
               4. Transferencia de Datos
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              HelpMe <strong>no vende, cede ni transfiere</strong> sus datos personales a terceros,
-              salvo en los siguientes casos permitidos por ley:
+              HelpMe <strong>no vende ni cede</strong> sus datos personales a terceros con fines
+              comerciales. Sí existen las siguientes transferencias, necesarias para el
+              funcionamiento del servicio:
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-1 mt-4">
               <li>Cuando sea requerido por autoridad competente mediante orden judicial</li>
-              <li>Cuando sea necesario para proteger su vida o integridad física</li>
+              <li>Cuando sea necesario para proteger la vida o integridad física del titular</li>
+              <li>
+                <strong>OpenStreetMap Foundation (servicio Nominatim)</strong>: al momento en que
+                una persona que asiste en una emergencia envía una alerta por WhatsApp, las
+                coordenadas de ubicación que esa persona confirma en el mapa se transmiten a este
+                servicio para obtener una dirección legible. Esta transferencia puede implicar el
+                envío de datos a servidores fuera de México y corresponde a datos de quien asiste,
+                no necesariamente del titular de la ficha médica
+              </li>
+              <li>
+                <strong>WhatsApp (Meta)</strong>: el mensaje con los datos de emergencia se envía a
+                través de esta plataforma solo cuando la persona que asiste elige hacerlo
+                explícitamente
+              </li>
             </ul>
           </section>
 

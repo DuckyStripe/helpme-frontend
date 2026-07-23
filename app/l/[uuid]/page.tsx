@@ -4,12 +4,21 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { tagsApi, scanApi } from '@/lib/api';
 import { calculateAge } from '@/lib/utils';
+import LocationPickerModal from '@/components/LocationPickerModal';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
   Heart, User, Calendar, Printer, PhoneCall, MessageCircle,
-  CheckCircle, Download,
+  CheckCircle, Download, Clock, RefreshCw,
 } from 'lucide-react';
+
+// Ventana de exposición: tras este tiempo la ficha se oculta del DOM y hay
+// que recargar (nuevo tap/petición) para volver a verla.
+const VIEW_SESSION_MS = 5 * 60 * 1000;
+
+// Centro de la CDMX: usado como punto de partida del mapa cuando el
+// navegador del rescatista no comparte o no tiene ubicación disponible.
+const DEFAULT_MAP_CENTER = { lat: 19.4326, lng: -99.1332 };
 
 interface ViewerData {
   uuid: string;
@@ -47,27 +56,56 @@ export default function ViewerPage() {
   const [error, setError] = useState('');
   const [data, setData] = useState<ViewerData | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [expired, setExpired] = useState(false);
+  const [remainingSec, setRemainingSec] = useState<number | null>(null);
+  const [locationPicker, setLocationPicker] = useState<{
+    contactPhone: string;
+    contactName: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     loadViewer();
-    
+
     // Capturar el evento beforeinstallprompt para PWA
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
-    
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
 
+  useEffect(() => {
+    if (!data || expired) return;
+
+    const deadline = Date.now() + VIEW_SESSION_MS;
+    setRemainingSec(Math.round(VIEW_SESSION_MS / 1000));
+
+    const interval = setInterval(() => {
+      const secondsLeft = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      setRemainingSec(secondsLeft);
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        setExpired(true);
+        setData(null);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
   async function loadViewer() {
     try {
       const response = await tagsApi.getViewer(uuid);
+      setExpired(false);
       setData(response);
       triggerScanRegistration();
     } catch (err: any) {
@@ -81,107 +119,80 @@ export default function ViewerPage() {
     }
   }
 
+  async function handleReload() {
+    setLoading(true);
+    setError('');
+    await loadViewer();
+  }
+
   function triggerScanRegistration() {
     const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : undefined;
     scanApi.registerScan(uuid, { userAgent });
   }
 
-  async function getLocation(): Promise<{ address: string; lat: number; lng: number } | null> {
+  async function detectPosition(): Promise<{ lat: number; lng: number }> {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      return null;
+      return DEFAULT_MAP_CENTER;
     }
 
     return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-
-          try {
-            const geoRes = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-              { headers: { 'Accept-Language': 'es' } }
-            );
-            if (geoRes.ok) {
-              const geoData = await geoRes.json();
-              const road = geoData.address?.road || '';
-              const houseNumber = geoData.address?.house_number || '';
-              const suburb = geoData.address?.suburb || '';
-              const city = geoData.address?.city || geoData.address?.town || geoData.address?.village || '';
-              const state = geoData.address?.state || '';
-              
-              let address = '';
-              if (road) {
-                address = road;
-                if (houseNumber) address += ` ${houseNumber}`;
-              }
-              if (suburb) address += `, ${suburb}`;
-              if (city) address += `, ${city}`;
-              if (state) address += `, ${state}`;
-              
-              if (!address) {
-                address = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-              }
-              
-              resolve({ address, lat, lng });
-            } else {
-              resolve({ address: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, lat, lng });
-            }
-          } catch {
-            resolve({ address: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, lat, lng });
-          }
-        },
-        () => {
-          resolve(null);
-        },
+        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
+        () => resolve(DEFAULT_MAP_CENTER),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     });
   }
 
-  async function buildWhatsAppMessage(): Promise<string> {
+  function buildWhatsAppMessage(location: { lat: number; lng: number; address: string } | null): string {
     if (!data?.medicalData) return '';
     const md = data.medicalData;
     const age = calculateAge(md.dob);
-    
+
     let message = `🚨 *EMERGENCIA MÉDICA* 🚨\n\n`;
     message += `*Paciente:* ${md.userName || 'No especificado'}\n`;
     if (age !== null) message += `*Edad:* ${age} años\n`;
     if (md.gender) message += `*Género:* ${md.gender}\n`;
     message += `*Tipo de Sangre:* ${md.bloodType}\n`;
-    
+
     if (md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna') {
       message += `*Alergias:* ${md.allergies}\n`;
     }
-    
+
     if (md.conditions && md.conditions.trim()) {
       message += `*Condiciones:* ${md.conditions}\n`;
     }
-    
+
     if (md.medications && md.medications.trim()) {
       message += `*Medicamentos:* ${md.medications}\n`;
     }
-    
+
     if (md.emergencyPhone) {
       message += `\n📞 *Tel. Personal:* ${md.emergencyPhone}\n`;
     }
-    
-    // Obtener ubicación actual
-    const loc = await getLocation();
-    if (loc) {
-      message += `\n📍 *Ubicación:* ${loc.address}\n`;
-      message += `https://maps.google.com/?q=${loc.lat},${loc.lng}\n`;
+
+    if (location) {
+      message += `\n📍 *Ubicación:* ${location.address}\n`;
+      message += `https://maps.google.com/?q=${location.lat},${location.lng}\n`;
     }
-    
+
     message += `\n_Mensaje enviado desde HelpMe Tag_`;
-    
+
     return encodeURIComponent(message);
   }
 
-  async function handleWhatsAppAlert() {
-    const message = await buildWhatsAppMessage();
-    const whatsappUrl = `https://wa.me/?text=${message}`;
+  async function handleWhatsAppAlert(contactPhone: string, contactName: string) {
+    const pos = await detectPosition();
+    setLocationPicker({ contactPhone, contactName, lat: pos.lat, lng: pos.lng });
+  }
+
+  function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
+    if (!locationPicker) return;
+    const message = buildWhatsAppMessage(location);
+    const cleanPhone = locationPicker.contactPhone.replace(/[\s\-\(\)]/g, '');
+    const whatsappUrl = `https://wa.me/52${cleanPhone}?text=${message}`;
     window.open(whatsappUrl, '_blank');
+    setLocationPicker(null);
   }
 
   async function handleInstallApp() {
@@ -228,6 +239,27 @@ export default function ViewerPage() {
           </div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Tag No Encontrado</h1>
           <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (expired) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock className="w-8 h-8 text-gray-500" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Sesión Expirada</h1>
+          <p className="text-gray-600 mb-4">Por seguridad, la ficha médica se oculta después de un tiempo. Vuelve a escanear el tag o recarga para verla de nuevo.</p>
+          <button
+            onClick={handleReload}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors active:scale-95"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Ver ficha de nuevo
+          </button>
         </div>
       </div>
     );
@@ -295,13 +327,23 @@ export default function ViewerPage() {
                 <p className="text-[9px] text-red-200 uppercase tracking-widest">Emergencia</p>
               </div>
             </div>
-            <button
-              onClick={() => window.print()}
-              className="no-print p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
-              aria-label="Imprimir ficha"
-            >
-              <Printer className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {remainingSec !== null && (
+                <div className="no-print flex items-center gap-1 bg-white/10 px-2.5 py-1.5 rounded-xl" title="Esta ficha se oculta automáticamente por seguridad">
+                  <Clock className="w-3.5 h-3.5 text-red-100" />
+                  <span className="text-xs font-mono font-bold text-red-100">
+                    {String(Math.floor(remainingSec / 60)).padStart(2, '0')}:{String(remainingSec % 60).padStart(2, '0')}
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={() => window.print()}
+                className="no-print p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
+                aria-label="Imprimir ficha"
+              >
+                <Printer className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Nombre y datos básicos */}
@@ -598,14 +640,30 @@ export default function ViewerPage() {
 
         {/* BOTONES DE ACCIÓN */}
         <section className="px-5 pt-5 space-y-3 no-print">
-          {/* Botón WhatsApp */}
-          <button
-            onClick={handleWhatsAppAlert}
-            className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span>Enviar Alerta por WhatsApp</span>
-          </button>
+          {/* Botones de WhatsApp por contacto */}
+          {data.contacts.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Enviar Alerta por WhatsApp
+              </p>
+              {data.contacts.map((contact, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleWhatsAppAlert(contact.phone, contact.name)}
+                  className="w-full flex items-center justify-between gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <MessageCircle className="w-6 h-6" />
+                    <div className="text-left">
+                      <p className="text-sm font-bold">Alertar a {contact.name}</p>
+                      <p className="text-xs font-normal opacity-90">{contact.relationship}</p>
+                    </div>
+                  </div>
+                  <Phone className="w-5 h-5" />
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Botón Agregar a pantalla de inicio */}
           <button
@@ -628,6 +686,16 @@ export default function ViewerPage() {
           </p>
         </footer>
       </main>
+
+      {locationPicker && (
+        <LocationPickerModal
+          initialLat={locationPicker.lat}
+          initialLng={locationPicker.lng}
+          contactName={locationPicker.contactName}
+          onConfirm={handleLocationConfirm}
+          onCancel={() => setLocationPicker(null)}
+        />
+      )}
     </div>
   );
 }

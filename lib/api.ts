@@ -258,14 +258,19 @@ export const pinApi = {
     return json.data ?? json;
   },
 
-  async updateMedicalData(token: string, medicalData: any, contacts: any[]) {
+  async updateMedicalData(
+    token: string,
+    medicalData: any,
+    contacts: any[],
+    consent: { isMinor: boolean; consentAccepted: boolean }
+  ) {
     const res = await fetch(`${API_BASE}/tags/config/data`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ medicalData, contacts }),
+      body: JSON.stringify({ medicalData, contacts, ...consent }),
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error?.message || 'Request failed');
