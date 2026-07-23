@@ -748,7 +748,7 @@ export default function ConfigPage() {
       return;
     }
 
-    const contactsToSubmit = filledContacts.map(({ index, ...c }) => c);
+    const contactsToSubmit = filledContacts.map(({ index: _index, ...c }) => c);
 
     setSaving(true);
     try {
