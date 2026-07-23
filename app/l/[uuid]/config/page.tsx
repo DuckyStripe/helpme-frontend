@@ -9,16 +9,17 @@ import {
   User, FileText, Eye, EyeOff, ChevronDown, ChevronUp,
   Stethoscope, AlertCircle, Contact,
 } from 'lucide-react';
+import OwnerView from '@/components/OwnerView';
 
 type TagStatus = 'VIRGIN' | 'INCOMPLETE' | 'ACTIVE' | 'SUSPENDED';
 
-interface Contact {
+export interface Contact {
   name: string;
   relationship: string;
   phone: string;
 }
 
-interface MedicalData {
+export interface MedicalData {
   userName: string;
   dob: string;
   gender: string;
@@ -363,6 +364,8 @@ export default function ConfigPage() {
   const [isMinor, setIsMinor] = useState(false);
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [consentError, setConsentError] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [editMode, setEditMode] = useState(false);
 
   const personalSectionRef = useRef<HTMLDivElement>(null);
   const userNameRef = useRef<HTMLInputElement>(null);
@@ -376,8 +379,29 @@ export default function ConfigPage() {
 
   useEffect(() => {
     loadTagStatus();
+
+    // Solo el dueño (autenticado con su PIN en esta pantalla) puede instalar
+    // la ficha como respaldo en su teléfono.
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
+
+  async function handleInstallApp() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert('Para agregar esta página a tu pantalla de inicio:\n\n• En Android: Menú (⋮) → "Agregar a pantalla de inicio"\n• En iPhone: Compartir → "Agregar a pantalla de inicio"');
+    }
+  }
 
   async function loadTagStatus() {
     try {
@@ -483,6 +507,7 @@ export default function ConfigPage() {
       setPinToken(loginRes.token);
       setStatus(loginRes.status as TagStatus);
       await loadConfigData(loginRes.token);
+      setEditMode(true);
       setTimeout(() => setFormTransition(true), 100);
     } catch (err: any) {
       toast.error(err.message || 'Error al crear el PIN');
@@ -503,7 +528,8 @@ export default function ConfigPage() {
       const res = await pinApi.pinLogin(uuid, pin);
       setPinToken(res.token);
       setStatus(res.status as TagStatus);
-      await loadConfigData(res.token);
+      const hasData = await loadConfigData(res.token);
+      setEditMode(!hasData);
       toast.success('Acceso concedido');
       setTimeout(() => setFormTransition(true), 100);
     } catch (err: any) {
@@ -512,7 +538,7 @@ export default function ConfigPage() {
     }
   }
 
-  async function loadConfigData(token: string) {
+  async function loadConfigData(token: string): Promise<boolean> {
     try {
       const data = await pinApi.getConfigData(uuid, token);
       if (data.medicalData) {
@@ -558,8 +584,10 @@ export default function ConfigPage() {
       if (data.contacts && data.contacts.length > 0) {
         setContacts(data.contacts);
       }
+      return Boolean(data.medicalData?.userName);
     } catch {
       // Si falla, continuar con datos vacíos
+      return false;
     }
   }
 
@@ -727,20 +755,23 @@ export default function ConfigPage() {
 
               <div className="space-y-3 pt-2">
                 <button
+                  onClick={() => {
+                    setShowSuccess(false);
+                    setEditMode(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-red-600 text-white font-semibold py-3.5 px-6 rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 min-h-[44px]"
+                >
+                  <Activity className="w-5 h-5" />
+                  Ver mi Ficha
+                </button>
+
+                <button
                   onClick={() => setShowSuccess(false)}
                   className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3.5 px-6 rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
                 >
                   <Save className="w-5 h-5" />
-                  Volver a Editar Datos
+                  Seguir Editando
                 </button>
-
-                <a
-                  href={`/L/${uuid}`}
-                  className="w-full flex items-center justify-center gap-2 bg-red-600 text-white font-semibold py-3.5 px-6 rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 min-h-[44px]"
-                >
-                  <Activity className="w-5 h-5" />
-                  Ver mi Tag Activo
-                </a>
               </div>
             </div>
           </div>
@@ -749,7 +780,18 @@ export default function ConfigPage() {
     );
   }
 
-  if (pinToken && formTransition) {
+  if (pinToken && formTransition && !editMode) {
+    return (
+      <OwnerView
+        medicalData={medicalData}
+        contacts={contacts}
+        onEdit={() => setEditMode(true)}
+        onInstallApp={handleInstallApp}
+      />
+    );
+  }
+
+  if (pinToken && formTransition && editMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50 p-4 sm:p-6">
         <div className="max-w-lg mx-auto">
@@ -1477,7 +1519,7 @@ export default function ConfigPage() {
                 )}
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 no-print space-y-2">
                 <button
                   type="submit"
                   disabled={saving}
@@ -1495,6 +1537,16 @@ export default function ConfigPage() {
                     </>
                   )}
                 </button>
+                {isActive && (
+                  <button
+                    type="button"
+                    onClick={() => setEditMode(false)}
+                    disabled={saving}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 min-h-[44px]"
+                  >
+                    Cancelar
+                  </button>
+                )}
               </div>
             </form>
           </div>

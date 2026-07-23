@@ -8,8 +8,8 @@ import LocationPickerModal from '@/components/LocationPickerModal';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
-  Heart, User, Calendar, Printer, PhoneCall, MessageCircle,
-  CheckCircle, Download, Clock, RefreshCw,
+  Heart, User, Calendar, PhoneCall, MessageCircle,
+  CheckCircle, Clock, RefreshCw,
 } from 'lucide-react';
 
 // Ventana de exposición: tras este tiempo la ficha se oculta del DOM y hay
@@ -61,7 +61,6 @@ export default function ViewerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [data, setData] = useState<ViewerData | null>(null);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [expired, setExpired] = useState(false);
   const [remainingSec, setRemainingSec] = useState<number | null>(null);
   const [locationPicker, setLocationPicker] = useState<{
@@ -80,18 +79,6 @@ export default function ViewerPage() {
 
   useEffect(() => {
     loadViewer();
-
-    // Capturar el evento beforeinstallprompt para PWA
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
 
@@ -168,19 +155,6 @@ export default function ViewerPage() {
     await tagsApi.sendAlert(uuid, contactId, location);
     setLocationPicker(null);
     setAlertFeedback({ type: 'success', message: `Alerta enviada a ${contactName}` });
-  }
-
-  async function handleInstallApp() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-      }
-    } else {
-      // Fallback: mostrar instrucciones
-      alert('Para agregar esta página a tu pantalla de inicio:\n\n• En Android: Menú (⋮) → "Agregar a pantalla de inicio"\n• En iPhone: Compartir → "Agregar a pantalla de inicio"');
-    }
   }
 
   if (loading) {
@@ -311,13 +285,6 @@ export default function ViewerPage() {
                   </span>
                 </div>
               )}
-              <button
-                onClick={() => window.print()}
-                className="no-print p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
-                aria-label="Imprimir ficha"
-              >
-                <Printer className="w-5 h-5" />
-              </button>
             </div>
           </div>
 
@@ -640,14 +607,6 @@ export default function ViewerPage() {
             </div>
           )}
 
-          {/* Botón Agregar a pantalla de inicio */}
-          <button
-            onClick={handleInstallApp}
-            className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-600/30 active:scale-95 transition-all"
-          >
-            <Download className="w-6 h-6" />
-            <span>Agregar a Pantalla de Inicio</span>
-          </button>
         </section>
 
         {/* FOOTER */}
