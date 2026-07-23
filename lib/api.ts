@@ -227,6 +227,10 @@ export const tagsApi = {
     return api.getPublic<any>(`/tags/${uuid}/view`);
   },
 
+  async sendAlert(uuid: string, contactId: string, location: { lat: number; lng: number; address?: string }) {
+    return api.post<{ success: boolean; contactName: string }>(`/tags/${uuid}/alert`, { contactId, location });
+  },
+
   async getScans(id: string) {
     return api.get<{ scans: any[] }>(`/tags/${id}/scans`);
   },
@@ -275,6 +279,16 @@ export const pinApi = {
     const json = await res.json();
     if (!res.ok) throw new Error(json.error?.message || 'Request failed');
     return json.data ?? json;
+  },
+};
+
+export const settingsApi = {
+  async getOpenwa() {
+    return api.get<{ baseUrl: string; sessionId: string; hasApiKey: boolean; updatedAt: string | null }>('/settings/openwa');
+  },
+
+  async updateOpenwa(data: { baseUrl?: string; sessionId?: string; apiKey?: string }) {
+    return api.put<{ baseUrl: string; sessionId: string; hasApiKey: boolean; updatedAt: string | null }>('/settings/openwa', data);
   },
 };
 

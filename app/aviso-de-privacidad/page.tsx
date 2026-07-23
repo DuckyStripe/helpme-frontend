@@ -139,9 +139,16 @@ export default function AvisoPrivacidadPage() {
                 no necesariamente del titular de la ficha médica
               </li>
               <li>
-                <strong>WhatsApp (Meta)</strong>: el mensaje con los datos de emergencia se envía a
-                través de esta plataforma solo cuando la persona que asiste elige hacerlo
-                explícitamente
+                <strong>OpenWA (proveedor de mensajería) y WhatsApp (Meta)</strong>: cuando la
+                persona que asiste confirma el envío de una alerta, los datos médicos de
+                emergencia del titular (nombre, tipo de sangre, alergias, padecimientos,
+                medicamentos, teléfono de contacto y la ubicación confirmada) se envían desde los
+                servidores de HelpMe a OpenWA, un proveedor externo que actúa como encargado para
+                transmitir el mensaje por WhatsApp al contacto de confianza registrado por el
+                titular. HelpMe ya no abre WhatsApp en el dispositivo de quien asiste; es el
+                servidor quien realiza el envío, precisamente para asegurar que solo pueda
+                dirigirse a los contactos de confianza dados de alta en la ficha, y no a
+                cualquier otro número
               </li>
             </ul>
           </section>

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import {
-  LayoutDashboard, QrCode, Users, LogOut, Shield, UserCog,
+  LayoutDashboard, QrCode, Users, LogOut, Shield, UserCog, Settings,
 } from 'lucide-react';
 import type { User } from '@/types';
 
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/dashboard/tags', label: 'Tags', icon: QrCode, roles: ['ADMIN', 'VENDEDOR'] },
   { href: '/dashboard/sellers', label: 'Vendedores', icon: Users, roles: ['ADMIN'] },
   { href: '/dashboard/admins', label: 'Administradores', icon: UserCog, roles: ['ADMIN'] },
+  { href: '/dashboard/settings', label: 'Configuración', icon: Settings, roles: ['ADMIN'] },
 ];
 
 export default function DashboardLayout({ user, children }: DashboardLayoutProps) {

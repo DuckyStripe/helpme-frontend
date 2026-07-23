@@ -42,10 +42,16 @@ interface ViewerData {
     hereditaryConditions?: string;
   } | null;
   contacts: {
+    id: string;
     name: string;
     relationship: string;
     phone: string;
   }[];
+}
+
+interface AlertFeedback {
+  type: 'success' | 'error';
+  message: string;
 }
 
 export default function ViewerPage() {
@@ -59,11 +65,18 @@ export default function ViewerPage() {
   const [expired, setExpired] = useState(false);
   const [remainingSec, setRemainingSec] = useState<number | null>(null);
   const [locationPicker, setLocationPicker] = useState<{
-    contactPhone: string;
+    contactId: string;
     contactName: string;
     lat: number;
     lng: number;
   } | null>(null);
+  const [alertFeedback, setAlertFeedback] = useState<AlertFeedback | null>(null);
+
+  useEffect(() => {
+    if (!alertFeedback) return;
+    const timeout = setTimeout(() => setAlertFeedback(null), 5000);
+    return () => clearTimeout(timeout);
+  }, [alertFeedback]);
 
   useEffect(() => {
     loadViewer();
@@ -144,55 +157,17 @@ export default function ViewerPage() {
     });
   }
 
-  function buildWhatsAppMessage(location: { lat: number; lng: number; address: string } | null): string {
-    if (!data?.medicalData) return '';
-    const md = data.medicalData;
-    const age = calculateAge(md.dob);
-
-    let message = `🚨 *EMERGENCIA MÉDICA* 🚨\n\n`;
-    message += `*Paciente:* ${md.userName || 'No especificado'}\n`;
-    if (age !== null) message += `*Edad:* ${age} años\n`;
-    if (md.gender) message += `*Género:* ${md.gender}\n`;
-    message += `*Tipo de Sangre:* ${md.bloodType}\n`;
-
-    if (md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna') {
-      message += `*Alergias:* ${md.allergies}\n`;
-    }
-
-    if (md.conditions && md.conditions.trim()) {
-      message += `*Condiciones:* ${md.conditions}\n`;
-    }
-
-    if (md.medications && md.medications.trim()) {
-      message += `*Medicamentos:* ${md.medications}\n`;
-    }
-
-    if (md.emergencyPhone) {
-      message += `\n📞 *Tel. Personal:* ${md.emergencyPhone}\n`;
-    }
-
-    if (location) {
-      message += `\n📍 *Ubicación:* ${location.address}\n`;
-      message += `https://maps.google.com/?q=${location.lat},${location.lng}\n`;
-    }
-
-    message += `\n_Mensaje enviado desde HelpMe Tag_`;
-
-    return encodeURIComponent(message);
-  }
-
-  async function handleWhatsAppAlert(contactPhone: string, contactName: string) {
+  async function handleWhatsAppAlert(contactId: string, contactName: string) {
     const pos = await detectPosition();
-    setLocationPicker({ contactPhone, contactName, lat: pos.lat, lng: pos.lng });
+    setLocationPicker({ contactId, contactName, lat: pos.lat, lng: pos.lng });
   }
 
-  function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
+  async function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
     if (!locationPicker) return;
-    const message = buildWhatsAppMessage(location);
-    const cleanPhone = locationPicker.contactPhone.replace(/[\s\-\(\)]/g, '');
-    const whatsappUrl = `https://wa.me/52${cleanPhone}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+    const { contactId, contactName } = locationPicker;
+    await tagsApi.sendAlert(uuid, contactId, location);
     setLocationPicker(null);
+    setAlertFeedback({ type: 'success', message: `Alerta enviada a ${contactName}` });
   }
 
   async function handleInstallApp() {
@@ -649,7 +624,7 @@ export default function ViewerPage() {
               {data.contacts.map((contact, index) => (
                 <button
                   key={index}
-                  onClick={() => handleWhatsAppAlert(contact.phone, contact.name)}
+                  onClick={() => handleWhatsAppAlert(contact.id, contact.name)}
                   className="w-full flex items-center justify-between gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
                 >
                   <div className="flex items-center gap-3">
@@ -695,6 +670,23 @@ export default function ViewerPage() {
           onConfirm={handleLocationConfirm}
           onCancel={() => setLocationPicker(null)}
         />
+      )}
+
+      {alertFeedback && (
+        <div
+          className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] max-w-[90vw] px-5 py-3 rounded-2xl shadow-xl font-bold text-sm flex items-center gap-2 ${
+            alertFeedback.type === 'success'
+              ? 'bg-green-600 text-white'
+              : 'bg-red-600 text-white'
+          }`}
+        >
+          {alertFeedback.type === 'success' ? (
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          )}
+          {alertFeedback.message}
+        </div>
       )}
     </div>
   );

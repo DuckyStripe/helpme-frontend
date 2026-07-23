@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { MapPin, Loader2, Send, X } from 'lucide-react';
+import { MapPin, Loader2, Send, X, AlertTriangle } from 'lucide-react';
 
 const LocationMap = dynamic(() => import('./LocationMap'), {
   ssr: false,
@@ -46,7 +46,7 @@ interface LocationPickerModalProps {
   initialLat: number;
   initialLng: number;
   contactName: string;
-  onConfirm: (location: { lat: number; lng: number; address: string }) => void;
+  onConfirm: (location: { lat: number; lng: number; address: string }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -62,6 +62,7 @@ export default function LocationPickerModal({
   const [address, setAddress] = useState('Buscando dirección...');
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,7 +86,13 @@ export default function LocationPickerModal({
 
   async function handleConfirm() {
     setSending(true);
-    onConfirm({ lat, lng, address });
+    setError(null);
+    try {
+      await onConfirm({ lat, lng, address });
+    } catch (err: any) {
+      setError(err?.message || 'No se pudo enviar la alerta. Intenta de nuevo.');
+      setSending(false);
+    }
   }
 
   return (
@@ -118,8 +125,15 @@ export default function LocationPickerModal({
           </div>
           <p className="text-[11px] text-gray-400 leading-snug">
             La dirección aproximada se obtiene mediante el servicio de mapas OpenStreetMap
-            (Nominatim), al que se envían únicamente las coordenadas mostradas.
+            (Nominatim), al que se envían únicamente las coordenadas mostradas. El mensaje se
+            envía desde el servidor de HelpMe (vía OpenWA) directamente al contacto de confianza.
           </p>
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 leading-snug">{error}</p>
+            </div>
+          )}
           <button
             onClick={handleConfirm}
             disabled={sending}
