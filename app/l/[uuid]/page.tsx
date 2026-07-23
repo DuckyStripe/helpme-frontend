@@ -69,6 +69,7 @@ export default function ViewerPage() {
     contactName: string;
     lat: number;
     lng: number;
+    approximate: boolean;
   } | null>(null);
   const [alertFeedback, setAlertFeedback] = useState<AlertFeedback | null>(null);
 
@@ -131,15 +132,15 @@ export default function ViewerPage() {
     scanApi.registerScan(uuid, { userAgent });
   }
 
-  async function detectPosition(): Promise<{ lat: number; lng: number }> {
+  async function detectPosition(): Promise<{ lat: number; lng: number; approximate: boolean }> {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      return DEFAULT_MAP_CENTER;
+      return { ...DEFAULT_MAP_CENTER, approximate: true };
     }
 
     return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
-        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
-        () => resolve(DEFAULT_MAP_CENTER),
+        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude, approximate: false }),
+        () => resolve({ ...DEFAULT_MAP_CENTER, approximate: true }),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     });
@@ -147,15 +148,20 @@ export default function ViewerPage() {
 
   async function handleWhatsAppAlert(contactId: string, contactName: string) {
     const pos = await detectPosition();
-    setLocationPicker({ contactId, contactName, lat: pos.lat, lng: pos.lng });
+    setLocationPicker({ contactId, contactName, lat: pos.lat, lng: pos.lng, approximate: pos.approximate });
   }
 
   async function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
     if (!locationPicker) return;
     const { contactId, contactName } = locationPicker;
-    await tagsApi.sendAlert(uuid, contactId, location);
+    const result = await tagsApi.sendAlert(uuid, contactId, location);
     setLocationPicker(null);
-    setAlertFeedback({ type: 'success', message: `Alerta enviada a ${contactName}` });
+    setAlertFeedback({
+      type: 'success',
+      message: result.locationWarning
+        ? `Alerta enviada a ${contactName}. ${result.locationWarning}`
+        : `Alerta enviada a ${contactName}`,
+    });
   }
 
   if (loading) {
@@ -296,7 +302,7 @@ export default function ViewerPage() {
               <img
                 src={md.photo}
                 alt={md.userName || 'Foto del paciente'}
-                className="w-16 h-16 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
+                className="w-24 h-24 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
               />
             )}
             <div>
@@ -637,6 +643,7 @@ export default function ViewerPage() {
           initialLat={locationPicker.lat}
           initialLng={locationPicker.lng}
           contactName={locationPicker.contactName}
+          approximate={locationPicker.approximate}
           onConfirm={handleLocationConfirm}
           onCancel={() => setLocationPicker(null)}
         />

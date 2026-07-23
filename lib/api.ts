@@ -228,7 +228,10 @@ export const tagsApi = {
   },
 
   async sendAlert(uuid: string, contactId: string, location: { lat: number; lng: number; address?: string }) {
-    return api.post<{ success: boolean; contactName: string }>(`/tags/${uuid}/alert`, { contactId, location });
+    return api.post<{ success: boolean; contactName: string; locationSent: boolean; locationWarning?: string }>(
+      `/tags/${uuid}/alert`,
+      { contactId, location }
+    );
   },
 
   async getScans(id: string) {

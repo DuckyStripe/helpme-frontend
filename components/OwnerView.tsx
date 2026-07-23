@@ -104,7 +104,7 @@ export default function OwnerView({ medicalData: md, contacts, onEdit, onInstall
               <img
                 src={md.photo}
                 alt={md.userName || 'Foto del paciente'}
-                className="w-16 h-16 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
+                className="w-24 h-24 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
               />
             )}
             <div>

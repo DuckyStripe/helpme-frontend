@@ -46,6 +46,7 @@ interface LocationPickerModalProps {
   initialLat: number;
   initialLng: number;
   contactName: string;
+  approximate?: boolean;
   onConfirm: (location: { lat: number; lng: number; address: string }) => Promise<void>;
   onCancel: () => void;
 }
@@ -54,6 +55,7 @@ export default function LocationPickerModal({
   initialLat,
   initialLng,
   contactName,
+  approximate,
   onConfirm,
   onCancel,
 }: LocationPickerModalProps) {
@@ -117,6 +119,16 @@ export default function LocationPickerModal({
         </div>
 
         <div className="px-5 py-4 space-y-3">
+          {approximate && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 leading-snug">
+                No pudimos detectar tu ubicación exacta (permiso denegado o no disponible). El
+                pin está en un punto de referencia, <strong>muévelo al lugar real</strong> antes
+                de enviar.
+              </p>
+            </div>
+          )}
           <div className="bg-gray-50 rounded-xl p-3 flex items-start gap-2">
             <MapPin className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-gray-800 leading-snug">

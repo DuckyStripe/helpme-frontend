@@ -395,6 +395,7 @@ export default function ConfigPage() {
   const [hasAllergies, setHasAllergies] = useState<boolean | null>(null);
   const [hasHereditary, setHasHereditary] = useState<boolean | null>(null);
   const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
+  const [contactErrors, setContactErrors] = useState<Record<number, string>>({});
   const [personalOpenKey, setPersonalOpenKey] = useState(0);
   const [isMinor, setIsMinor] = useState(false);
   const [consentAccepted, setConsentAccepted] = useState(false);
@@ -716,6 +717,26 @@ export default function ConfigPage() {
       return;
     }
 
+    const filledContacts = contacts
+      .map((c, index) => ({ ...c, index }))
+      .filter((c) => c.name.trim() || c.phone.trim());
+
+    const newContactErrors: Record<number, string> = {};
+    filledContacts.forEach((c) => {
+      if (!c.name.trim() || c.name.trim().length < 2) {
+        newContactErrors[c.index] = 'Ingresa el nombre completo del contacto';
+      } else if (c.phone.length !== 10) {
+        newContactErrors[c.index] = 'El teléfono debe tener 10 dígitos';
+      }
+    });
+
+    if (Object.keys(newContactErrors).length > 0) {
+      setContactErrors(newContactErrors);
+      toast.error('Revisa los datos de tus contactos de emergencia');
+      return;
+    }
+    setContactErrors({});
+
     if (!consentAccepted) {
       setConsentError('Debes aceptar el Aviso de Privacidad para guardar tus datos');
       toast.error('Debes aceptar el Aviso de Privacidad para continuar');
@@ -727,9 +748,11 @@ export default function ConfigPage() {
       return;
     }
 
+    const contactsToSubmit = filledContacts.map(({ index, ...c }) => c);
+
     setSaving(true);
     try {
-      await pinApi.updateMedicalData(pinToken, medicalData, contacts, { isMinor, consentAccepted });
+      await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted });
       toast.success('Datos guardados exitosamente');
       setIsActive(true);
       setStatus('ACTIVE');
@@ -1570,9 +1593,19 @@ export default function ConfigPage() {
                         type="tel"
                         inputMode="numeric"
                         value={contact.phone}
-                        onChange={(e) => updateContact(index, 'phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        onChange={(e) => {
+                          updateContact(index, 'phone', e.target.value.replace(/\D/g, '').slice(0, 10));
+                          if (contactErrors[index]) {
+                            setContactErrors((prev) => {
+                              const next = { ...prev };
+                              delete next[index];
+                              return next;
+                            });
+                          }
+                        }}
                         placeholder="10 digitos"
                         maxLength={10}
+                        error={contactErrors[index]}
                       />
                     </div>
                   ))}
