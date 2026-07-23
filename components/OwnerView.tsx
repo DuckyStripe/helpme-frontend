@@ -1,11 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { calculateAge } from '@/lib/utils';
 import type { MedicalData, Contact } from '@/app/l/[uuid]/config/page';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact as ContactIcon,
   Phone, Stethoscope, Pill, User, Calendar, Printer, Download, Pencil,
-  Heart, CheckCircle, PhoneCall,
+  Heart, CheckCircle, PhoneCall, Smartphone, Loader2,
 } from 'lucide-react';
 
 interface OwnerViewProps {
@@ -13,20 +14,36 @@ interface OwnerViewProps {
   contacts: Contact[];
   onEdit: () => void;
   onInstallApp: () => void;
+  onDownloadImage: () => Promise<void>;
 }
 
-export default function OwnerView({ medicalData: md, contacts, onEdit, onInstallApp }: OwnerViewProps) {
+export default function OwnerView({ medicalData: md, contacts, onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
   const age = calculateAge(md.dob);
   const hasAllergies = md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna';
   const hasConditions = md.conditions && md.conditions.trim().length > 0;
   const hasMedications = md.medications && md.medications.trim().length > 0;
   const hasHereditary = md.hereditaryConditions && md.hereditaryConditions.trim().length > 0;
   const realContacts = contacts.filter((c) => c.name.trim() || c.phone.trim());
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      await onDownloadImage();
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex items-start justify-center p-0 sm:p-4 sm:items-center">
       <style>{`
         @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           body { background: white !important; }
           .no-print { display: none !important; }
           main { box-shadow: none !important; border: none !important; }
@@ -51,7 +68,16 @@ export default function OwnerView({ medicalData: md, contacts, onEdit, onInstall
                 aria-label="Agregar a pantalla de inicio"
                 title="Agregar a pantalla de inicio"
               >
-                <Download className="w-5 h-5" />
+                <Smartphone className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95 disabled:opacity-60"
+                aria-label="Descargar imagen de mi ficha"
+                title="Descargar imagen"
+              >
+                {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
               </button>
               <button
                 onClick={() => window.print()}
@@ -72,23 +98,33 @@ export default function OwnerView({ medicalData: md, contacts, onEdit, onInstall
             </div>
           </div>
 
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">
-              {md.userName || 'Paciente'}
-            </h1>
-            <div className="flex items-center gap-3 text-red-100 text-sm">
-              {age !== null && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {age} años
-                </span>
-              )}
-              {md.gender && (
-                <span className="flex items-center gap-1">
-                  <User className="w-3.5 h-3.5" />
-                  {md.gender}
-                </span>
-              )}
+          <div className="mb-4 flex items-center gap-4">
+            {md.photo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={md.photo}
+                alt={md.userName || 'Foto del paciente'}
+                className="w-16 h-16 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
+              />
+            )}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">
+                {md.userName || 'Paciente'}
+              </h1>
+              <div className="flex items-center gap-3 text-red-100 text-sm">
+                {age !== null && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {age} años
+                  </span>
+                )}
+                {md.gender && (
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5" />
+                    {md.gender}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

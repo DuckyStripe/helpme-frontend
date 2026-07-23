@@ -280,6 +280,26 @@ export const pinApi = {
     if (!res.ok) throw new Error(json.error?.message || 'Request failed');
     return json.data ?? json;
   },
+
+  async downloadCardImage(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/config/card-image`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const json = await res.json().catch(() => null);
+      throw new Error(json?.error?.message || 'No se pudo generar la imagen');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ficha-medica-helpme.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
 };
 
 export const settingsApi = {

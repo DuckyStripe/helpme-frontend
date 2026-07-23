@@ -7,7 +7,7 @@ import { toast } from '@/lib/toast';
 import {
   Shield, Lock, Activity, Plus, Trash2, Save, CheckCircle, Loader2, AlertTriangle,
   User, FileText, Eye, EyeOff, ChevronDown, ChevronUp,
-  Stethoscope, AlertCircle, Contact,
+  Stethoscope, AlertCircle, Contact, Camera, X,
 } from 'lucide-react';
 import OwnerView from '@/components/OwnerView';
 
@@ -35,6 +35,7 @@ export interface MedicalData {
   nss: string;
   pob: string;
   umf: string;
+  photo: string;
 }
 
 const emptyMedicalData: MedicalData = {
@@ -53,7 +54,41 @@ const emptyMedicalData: MedicalData = {
   nss: '',
   pob: '',
   umf: '',
+  photo: '',
 };
+
+function resizeImageToDataUrl(file: File, maxSize: number, quality: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxSize) {
+          height = Math.round((height * maxSize) / width);
+          width = maxSize;
+        } else if (height >= width && height > maxSize) {
+          width = Math.round((width * maxSize) / height);
+          height = maxSize;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas no soportado'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
 
 const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -366,6 +401,7 @@ export default function ConfigPage() {
   const [consentError, setConsentError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
+  const [photoProcessing, setPhotoProcessing] = useState(false);
 
   const personalSectionRef = useRef<HTMLDivElement>(null);
   const userNameRef = useRef<HTMLInputElement>(null);
@@ -400,6 +436,15 @@ export default function ConfigPage() {
       }
     } else {
       alert('Para agregar esta página a tu pantalla de inicio:\n\n• En Android: Menú (⋮) → "Agregar a pantalla de inicio"\n• En iPhone: Compartir → "Agregar a pantalla de inicio"');
+    }
+  }
+
+  async function handleDownloadImage() {
+    if (!pinToken) return;
+    try {
+      await pinApi.downloadCardImage(uuid, pinToken);
+    } catch (err: any) {
+      toast.error(err.message || 'No se pudo descargar la imagen');
     }
   }
 
@@ -603,6 +648,31 @@ export default function ConfigPage() {
     }
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('El archivo debe ser una imagen');
+      return;
+    }
+
+    setPhotoProcessing(true);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file, 480, 0.8);
+      updateMedicalField('photo', dataUrl);
+    } catch {
+      toast.error('No se pudo procesar la imagen');
+    } finally {
+      setPhotoProcessing(false);
+    }
+  }
+
+  function handleRemovePhoto() {
+    updateMedicalField('photo', '');
+  }
+
   function addContact() {
     setContacts((prev) => [...prev, { name: '', relationship: '', phone: '' }]);
   }
@@ -787,6 +857,7 @@ export default function ConfigPage() {
         contacts={contacts}
         onEdit={() => setEditMode(true)}
         onInstallApp={handleInstallApp}
+        onDownloadImage={handleDownloadImage}
       />
     );
   }
@@ -833,6 +904,51 @@ export default function ConfigPage() {
                 highlight={Object.keys(errors).length > 0}
               >
                 <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-20 h-20 flex-shrink-0">
+                      {medicalData.photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={medicalData.photo}
+                          alt="Foto"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                          <Camera className="w-7 h-7 text-gray-400" />
+                        </div>
+                      )}
+                      {photoProcessing && (
+                        <div className="absolute inset-0 bg-white/70 rounded-full flex items-center justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-red-600" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="cursor-pointer inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700">
+                        <Camera className="w-4 h-4" />
+                        {medicalData.photo ? 'Cambiar foto' : 'Agregar foto'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoChange}
+                          className="hidden"
+                          disabled={photoProcessing}
+                        />
+                      </label>
+                      {medicalData.photo && (
+                        <button
+                          type="button"
+                          onClick={handleRemovePhoto}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          Quitar foto
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <InputField
                     ref={userNameRef}
                     label="Nombre Completo"

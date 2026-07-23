@@ -40,6 +40,7 @@ interface ViewerData {
     pob?: string;
     umf?: string;
     hereditaryConditions?: string;
+    photo?: string;
   } | null;
   contacts: {
     id: string;
@@ -289,23 +290,33 @@ export default function ViewerPage() {
           </div>
 
           {/* Nombre y datos básicos */}
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">
-              {md.userName || 'Paciente'}
-            </h1>
-            <div className="flex items-center gap-3 text-red-100 text-sm">
-              {age !== null && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {age} años
-                </span>
-              )}
-              {md.gender && (
-                <span className="flex items-center gap-1">
-                  <User className="w-3.5 h-3.5" />
-                  {md.gender}
-                </span>
-              )}
+          <div className="mb-4 flex items-center gap-4">
+            {md.photo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={md.photo}
+                alt={md.userName || 'Foto del paciente'}
+                className="w-16 h-16 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
+              />
+            )}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">
+                {md.userName || 'Paciente'}
+              </h1>
+              <div className="flex items-center gap-3 text-red-100 text-sm">
+                {age !== null && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {age} años
+                  </span>
+                )}
+                {md.gender && (
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5" />
+                    {md.gender}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

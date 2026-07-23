@@ -75,6 +75,8 @@ export default function AvisoPrivacidadPage() {
               <li>Fecha y lugar de nacimiento, género</li>
               <li>Religión (dato sensible conforme al art. 3, fracción VI de la LFPDPPP)</li>
               <li>CURP y número de seguridad social (NSS) / Unidad de Medicina Familiar (UMF)</li>
+              <li>Fotografía del titular, si decide agregarla (dato opcional, usado únicamente para
+                que quien lo asista en una emergencia pueda identificarlo visualmente)</li>
             </ul>
             <h3 className="font-semibold text-gray-900 mb-2">Datos de ubicación (de quien escanea el tag, no del titular):</h3>
             <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
@@ -84,9 +86,10 @@ export default function AvisoPrivacidadPage() {
             </ul>
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <p className="text-sm text-amber-800 leading-relaxed">
-                Los datos de salud, religión y los identificadores gubernamentales (CURP, NSS) son
-                considerados <strong>datos sensibles</strong> conforme al artículo 3, fracción VI de
-                la LFPDPPP y reciben protección reforzada.
+                Los datos de salud, religión, los identificadores gubernamentales (CURP, NSS) y la
+                fotografía del titular son considerados <strong>datos sensibles</strong> conforme al
+                artículo 3, fracción VI de la LFPDPPP y reciben protección reforzada (cifrado
+                AES-256-GCM en la base de datos, igual que el resto de su información médica).
               </p>
             </div>
           </section>
