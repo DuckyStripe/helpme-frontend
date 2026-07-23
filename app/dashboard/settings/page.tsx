@@ -7,7 +7,7 @@ import { toast } from '@/lib/toast';
 import type { User } from '@/types';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { PageLoader } from '@/components/ui/Skeleton';
-import { MessageCircle, Loader2, Save, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Loader2, Save, Eye, EyeOff, CheckCircle2, Wifi, AlertTriangle } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -21,6 +21,8 @@ export default function SettingsPage() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -62,6 +64,7 @@ export default function SettingsPage() {
       return;
     }
     setSaving(true);
+    setTestResult(null);
     try {
       const data = await settingsApi.updateOpenwa({
         baseUrl: baseUrl.trim(),
@@ -76,6 +79,19 @@ export default function SettingsPage() {
       toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleTest() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await settingsApi.testOpenwa();
+      setTestResult(result);
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message || 'No se pudo probar la conexión' });
+    } finally {
+      setTesting(false);
     }
   }
 
@@ -174,16 +190,43 @@ export default function SettingsPage() {
               </p>
             </div>
 
+            {testResult && (
+              <div
+                className={`rounded-lg p-3 flex items-start gap-2 text-sm ${
+                  testResult.ok
+                    ? 'bg-green-600/10 border border-green-600/30 text-green-400'
+                    : 'bg-red-600/10 border border-red-600/30 text-red-400'
+                }`}
+              >
+                {testResult.ok ? (
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                )}
+                <span>{testResult.message}</span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between pt-2">
               <p className="text-xs text-gray-500">Última actualización: {formatDate(updatedAt)}</p>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Guardar
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleTest}
+                  disabled={testing}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-700/50 text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                  Probar conexión
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar
+                </button>
+              </div>
             </div>
           </div>
         )}

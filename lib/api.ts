@@ -313,6 +313,10 @@ export const settingsApi = {
   async updateOpenwa(data: { baseUrl?: string; sessionId?: string; apiKey?: string }) {
     return api.put<{ baseUrl: string; sessionId: string; hasApiKey: boolean; updatedAt: string | null }>('/settings/openwa', data);
   },
+
+  async testOpenwa() {
+    return api.post<{ ok: boolean; message: string; status?: string }>('/settings/openwa/test', {});
+  },
 };
 
 export const usersApi = {
