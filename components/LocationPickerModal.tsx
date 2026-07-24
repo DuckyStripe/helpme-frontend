@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { MapPin, Loader2, Send, X, AlertTriangle } from 'lucide-react';
+import { MapPin, Loader2, Send, X, AlertTriangle, RefreshCw } from 'lucide-react';
 
 const LocationMap = dynamic(() => import('./LocationMap'), {
   ssr: false,
@@ -13,12 +13,23 @@ const LocationMap = dynamic(() => import('./LocationMap'), {
   ),
 });
 
-async function reverseGeocode(lat: number, lng: number): Promise<string> {
+// Coordenadas de CDMX (fallback cuando no se puede detectar ubicación)
+const DEFAULT_LOCATION = { lat: 19.4326, lng: -99.1332 };
+
+async function reverseGeocode(lat: number, lng: number, retries = 2): Promise<string> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-      { headers: { 'Accept-Language': 'es' } }
+      { 
+        headers: { 'Accept-Language': 'es' },
+        signal: controller.signal
+      }
     );
+    clearTimeout(timeoutId);
+    
     if (!res.ok) throw new Error('geocode failed');
     const data = await res.json();
     const road = data.address?.road || '';
@@ -36,10 +47,20 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
     if (city) address += `, ${city}`;
     if (state) address += `, ${state}`;
 
-    return address || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+    return address || '';
   } catch {
-    return `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+    clearTimeout(timeoutId);
+    if (retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return reverseGeocode(lat, lng, retries - 1);
+    }
+    return '';
   }
+}
+
+function isDefaultLocation(lat: number, lng: number): boolean {
+  return Math.abs(lat - DEFAULT_LOCATION.lat) < 0.001 && 
+         Math.abs(lng - DEFAULT_LOCATION.lng) < 0.001;
 }
 
 interface LocationPickerModalProps {
@@ -61,24 +82,35 @@ export default function LocationPickerModal({
 }: LocationPickerModalProps) {
   const [lat, setLat] = useState(initialLat);
   const [lng, setLng] = useState(initialLng);
-  const [address, setAddress] = useState('Buscando dirección...');
+  const [address, setAddress] = useState('');
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [geocodeError, setGeocodeError] = useState(false);
+
+  const isDefault = isDefaultLocation(lat, lng);
+  const showWarning = approximate || isDefault;
 
   useEffect(() => {
     let cancelled = false;
     setLoadingAddress(true);
+    setGeocodeError(false);
+    
     reverseGeocode(lat, lng).then((result) => {
       if (!cancelled) {
-        setAddress(result);
+        if (result) {
+          setAddress(result);
+          setGeocodeError(false);
+        } else {
+          setAddress(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+          setGeocodeError(true);
+        }
         setLoadingAddress(false);
       }
     });
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng]);
 
   function handleMove(newLat: number, newLng: number) {
@@ -86,11 +118,34 @@ export default function LocationPickerModal({
     setLng(newLng);
   }
 
+  function handleRetryGeocode() {
+    setLoadingAddress(true);
+    setGeocodeError(false);
+    reverseGeocode(lat, lng).then((result) => {
+      if (result) {
+        setAddress(result);
+        setGeocodeError(false);
+      } else {
+        setAddress(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+        setGeocodeError(true);
+      }
+      setLoadingAddress(false);
+    });
+  }
+
   async function handleConfirm() {
+    if (showWarning && isDefault) {
+      const confirmed = window.confirm(
+        'La ubicación actual es aproximada (punto de referencia). ¿Estás seguro de que quieres enviar esta ubicación? Te recomendamos ajustar el pin al lugar exacto.'
+      );
+      if (!confirmed) return;
+    }
+
     setSending(true);
     setError(null);
     try {
-      await onConfirm({ lat, lng, address });
+      const finalAddress = address || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+      await onConfirm({ lat, lng, address: finalAddress });
     } catch (err: any) {
       setError(err?.message || 'No se pudo enviar la alerta. Intenta de nuevo.');
       setSending(false);
@@ -119,26 +174,52 @@ export default function LocationPickerModal({
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          {approximate && (
+          {showWarning && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-amber-800 leading-snug">
-                No pudimos detectar tu ubicación exacta (permiso denegado o no disponible). El
-                pin está en un punto de referencia, <strong>muévelo al lugar real</strong> antes
-                de enviar.
+                {isDefault 
+                  ? 'La ubicación actual es un punto de referencia. '
+                  : 'No pudimos detectar tu ubicación exacta. '
+                }
+                <strong>Mueve el pin al lugar real</strong> antes de enviar.
               </p>
             </div>
           )}
           <div className="bg-gray-50 rounded-xl p-3 flex items-start gap-2">
             <MapPin className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-gray-800 leading-snug">
-              {loadingAddress ? 'Buscando dirección...' : address}
-            </p>
+            <div className="flex-1 min-w-0">
+              {loadingAddress ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Buscando dirección...</span>
+                </div>
+              ) : (
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm text-gray-800 leading-snug break-words">
+                    {geocodeError && (
+                      <span className="text-amber-600 block mb-1">
+                        ⚠️ No se pudo obtener la dirección
+                      </span>
+                    )}
+                    {address}
+                  </p>
+                  {geocodeError && (
+                    <button
+                      onClick={handleRetryGeocode}
+                      className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors"
+                      title="Reintentar"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <p className="text-[11px] text-gray-400 leading-snug">
-            La dirección aproximada se obtiene mediante el servicio de mapas OpenStreetMap
-            (Nominatim), al que se envían únicamente las coordenadas mostradas. El mensaje se
-            envía desde el servidor de HelpMe (vía OpenWA) directamente al contacto de confianza.
+            La dirección se obtiene mediante OpenStreetMap. El mensaje se envía desde el servidor 
+            de HelpMe directamente al contacto de confianza.
           </p>
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
@@ -148,11 +229,11 @@ export default function LocationPickerModal({
           )}
           <button
             onClick={handleConfirm}
-            disabled={sending}
+            disabled={sending || loadingAddress}
             className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
           >
             {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            Enviar ubicación a {recipientLabel}
+            {sending ? 'Enviando...' : `Enviar a ${recipientLabel}`}
           </button>
         </div>
       </div>

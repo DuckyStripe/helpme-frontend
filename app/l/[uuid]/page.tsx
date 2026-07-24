@@ -130,15 +130,47 @@ export default function ViewerPage() {
     scanApi.registerScan(uuid, { userAgent });
   }
 
-  async function detectPosition(): Promise<{ lat: number; lng: number; approximate: boolean }> {
+  async function detectPosition(): Promise<{ lat: number; lng: number; approximate: boolean; error?: string }> {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      return { ...DEFAULT_MAP_CENTER, approximate: true };
+      return { ...DEFAULT_MAP_CENTER, approximate: true, error: 'Geolocalización no disponible' };
     }
 
     return new Promise((resolve) => {
+      // Primer intento con alta precisión
       navigator.geolocation.getCurrentPosition(
-        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude, approximate: false }),
-        () => resolve({ ...DEFAULT_MAP_CENTER, approximate: true }),
+        (position) => resolve({ 
+          lat: position.coords.latitude, 
+          lng: position.coords.longitude, 
+          approximate: false 
+        }),
+        async (error) => {
+          // Si falla, intentar con baja precisión
+          if (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => resolve({ 
+                lat: position.coords.latitude, 
+                lng: position.coords.longitude, 
+                approximate: true 
+              }),
+              () => resolve({ 
+                ...DEFAULT_MAP_CENTER, 
+                approximate: true, 
+                error: error.code === error.PERMISSION_DENIED 
+                  ? 'Permiso de ubicación denegado' 
+                  : 'No se pudo obtener ubicación'
+              }),
+              { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+            );
+          } else {
+            resolve({ 
+              ...DEFAULT_MAP_CENTER, 
+              approximate: true, 
+              error: error.code === error.PERMISSION_DENIED 
+                ? 'Permiso de ubicación denegado' 
+                : 'No se pudo obtener ubicación'
+            });
+          }
+        },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     });
@@ -146,6 +178,9 @@ export default function ViewerPage() {
 
   async function handleWhatsAppAlert() {
     const pos = await detectPosition();
+    if (pos.error) {
+      console.warn('Location detection:', pos.error);
+    }
     setLocationPicker({ lat: pos.lat, lng: pos.lng, approximate: pos.approximate });
   }
 
