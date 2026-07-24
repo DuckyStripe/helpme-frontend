@@ -397,7 +397,7 @@ export default function ConfigPage() {
   const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
   const [contactErrors, setContactErrors] = useState<Record<number, string>>({});
   const [contactVerified, setContactVerified] = useState<
-    Record<number, { phone: string; status: 'verifying' | 'success' | 'error'; error?: string }>
+    Record<number, { phone: string; status: 'verifying' | 'success' | 'error'; error?: string; cooldownUntil?: number }>
   >({});
   const [personalOpenKey, setPersonalOpenKey] = useState(0);
   const [isMinor, setIsMinor] = useState(false);
@@ -430,6 +430,14 @@ export default function ConfigPage() {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
+
+  const [cooldownTick, setCooldownTick] = useState(0);
+  useEffect(() => {
+    const hasAnyCooldown = Object.values(contactVerified).some((v) => v.cooldownUntil && v.cooldownUntil > Date.now());
+    if (!hasAnyCooldown) return;
+    const interval = setInterval(() => setCooldownTick((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, [contactVerified, cooldownTick]);
 
   async function handleInstallApp() {
     if (deferredPrompt) {
@@ -706,6 +714,8 @@ export default function ConfigPage() {
     }
   }
 
+  const VERIFY_COOLDOWN_MS = 30_000;
+
   async function handleVerifyContact(index: number) {
     const contact = contacts[index];
     if (!contact || contact.phone.length !== 10) {
@@ -714,18 +724,27 @@ export default function ConfigPage() {
     }
     if (!pinToken) return;
 
+    const existing = contactVerified[index];
+    if (existing?.cooldownUntil && existing.cooldownUntil > Date.now()) {
+      const secondsLeft = Math.ceil((existing.cooldownUntil - Date.now()) / 1000);
+      toast.error(`Espera ${secondsLeft} segundos antes de reintentar`);
+      return;
+    }
+
     setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'verifying' } }));
     try {
       const result = await pinApi.verifyContact(pinToken, contact.phone, medicalData.userName || undefined);
+      const cooldownUntil = Date.now() + VERIFY_COOLDOWN_MS;
       if (result.success) {
-        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'success' } }));
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'success', cooldownUntil } }));
         toast.success(`Se envió un mensaje de prueba a ${contact.name || 'este contacto'} por WhatsApp`);
       } else {
-        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: result.error } }));
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: result.error, cooldownUntil } }));
         toast.error(result.error || 'No se pudo verificar el número por WhatsApp');
       }
     } catch (err: any) {
-      setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: err.message } }));
+      const cooldownUntil = Date.now() + VERIFY_COOLDOWN_MS;
+      setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: err.message, cooldownUntil } }));
       toast.error(err.message || 'No se pudo verificar el número por WhatsApp');
     }
   }
@@ -1665,7 +1684,11 @@ export default function ConfigPage() {
                         <button
                           type="button"
                           onClick={() => handleVerifyContact(index)}
-                          disabled={contact.phone.length !== 10 || contactVerified[index]?.status === 'verifying'}
+                          disabled={
+                            contact.phone.length !== 10 ||
+                            contactVerified[index]?.status === 'verifying' ||
+                            Boolean(contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now())
+                          }
                           className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 disabled:opacity-50 disabled:hover:bg-green-50 px-3 py-2 rounded-lg transition-colors min-h-[36px]"
                         >
                           {contactVerified[index]?.status === 'verifying' ? (
@@ -1673,14 +1696,20 @@ export default function ConfigPage() {
                           ) : (
                             <MessageCircle className="w-3.5 h-3.5" />
                           )}
-                          Verificar por WhatsApp
+                          {contactVerified[index]?.status === 'verifying'
+                            ? 'Verificando...'
+                            : contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now()
+                              ? `Reintentar (${Math.ceil((contactVerified[index].cooldownUntil - Date.now()) / 1000)}s)`
+                              : contactVerified[index]?.status === 'success'
+                                ? 'Reenviar verificación'
+                                : 'Verificar por WhatsApp'}
                         </button>
-                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'success' && (
+                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'success' && (!contactVerified[index]?.cooldownUntil || contactVerified[index].cooldownUntil <= Date.now()) && (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
                             <CheckCircle className="w-3.5 h-3.5" /> Mensaje de prueba enviado
                           </span>
                         )}
-                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'error' && (
+                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'error' && (!contactVerified[index]?.cooldownUntil || contactVerified[index].cooldownUntil <= Date.now()) && (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600">
                             <AlertCircle className="w-3.5 h-3.5" /> {contactVerified[index]?.error || 'No se pudo verificar'}
                           </span>
