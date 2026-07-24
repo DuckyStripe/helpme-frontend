@@ -14,9 +14,12 @@ import OwnerView from '@/components/OwnerView';
 type TagStatus = 'VIRGIN' | 'INCOMPLETE' | 'ACTIVE' | 'SUSPENDED';
 
 export interface Contact {
+  id?: string;
   name: string;
   relationship: string;
   phone: string;
+  verified?: boolean;
+  lastVerificationAt?: string;
 }
 
 export interface MedicalData {
@@ -397,7 +400,7 @@ export default function ConfigPage() {
   const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
   const [contactErrors, setContactErrors] = useState<Record<number, string>>({});
   const [contactVerified, setContactVerified] = useState<
-    Record<number, { phone: string; status: 'verifying' | 'success' | 'error'; error?: string; cooldownUntil?: number }>
+    Record<number, { phone: string; status: 'verifying' | 'success' | 'error' | 'verified'; error?: string; cooldownUntil?: number }>
   >({});
   const [personalOpenKey, setPersonalOpenKey] = useState(0);
   const [isMinor, setIsMinor] = useState(false);
@@ -750,8 +753,54 @@ export default function ConfigPage() {
       const cooldownUntil = now + VERIFY_COOLDOWN_MS;
       setGlobalCooldownUntil(now + GLOBAL_COOLDOWN_MS);
       if (result.success) {
-        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'success', cooldownUntil } }));
+        // Actualizar estado del contacto en la lista
+        setContacts((prev) => prev.map((c, i) => 
+          i === index ? { ...c, verified: true, lastVerificationAt: new Date().toISOString() } : c
+        ));
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'verified', cooldownUntil } }));
         toast.success(`Se envió un mensaje de prueba a ${contact.name || 'este contacto'} por WhatsApp`);
+      } else {
+        const sanitizedError = sanitizeUserError(result.error);
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: sanitizedError, cooldownUntil } }));
+        toast.error(sanitizedError);
+      }
+    } catch (err: any) {
+      const cooldownUntil = now + VERIFY_COOLDOWN_MS;
+      setGlobalCooldownUntil(now + GLOBAL_COOLDOWN_MS);
+      const sanitizedError = sanitizeUserError(err.message);
+      setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: sanitizedError, cooldownUntil } }));
+      toast.error(sanitizedError);
+    }
+  }
+
+  async function handleResendVerification(index: number) {
+    const contact = contacts[index];
+    if (!contact || !contact.verified) return;
+    if (!pinToken) return;
+
+    const now = Date.now();
+    if (globalCooldownUntil > now) {
+      const secondsLeft = Math.ceil((globalCooldownUntil - now) / 1000);
+      toast.error(`Espera ${secondsLeft} segundos antes de reenviar`);
+      return;
+    }
+
+    setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'verifying' } }));
+    try {
+      const result = await pinApi.resendContactVerification(
+        pinToken,
+        contact.id || '',
+        contact.phone,
+        medicalData.userName || undefined
+      );
+      const cooldownUntil = now + VERIFY_COOLDOWN_MS;
+      setGlobalCooldownUntil(now + GLOBAL_COOLDOWN_MS);
+      if (result.success) {
+        setContacts((prev) => prev.map((c, i) => 
+          i === index ? { ...c, lastVerificationAt: new Date().toISOString() } : c
+        ));
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'verified', cooldownUntil } }));
+        toast.success(`Mensaje reenviado a ${contact.name || 'este contacto'}`);
       } else {
         const sanitizedError = sanitizeUserError(result.error);
         setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: sanitizedError, cooldownUntil } }));
@@ -1698,33 +1747,49 @@ export default function ConfigPage() {
                         error={contactErrors[index]}
                       />
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleVerifyContact(index)}
-                          disabled={
-                            contact.phone.length !== 10 ||
-                            contactVerified[index]?.status === 'verifying' ||
-                            Boolean(contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now())
-                          }
-                          className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 disabled:opacity-50 disabled:hover:bg-green-50 px-3 py-2 rounded-lg transition-colors min-h-[36px]"
-                        >
-                          {contactVerified[index]?.status === 'verifying' ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <MessageCircle className="w-3.5 h-3.5" />
-                          )}
-                          {contactVerified[index]?.status === 'verifying'
-                            ? 'Verificando...'
-                            : contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now()
-                              ? `Reintentar (${Math.ceil((contactVerified[index].cooldownUntil - Date.now()) / 1000)}s)`
-                              : contactVerified[index]?.status === 'success'
-                                ? 'Reenviar verificación'
+                        {contact.verified ? (
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                              <CheckCircle className="w-3.5 h-3.5" /> Verificado
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleResendVerification(index)}
+                              disabled={
+                                contactVerified[index]?.status === 'verifying' ||
+                                Boolean(contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now())
+                              }
+                              className="text-xs text-blue-600 hover:text-blue-800 underline disabled:opacity-50 disabled:hover:text-blue-600"
+                            >
+                              {contactVerified[index]?.status === 'verifying'
+                                ? 'Enviando...'
+                                : contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now()
+                                  ? `Reenviar (${Math.ceil((contactVerified[index].cooldownUntil - Date.now()) / 1000)}s)`
+                                  : 'Reenviar mensaje'}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleVerifyContact(index)}
+                            disabled={
+                              contact.phone.length !== 10 ||
+                              contactVerified[index]?.status === 'verifying' ||
+                              Boolean(contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now())
+                            }
+                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 disabled:opacity-50 disabled:hover:bg-green-50 px-3 py-2 rounded-lg transition-colors min-h-[36px]"
+                          >
+                            {contactVerified[index]?.status === 'verifying' ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <MessageCircle className="w-3.5 h-3.5" />
+                            )}
+                            {contactVerified[index]?.status === 'verifying'
+                              ? 'Verificando...'
+                              : contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now()
+                                ? `Reintentar (${Math.ceil((contactVerified[index].cooldownUntil - Date.now()) / 1000)}s)`
                                 : 'Verificar por WhatsApp'}
-                        </button>
-                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'success' && (!contactVerified[index]?.cooldownUntil || contactVerified[index].cooldownUntil <= Date.now()) && (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
-                            <CheckCircle className="w-3.5 h-3.5" /> Mensaje de prueba enviado
-                          </span>
+                          </button>
                         )}
                         {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'error' && (!contactVerified[index]?.cooldownUntil || contactVerified[index].cooldownUntil <= Date.now()) && (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600">
