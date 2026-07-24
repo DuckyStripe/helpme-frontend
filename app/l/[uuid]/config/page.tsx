@@ -7,7 +7,7 @@ import { toast } from '@/lib/toast';
 import {
   Shield, Lock, Activity, Plus, Trash2, Save, CheckCircle, Loader2, AlertTriangle,
   User, FileText, Eye, EyeOff, ChevronDown, ChevronUp,
-  Stethoscope, AlertCircle, Contact, Camera, X,
+  Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle,
 } from 'lucide-react';
 import OwnerView from '@/components/OwnerView';
 
@@ -396,6 +396,9 @@ export default function ConfigPage() {
   const [hasHereditary, setHasHereditary] = useState<boolean | null>(null);
   const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
   const [contactErrors, setContactErrors] = useState<Record<number, string>>({});
+  const [contactVerified, setContactVerified] = useState<
+    Record<number, { phone: string; status: 'verifying' | 'success' | 'error'; error?: string }>
+  >({});
   const [personalOpenKey, setPersonalOpenKey] = useState(0);
   const [isMinor, setIsMinor] = useState(false);
   const [consentAccepted, setConsentAccepted] = useState(false);
@@ -681,6 +684,11 @@ export default function ConfigPage() {
   function removeContact(index: number) {
     if (contacts.length > 1) {
       setContacts((prev) => prev.filter((_, i) => i !== index));
+      // Los índices se recorren al quitar un elemento; en vez de arrastrar
+      // estados mal alineados con el contacto equivocado, se limpian y el
+      // usuario vuelve a verificar/corregir si hacía falta.
+      setContactErrors({});
+      setContactVerified({});
     }
   }
 
@@ -688,6 +696,38 @@ export default function ConfigPage() {
     setContacts((prev) =>
       prev.map((c, i) => (i === index ? { ...c, [field]: value } : c))
     );
+    if (field === 'phone') {
+      setContactVerified((prev) => {
+        if (!prev[index]) return prev;
+        const next = { ...prev };
+        delete next[index];
+        return next;
+      });
+    }
+  }
+
+  async function handleVerifyContact(index: number) {
+    const contact = contacts[index];
+    if (!contact || contact.phone.length !== 10) {
+      toast.error('Ingresa un teléfono de 10 dígitos antes de verificar');
+      return;
+    }
+    if (!pinToken) return;
+
+    setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'verifying' } }));
+    try {
+      const result = await pinApi.verifyContact(pinToken, contact.phone, medicalData.userName || undefined);
+      if (result.success) {
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'success' } }));
+        toast.success(`Se envió un mensaje de prueba a ${contact.name || 'este contacto'} por WhatsApp`);
+      } else {
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: result.error } }));
+        toast.error(result.error || 'No se pudo verificar el número por WhatsApp');
+      }
+    } catch (err: any) {
+      setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: err.message } }));
+      toast.error(err.message || 'No se pudo verificar el número por WhatsApp');
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -735,6 +775,20 @@ export default function ConfigPage() {
       toast.error('Revisa los datos de tus contactos de emergencia');
       return;
     }
+
+    const unverified = filledContacts.filter((c) => {
+      const v = contactVerified[c.index];
+      return !v || v.phone !== c.phone || v.status !== 'success';
+    });
+    if (unverified.length > 0) {
+      const unverifiedErrors: Record<number, string> = {};
+      unverified.forEach((c) => {
+        unverifiedErrors[c.index] = 'Verifica este número por WhatsApp antes de guardar';
+      });
+      setContactErrors(unverifiedErrors);
+      toast.error('Verifica el número de tus contactos de emergencia antes de guardar (botón "Verificar")');
+      return;
+    }
     setContactErrors({});
 
     if (!consentAccepted) {
@@ -752,20 +806,11 @@ export default function ConfigPage() {
 
     setSaving(true);
     try {
-      const result = await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted });
+      await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted });
       toast.success('Datos guardados exitosamente');
       setIsActive(true);
       setStatus('ACTIVE');
       setShowSuccess(true);
-
-      const verifications: Array<{ name: string; success: boolean; error?: string }> = result?.contactVerifications || [];
-      verifications.forEach((v) => {
-        if (v.success) {
-          toast.success(`Se envió un mensaje de prueba a ${v.name} por WhatsApp para confirmar su número`);
-        } else {
-          toast.error(`No se pudo verificar el número de ${v.name}: ${v.error || 'revisa que sea correcto'}`);
-        }
-      });
     } catch (err: any) {
       toast.error(err.message || 'Error al guardar los datos');
     } finally {
@@ -1616,6 +1661,31 @@ export default function ConfigPage() {
                         maxLength={10}
                         error={contactErrors[index]}
                       />
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleVerifyContact(index)}
+                          disabled={contact.phone.length !== 10 || contactVerified[index]?.status === 'verifying'}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 disabled:opacity-50 disabled:hover:bg-green-50 px-3 py-2 rounded-lg transition-colors min-h-[36px]"
+                        >
+                          {contactVerified[index]?.status === 'verifying' ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          )}
+                          Verificar por WhatsApp
+                        </button>
+                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'success' && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                            <CheckCircle className="w-3.5 h-3.5" /> Mensaje de prueba enviado
+                          </span>
+                        )}
+                        {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'error' && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600">
+                            <AlertCircle className="w-3.5 h-3.5" /> {contactVerified[index]?.error || 'No se pudo verificar'}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                   <button

@@ -272,6 +272,20 @@ export const pinApi = {
     return json.data ?? json;
   },
 
+  async verifyContact(token: string, phone: string, ownerName?: string) {
+    const res = await fetch(`${API_BASE}/tags/config/contacts/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ phone, ownerName }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { success: boolean; error?: string };
+  },
+
   async updateMedicalData(
     token: string,
     medicalData: any,
