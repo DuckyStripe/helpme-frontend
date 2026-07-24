@@ -715,6 +715,12 @@ export default function ConfigPage() {
   }
 
   const VERIFY_COOLDOWN_MS = 30_000;
+  const GLOBAL_COOLDOWN_MS = 10_000;
+  const [globalCooldownUntil, setGlobalCooldownUntil] = useState(0);
+
+  function sanitizeUserError(_error: string | undefined): string {
+    return 'No se pudo verificar el número. Intenta nuevamente más tarde.';
+  }
 
   async function handleVerifyContact(index: number) {
     const contact = contacts[index];
@@ -724,9 +730,16 @@ export default function ConfigPage() {
     }
     if (!pinToken) return;
 
+    const now = Date.now();
+    if (globalCooldownUntil > now) {
+      const secondsLeft = Math.ceil((globalCooldownUntil - now) / 1000);
+      toast.error(`Espera ${secondsLeft} segundos antes de verificar otro contacto`);
+      return;
+    }
+
     const existing = contactVerified[index];
-    if (existing?.cooldownUntil && existing.cooldownUntil > Date.now()) {
-      const secondsLeft = Math.ceil((existing.cooldownUntil - Date.now()) / 1000);
+    if (existing?.cooldownUntil && existing.cooldownUntil > now) {
+      const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000);
       toast.error(`Espera ${secondsLeft} segundos antes de reintentar`);
       return;
     }
@@ -734,18 +747,22 @@ export default function ConfigPage() {
     setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'verifying' } }));
     try {
       const result = await pinApi.verifyContact(pinToken, contact.phone, medicalData.userName || undefined);
-      const cooldownUntil = Date.now() + VERIFY_COOLDOWN_MS;
+      const cooldownUntil = now + VERIFY_COOLDOWN_MS;
+      setGlobalCooldownUntil(now + GLOBAL_COOLDOWN_MS);
       if (result.success) {
         setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'success', cooldownUntil } }));
         toast.success(`Se envió un mensaje de prueba a ${contact.name || 'este contacto'} por WhatsApp`);
       } else {
-        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: result.error, cooldownUntil } }));
-        toast.error(result.error || 'No se pudo verificar el número por WhatsApp');
+        const sanitizedError = sanitizeUserError(result.error);
+        setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: sanitizedError, cooldownUntil } }));
+        toast.error(sanitizedError);
       }
     } catch (err: any) {
-      const cooldownUntil = Date.now() + VERIFY_COOLDOWN_MS;
-      setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: err.message, cooldownUntil } }));
-      toast.error(err.message || 'No se pudo verificar el número por WhatsApp');
+      const cooldownUntil = now + VERIFY_COOLDOWN_MS;
+      setGlobalCooldownUntil(now + GLOBAL_COOLDOWN_MS);
+      const sanitizedError = sanitizeUserError(err.message);
+      setContactVerified((prev) => ({ ...prev, [index]: { phone: contact.phone, status: 'error', error: sanitizedError, cooldownUntil } }));
+      toast.error(sanitizedError);
     }
   }
 
