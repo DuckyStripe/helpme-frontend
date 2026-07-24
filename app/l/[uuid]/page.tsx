@@ -65,8 +65,6 @@ export default function ViewerPage() {
   const [expired, setExpired] = useState(false);
   const [remainingSec, setRemainingSec] = useState<number | null>(null);
   const [locationPicker, setLocationPicker] = useState<{
-    contactId: string;
-    contactName: string;
     lat: number;
     lng: number;
     approximate: boolean;
@@ -146,22 +144,35 @@ export default function ViewerPage() {
     });
   }
 
-  async function handleWhatsAppAlert(contactId: string, contactName: string) {
+  async function handleWhatsAppAlert() {
     const pos = await detectPosition();
-    setLocationPicker({ contactId, contactName, lat: pos.lat, lng: pos.lng, approximate: pos.approximate });
+    setLocationPicker({ lat: pos.lat, lng: pos.lng, approximate: pos.approximate });
   }
 
   async function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
     if (!locationPicker) return;
-    const { contactId, contactName } = locationPicker;
-    const result = await tagsApi.sendAlert(uuid, contactId, location);
+    const result = await tagsApi.sendAlertToAll(uuid, location);
     setLocationPicker(null);
-    setAlertFeedback({
-      type: 'success',
-      message: result.locationWarning
-        ? `Alerta enviada a ${contactName}. ${result.locationWarning}`
-        : `Alerta enviada a ${contactName}`,
-    });
+
+    const succeeded = result.results.filter((r) => r.success);
+    const failed = result.results.filter((r) => !r.success);
+    const missingLocation = result.results.filter((r) => r.success && !r.locationSent);
+
+    let message: string;
+    if (failed.length === 0) {
+      message = `Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}`;
+    } else if (succeeded.length === 0) {
+      message = `No se pudo enviar la alerta a ningún contacto (${failed.map((r) => r.contactName).join(', ')})`;
+    } else {
+      message = `Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}. No se pudo avisar a ${failed
+        .map((r) => r.contactName)
+        .join(', ')}.`;
+    }
+    if (missingLocation.length > 0) {
+      message += ` (No se pudo compartir la ubicación con ${missingLocation.map((r) => r.contactName).join(', ')}, considera llamarles)`;
+    }
+
+    setAlertFeedback({ type: succeeded.length > 0 ? 'success' : 'error', message });
   }
 
   if (loading) {
@@ -599,28 +610,26 @@ export default function ViewerPage() {
 
         {/* BOTONES DE ACCIÓN */}
         <section className="px-5 pt-5 space-y-3 no-print">
-          {/* Botones de WhatsApp por contacto */}
           {data.contacts.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                 Enviar Alerta por WhatsApp
               </p>
-              {data.contacts.map((contact, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleWhatsAppAlert(contact.id, contact.name)}
-                  className="w-full flex items-center justify-between gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <MessageCircle className="w-6 h-6" />
-                    <div className="text-left">
-                      <p className="text-sm font-bold">Alertar a {contact.name}</p>
-                      <p className="text-xs font-normal opacity-90">{contact.relationship}</p>
-                    </div>
+              <button
+                onClick={handleWhatsAppAlert}
+                className="w-full flex items-center justify-between gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-6 h-6" />
+                  <div className="text-left">
+                    <p className="text-sm font-bold">Alertar a todos los contactos</p>
+                    <p className="text-xs font-normal opacity-90">
+                      Se enviará a los {data.contacts.length} contacto{data.contacts.length > 1 ? 's' : ''} de emergencia
+                    </p>
                   </div>
-                  <Phone className="w-5 h-5" />
-                </button>
-              ))}
+                </div>
+                <Phone className="w-5 h-5" />
+              </button>
             </div>
           )}
 
@@ -642,7 +651,11 @@ export default function ViewerPage() {
         <LocationPickerModal
           initialLat={locationPicker.lat}
           initialLng={locationPicker.lng}
-          contactName={locationPicker.contactName}
+          recipientLabel={
+            data
+              ? `${data.contacts.length} contacto${data.contacts.length > 1 ? 's' : ''} de emergencia`
+              : 'tus contactos de emergencia'
+          }
           approximate={locationPicker.approximate}
           onConfirm={handleLocationConfirm}
           onCancel={() => setLocationPicker(null)}

@@ -45,7 +45,7 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
 interface LocationPickerModalProps {
   initialLat: number;
   initialLng: number;
-  contactName: string;
+  recipientLabel: string;
   approximate?: boolean;
   onConfirm: (location: { lat: number; lng: number; address: string }) => Promise<void>;
   onCancel: () => void;
@@ -54,7 +54,7 @@ interface LocationPickerModalProps {
 export default function LocationPickerModal({
   initialLat,
   initialLng,
-  contactName,
+  recipientLabel,
   approximate,
   onConfirm,
   onCancel,
@@ -152,7 +152,7 @@ export default function LocationPickerModal({
             className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
           >
             {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            Enviar ubicación a {contactName}
+            Enviar ubicación a {recipientLabel}
           </button>
         </div>
       </div>

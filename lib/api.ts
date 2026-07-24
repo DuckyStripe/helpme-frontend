@@ -234,6 +234,13 @@ export const tagsApi = {
     );
   },
 
+  async sendAlertToAll(uuid: string, location: { lat: number; lng: number; address?: string }) {
+    return api.post<{
+      success: boolean;
+      results: { contactName: string; success: boolean; locationSent: boolean; error?: string }[];
+    }>(`/tags/${uuid}/alert-all`, { location });
+  },
+
   async getScans(id: string) {
     return api.get<{ scans: any[] }>(`/tags/${id}/scans`);
   },
