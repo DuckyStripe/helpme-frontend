@@ -752,11 +752,20 @@ export default function ConfigPage() {
 
     setSaving(true);
     try {
-      await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted });
+      const result = await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted });
       toast.success('Datos guardados exitosamente');
       setIsActive(true);
       setStatus('ACTIVE');
       setShowSuccess(true);
+
+      const verifications: Array<{ name: string; success: boolean; error?: string }> = result?.contactVerifications || [];
+      verifications.forEach((v) => {
+        if (v.success) {
+          toast.success(`Se envió un mensaje de prueba a ${v.name} por WhatsApp para confirmar su número`);
+        } else {
+          toast.error(`No se pudo verificar el número de ${v.name}: ${v.error || 'revisa que sea correcto'}`);
+        }
+      });
     } catch (err: any) {
       toast.error(err.message || 'Error al guardar los datos');
     } finally {

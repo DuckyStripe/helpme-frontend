@@ -63,6 +63,10 @@ export default function SettingsPage() {
       toast.error('La URL base y el ID de sesión son obligatorios');
       return;
     }
+    if (!hasApiKey && !apiKey.trim()) {
+      toast.error('La API Key es obligatoria para poder enviar alertas');
+      return;
+    }
     setSaving(true);
     setTestResult(null);
     try {
@@ -159,7 +163,7 @@ export default function SettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                API Key <span className="text-gray-500 font-normal">(opcional)</span>
+                API Key <span className="text-red-400">*</span>
                 {hasApiKey && (
                   <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-400 font-normal">
                     <CheckCircle2 className="w-3.5 h-3.5" /> configurada
@@ -171,7 +175,7 @@ export default function SettingsPage() {
                   type={showApiKey ? 'text' : 'password'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={hasApiKey ? 'Dejar vacío para no cambiarla' : 'Solo si tu instancia de OpenWA la exige'}
+                  placeholder={hasApiKey ? 'Dejar vacío para no cambiarla' : 'Requerida por OpenWA para enviar mensajes'}
                   className="w-full px-4 py-2.5 pr-11 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
                 />
                 <button
@@ -184,9 +188,9 @@ export default function SettingsPage() {
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1.5">
-                Lo único indispensable para enviar alertas es el ID de sesión de arriba. Deja esto
-                vacío si tu instancia de OpenWA no requiere autenticación; si la requiere, por
-                seguridad la key nunca se muestra una vez guardada.
+                Obligatoria: OpenWA requiere esta key en cada llamada (además de la URL base y el ID
+                de sesión). Por seguridad nunca se muestra una vez guardada; deja el campo vacío en
+                futuras ediciones para conservar la que ya está configurada.
               </p>
             </div>
 
