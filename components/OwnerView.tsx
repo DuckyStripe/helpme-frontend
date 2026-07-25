@@ -8,7 +8,7 @@ import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact as ContactIcon,
   Phone, Stethoscope, Pill, User, Calendar, Printer, Download, Pencil,
   Heart, CheckCircle, PhoneCall, Smartphone, Loader2, Cpu, Eye, Car, ShieldOff,
-  Siren, Lock, X, MapPin, Send,
+  Siren, Lock, MapPin, Send,
 } from 'lucide-react';
 
 interface OwnerViewProps {
@@ -75,10 +75,6 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
   const [routeLoading, setRouteLoading] = useState(false);
   const [activeRoute, setActiveRoute] = useState<any | null>(null);
 
-  useEffect(() => {
-    if (limits.hasRouteMode && tagUuid) loadActiveRoute();
-  }, [limits.hasRouteMode, tagUuid]);
-
   async function loadActiveRoute() {
     if (!tagUuid) return;
     try {
@@ -88,6 +84,11 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
       setActiveRoute(result.activeRoute);
     } catch { /* not active */ }
   }
+
+  useEffect(() => {
+    if (limits.hasRouteMode && tagUuid) loadActiveRoute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limits.hasRouteMode, tagUuid]);
 
   async function handleStartRoute() {
     if (!routeOrigin.trim() || !routeDestination.trim() || !tagUuid) return;
@@ -786,7 +787,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
                     )}
                     {(alert.comment || alert.rescuerComment) && (
                       <p className="text-xs text-gray-500 mt-1 italic">
-                        "{alert.comment || alert.rescuerComment}"
+                        &ldquo;{alert.comment || alert.rescuerComment}&rdquo;
                       </p>
                     )}
                   </div>
