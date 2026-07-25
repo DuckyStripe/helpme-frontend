@@ -380,7 +380,15 @@ export default function TagsPage() {
                     <span className="font-mono text-xs text-gray-300">{shortUuid(tag.uuid)}</span>
                   </td>
                   <td className="px-6 py-3">
-                    <StatusBadge status={tag.status} />
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={tag.status} />
+                      {tag.status === 'ACTIVE' && tag.userDisabled && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          Privado
+                        </span>
+                      )}
+                    </div>
                   </td>
                   {isAdmin && (
                     <td className="px-6 py-3 text-sm text-gray-400">{tag.seller?.name || '—'}</td>

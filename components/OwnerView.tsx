@@ -2,22 +2,26 @@
 
 import { useState } from 'react';
 import { calculateAge } from '@/lib/utils';
-import type { MedicalData, Contact } from '@/app/l/[uuid]/config/page';
+import type { MedicalData, Contact, Vehicle } from '@/app/l/[uuid]/config/page';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact as ContactIcon,
   Phone, Stethoscope, Pill, User, Calendar, Printer, Download, Pencil,
-  Heart, CheckCircle, PhoneCall, Smartphone, Loader2, Cpu, Eye,
+  Heart, CheckCircle, PhoneCall, Smartphone, Loader2, Cpu, Eye, Car, ShieldOff,
 } from 'lucide-react';
 
 interface OwnerViewProps {
   medicalData: MedicalData;
   contacts: Contact[];
+  vehicles?: Vehicle[];
+  userDisabled?: boolean;
+  onTogglePrivacy?: () => void;
+  togglingPrivacy?: boolean;
   onEdit: () => void;
   onInstallApp: () => void;
   onDownloadImage: () => Promise<void>;
 }
 
-export default function OwnerView({ medicalData: md, contacts, onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
+export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
   const age = calculateAge(md.dob);
   const hasAllergies = md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna';
   const hasConditions = md.conditions && md.conditions.trim().length > 0;
@@ -104,6 +108,34 @@ export default function OwnerView({ medicalData: md, contacts, onEdit, onInstall
               </button>
             </div>
           </div>
+
+          {onTogglePrivacy && (
+            <div className="mb-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {userDisabled ? (
+                  <ShieldOff className="w-4 h-4 text-amber-300" />
+                ) : (
+                  <CheckCircle className="w-4 h-4 text-green-300" />
+                )}
+                <span className="text-xs font-semibold">
+                  {userDisabled ? 'Ficha bloqueada' : 'Ficha pública'}
+                </span>
+              </div>
+              <button
+                onClick={onTogglePrivacy}
+                disabled={togglingPrivacy}
+                className={`relative w-11 h-6 rounded-full transition-colors disabled:opacity-50 ${
+                  userDisabled ? 'bg-amber-500' : 'bg-green-500'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    userDisabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          )}
 
           <div className="mb-4 flex items-center gap-4">
             {md.photo && (
@@ -403,6 +435,80 @@ export default function OwnerView({ medicalData: md, contacts, onEdit, onInstall
                   >
                     <Phone className="w-5 h-5" />
                   </a>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {vehicles.length > 0 && (
+          <section className="px-5 pt-5 pb-5">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Car className="w-4 h-4" />
+              Mis Vehículos
+            </h2>
+            <div className="space-y-3">
+              {vehicles.map((vehicle, index) => (
+                <div key={vehicle.id || index} className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      vehicle.type === 'AUTO' ? 'bg-blue-100' : vehicle.type === 'MOTO' ? 'bg-amber-100' : 'bg-green-100'
+                    }`}>
+                      <Car className={`w-5 h-5 ${
+                        vehicle.type === 'AUTO' ? 'text-blue-600' : vehicle.type === 'MOTO' ? 'text-amber-600' : 'text-green-600'
+                      }`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">
+                        {vehicle.brand} {vehicle.model}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {vehicle.type === 'AUTO' ? 'Auto' : vehicle.type === 'MOTO' ? 'Moto' : 'Bicicleta'}
+                        {vehicle.year ? ` · ${vehicle.year}` : ''}
+                        {vehicle.color ? ` · ${vehicle.color}` : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-gray-600">
+                    {vehicle.plate && (
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-700">Placa:</span>
+                        <span className="font-mono bg-gray-100 px-2 py-0.5 rounded">{vehicle.plate}</span>
+                      </div>
+                    )}
+                    {vehicle.type === 'MOTO' && vehicle.cylinder && (
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-700">Cilindraje:</span>
+                        <span>{vehicle.cylinder}</span>
+                      </div>
+                    )}
+                    {vehicle.type === 'BICICLETA' && vehicle.bikeType && (
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-700">Tipo:</span>
+                        <span>{vehicle.bikeType}</span>
+                      </div>
+                    )}
+                    {vehicle.insurer && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-blue-900">{vehicle.insurer.name}</p>
+                            {vehicle.policyNumber && (
+                              <p className="text-xs text-blue-700">Póliza: {vehicle.policyNumber}</p>
+                            )}
+                          </div>
+                          <a
+                            href={`tel:${vehicle.insurer.phone}`}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition-all"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            Llamar
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

@@ -319,8 +319,8 @@ function BenefitsSection() {
     },
     {
       icon: Lock,
-      title: 'Datos cifrados',
-      description: 'Seguridad de nivel bancario AES-256.',
+      title: 'Cifrado de extremo a extremo',
+      description: 'AES-256-GCM para datos médicos, geolocalización y tokens de sesión.',
     },
     {
       icon: Activity,
@@ -341,6 +341,26 @@ function BenefitsSection() {
       icon: Nfc,
       title: 'Sin registro',
       description: 'No necesitas crear cuenta. Solo escanea y listo.',
+    },
+    {
+      icon: Shield,
+      title: 'Datos médicos protegidos',
+      description: 'Tu información médica, contactos y ubicación viajan encriptados en nuestra base de datos.',
+    },
+    {
+      icon: Database,
+      title: 'Anti-filtración',
+      description: 'Si roban nuestra base de datos, solo verán datos cifrados imposibles de leer sin la clave maestra.',
+    },
+    {
+      icon: CheckCircle2,
+      title: 'Alertas de dispositivos implantados',
+      description: 'Marcapasos, implantes y prótesis visibles para paramédicos con advertencias de interferencia.',
+    },
+    {
+      icon: MessageCircle,
+      title: 'Alertas desde HelpMe, no desde tu celular',
+      description: 'Los mensajes de emergencia se envían desde números de HelpMe a tus contactos. El paramédico no necesita dar su número ni usar su WhatsApp.',
     },
   ];
 
@@ -483,6 +503,10 @@ function FAQSection() {
     {
       question: '¿Puedo actualizar mis datos después?',
       answer: 'Sí, cuantas veces quieras. Solo entra a tu enlace de configuración e ingresa tu PIN.',
+    },
+    {
+      question: '¿Las alertas se envían desde el celular del paramédico?',
+      answer: 'No. Las alertas se envían desde números de HelpMe directamente a tus contactos de emergencia. El paramédico solo escanea y presiona "Enviar alerta" — no necesita usar su WhatsApp ni dar su número personal.',
     },
   ];
 

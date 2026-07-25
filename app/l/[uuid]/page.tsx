@@ -9,7 +9,7 @@ import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
   Heart, User, Calendar, PhoneCall, MessageCircle,
-  CheckCircle, Clock, RefreshCw, Cpu, Eye,
+  CheckCircle, Clock, RefreshCw, Cpu, Eye, Key, ShieldOff,
 } from 'lucide-react';
 
 // Ventana de exposición: tras este tiempo la ficha se oculta del DOM y hay
@@ -23,6 +23,7 @@ const DEFAULT_MAP_CENTER = { lat: 19.4326, lng: -99.1332 };
 interface ViewerData {
   uuid: string;
   status: string;
+  userDisabled?: boolean;
   viewCount: number;
   medicalData: {
     userName?: string;
@@ -54,6 +55,19 @@ interface ViewerData {
     relationship: string;
     phone: string;
   }[];
+  vehicles?: {
+    id: string;
+    type: string;
+    brand: string;
+    model: string;
+    year?: string;
+    color: string;
+    plate?: string;
+    insurer?: { id: string; name: string; phone: string } | null;
+    policyNumber?: string;
+    cylinder?: string;
+    bikeType?: string;
+  }[];
 }
 
 interface AlertFeedback {
@@ -76,6 +90,13 @@ export default function ViewerPage() {
     approximate: boolean;
   } | null>(null);
   const [alertFeedback, setAlertFeedback] = useState<AlertFeedback | null>(null);
+  const [showRescuerInfo, setShowRescuerInfo] = useState(false);
+  const [rescuerName, setRescuerName] = useState('');
+  const [rescuerPhone, setRescuerPhone] = useState('');
+  const [rescuerComment, setRescuerComment] = useState('');
+  const [unlockCode, setUnlockCode] = useState('');
+  const [unlockError, setUnlockError] = useState('');
+  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
     if (!alertFeedback) return;
@@ -183,6 +204,11 @@ export default function ViewerPage() {
   }
 
   async function handleWhatsAppAlert() {
+    setShowRescuerInfo(true);
+  }
+
+  async function handleRescuerInfoConfirm() {
+    setShowRescuerInfo(false);
     const pos = await detectPosition();
     if (pos.error) {
       console.warn('Location detection:', pos.error);
@@ -190,10 +216,35 @@ export default function ViewerPage() {
     setLocationPicker({ lat: pos.lat, lng: pos.lng, approximate: pos.approximate });
   }
 
+  async function handleUnlock() {
+    if (unlockCode.length !== 6) {
+      setUnlockError('El código debe tener 6 dígitos');
+      return;
+    }
+    setUnlockError('');
+    setUnlocking(true);
+    try {
+      await tagsApi.validateUnlockCode(uuid, unlockCode);
+      await loadViewer();
+    } catch (err: any) {
+      setUnlockError(err.message || 'Código incorrecto');
+    } finally {
+      setUnlocking(false);
+    }
+  }
+
   async function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
     if (!locationPicker) return;
-    const result = await tagsApi.sendAlertToAll(uuid, location);
+
+    const rescuerPhoneDigits = rescuerPhone.replace(/\D/g, '');
+    const rescuerPhoneFormatted = rescuerPhoneDigits.length > 0 ? rescuerPhone : undefined;
+    const rescuerCommentText = rescuerComment.trim().length > 0 ? rescuerComment.trim() : undefined;
+
+    const result = await tagsApi.sendAlertToAll(uuid, location, rescuerPhoneFormatted, rescuerCommentText);
     setLocationPicker(null);
+    setRescuerName('');
+    setRescuerPhone('');
+    setRescuerComment('');
 
     const succeeded = result.results.filter((r) => r.success);
     const failed = result.results.filter((r) => !r.success);
@@ -291,6 +342,113 @@ export default function ViewerPage() {
             Activar mi Tag
           </a>
         </div>
+      </div>
+    );
+  }
+
+  if (data.userDisabled) {
+    const realContacts = data.contacts.filter((c) => c.name.trim() || c.phone.trim());
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-start justify-center p-0 sm:p-4 sm:items-center">
+        <main className="w-full max-w-md bg-white sm:rounded-3xl shadow-2xl overflow-hidden relative z-10 min-h-screen sm:min-h-0">
+          <header className="bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 text-white px-5 pt-6 pb-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl">
+                <ShieldOff className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">Ficha Bloqueada</h1>
+                <p className="text-amber-100 text-sm">Modo privado activado por el dueño</p>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <p className="text-sm text-amber-50 leading-relaxed">
+                El dueño de esta ficha ha activado temporalmente el modo privado. Sus datos médicos no están disponibles públicamente.
+              </p>
+            </div>
+          </header>
+
+          {realContacts.length > 0 && (
+            <section className="px-5 pt-5">
+              <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <PhoneCall className="w-4 h-4" />
+                Contactos de Emergencia
+              </h2>
+              <div className="space-y-2.5">
+                {realContacts.map((contact, index) => (
+                  <div key={index} className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="bg-emerald-600 p-2.5 rounded-xl text-white flex-shrink-0">
+                        <Contact className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-emerald-900 truncate">{contact.name}</p>
+                        <p className="text-[11px] text-emerald-600 font-medium">{contact.relationship}</p>
+                      </div>
+                    </div>
+                    <a
+                      href={`tel:+52${contact.phone.replace('+', '')}`}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex-shrink-0 ml-3"
+                    >
+                      <Phone className="w-5 h-5" />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="px-5 pt-5 pb-5">
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-amber-100 p-2.5 rounded-xl">
+                  <Key className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900">Desbloquear Ficha</h2>
+                  <p className="text-xs text-gray-500">Ingresa el código de emergencia</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={unlockCode}
+                  onChange={(e) => {
+                    setUnlockCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                    setUnlockError('');
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleUnlock(); }}
+                  placeholder="Código de 6 dígitos"
+                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all font-mono text-center text-lg tracking-widest"
+                />
+                <button
+                  onClick={handleUnlock}
+                  disabled={unlocking || unlockCode.length !== 6}
+                  className="h-12 px-5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                >
+                  {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Desbloquear'}
+                </button>
+              </div>
+              {unlockError && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs font-medium mt-2">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  {unlockError}
+                </div>
+              )}
+              <p className="text-xs text-gray-400 mt-3">
+                ¿No tienes el código? Comunícate con los contactos de emergencia listados arriba.
+              </p>
+            </div>
+          </section>
+
+          <footer className="bg-gray-50 border-t border-gray-200 p-5 flex flex-col items-center gap-2 text-gray-500">
+            <p className="text-[10px] text-gray-400 text-center">
+              HelpMe - Sistema de Emergencia
+            </p>
+          </footer>
+        </main>
       </div>
     );
   }
@@ -766,6 +924,70 @@ export default function ViewerPage() {
           </p>
         </footer>
       </main>
+
+      {showRescuerInfo && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowRescuerInfo(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 rounded-2xl mb-4">
+                <AlertTriangle className="w-7 h-7 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Enviar Alerta de Emergencia</h3>
+              <p className="text-sm text-gray-500 mt-2">Tu información se enviará a los contactos de emergencia. Los datos opcionales ayudan a la familia a contactarte.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
+                <input
+                  type="text"
+                  value={rescuerName}
+                  onChange={(e) => setRescuerName(e.target.value)}
+                  placeholder="Ej: Paramédico Juan"
+                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
+                <input
+                  type="tel"
+                  value={rescuerPhone}
+                  onChange={(e) => setRescuerPhone(e.target.value)}
+                  placeholder="Ej: +52 55 1234 5678"
+                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Describe la situación (opcional)</label>
+                <textarea
+                  value={rescuerComment}
+                  onChange={(e) => setRescuerComment(e.target.value)}
+                  rows={3}
+                  placeholder="Ej: Choque contra auto, paciente consciente, sangrado leve..."
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowRescuerInfo(false)}
+                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRescuerInfoConfirm}
+                className="flex-1 py-3 px-4 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/30"
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {locationPicker && (
         <LocationPickerModal

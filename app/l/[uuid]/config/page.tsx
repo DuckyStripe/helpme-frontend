@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { pinApi } from '@/lib/api';
+import { pinApi, insurersApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import {
   Shield, Lock, Activity, Plus, Trash2, Save, CheckCircle, Loader2, AlertTriangle,
   User, FileText, Eye, EyeOff, ChevronDown, ChevronUp,
-  Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle,
+  Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle, Car, Phone, ShieldOff,
 } from 'lucide-react';
 import OwnerView from '@/components/OwnerView';
 
@@ -20,6 +20,21 @@ export interface Contact {
   phone: string;
   verified?: boolean;
   lastVerificationAt?: string;
+}
+
+export interface Vehicle {
+  id?: string;
+  type: 'AUTO' | 'MOTO' | 'BICICLETA';
+  brand: string;
+  model: string;
+  year?: string;
+  color: string;
+  plate?: string;
+  insurerId?: string;
+  insurer?: { id: string; name: string; phone: string } | null;
+  policyNumber?: string;
+  cylinder?: string;
+  bikeType?: string;
 }
 
 export interface MedicalData {
@@ -433,6 +448,11 @@ export default function ConfigPage() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
   const [photoProcessing, setPhotoProcessing] = useState(false);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicleSectionEnabled, setVehicleSectionEnabled] = useState(false);
+  const [insurers, setInsurers] = useState<Array<{ id: string; name: string; phone: string }>>([]);
+  const [userDisabled, setUserDisabled] = useState(false);
+  const [togglingPrivacy, setTogglingPrivacy] = useState(false);
 
   const personalSectionRef = useRef<HTMLDivElement>(null);
   const userNameRef = useRef<HTMLInputElement>(null);
@@ -446,9 +466,8 @@ export default function ConfigPage() {
 
   useEffect(() => {
     loadTagStatus();
+    loadInsurers();
 
-    // Solo el dueño (autenticado con su PIN en esta pantalla) puede instalar
-    // la ficha como respaldo en su teléfono.
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -484,6 +503,15 @@ export default function ConfigPage() {
       await pinApi.downloadCardImage(uuid, pinToken);
     } catch (err: any) {
       toast.error(err.message || 'No se pudo descargar la imagen');
+    }
+  }
+
+  async function loadInsurers() {
+    try {
+      const list = await insurersApi.listActive();
+      setInsurers(list);
+    } catch {
+      // Silencioso
     }
   }
 
@@ -782,6 +810,13 @@ export default function ConfigPage() {
           setContactVerified((prev) => ({ ...prev, ...verifiedMap }));
         }
       }
+      if (data.vehicles && data.vehicles.length > 0) {
+        setVehicles(data.vehicles);
+        setVehicleSectionEnabled(true);
+      }
+      if (typeof data.userDisabled === 'boolean') {
+        setUserDisabled(data.userDisabled);
+      }
       return Boolean(data.medicalData?.userName);
     } catch {
       // Si falla, continuar con datos vacíos
@@ -828,6 +863,38 @@ export default function ConfigPage() {
 
   function addContact() {
     setContacts((prev) => [...prev, { name: '', relationship: '', phone: '' }]);
+  }
+
+  function addVehicle() {
+    if (vehicles.length >= 3) return;
+    setVehicles((prev) => [...prev, { type: 'AUTO', brand: '', model: '', year: '', color: '', plate: '', insurerId: '', policyNumber: '', cylinder: '', bikeType: '' }]);
+  }
+
+  function removeVehicle(index: number) {
+    setVehicles((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateVehicle(index: number, field: keyof Vehicle, value: string) {
+    setVehicles((prev) =>
+      prev.map((v, i) => (i === index ? { ...v, [field]: value } : v))
+    );
+  }
+
+  async function handleTogglePrivacy() {
+    if (!pinToken) return;
+    setTogglingPrivacy(true);
+    try {
+      const result = await pinApi.toggleUserDisabled(uuid, pinToken, !userDisabled);
+      setUserDisabled(result.userDisabled);
+      toast.success(result.userDisabled
+        ? 'Modo privado activado. Tus contactos han recibido el código de emergencia.'
+        : 'Modo privado desactivado. Tu ficha es pública de nuevo.'
+      );
+    } catch (err: any) {
+      toast.error(err.message || 'Error al cambiar el modo privado');
+    } finally {
+      setTogglingPrivacy(false);
+    }
   }
 
   function removeContact(index: number) {
@@ -1027,9 +1094,13 @@ export default function ConfigPage() {
 
     const contactsToSubmit = filledContacts.map(({ index: _index, ...c }) => c);
 
+    const vehiclesToSubmit = vehicleSectionEnabled
+      ? vehicles.filter((v) => v.brand.trim() || v.model.trim() || v.color.trim())
+      : [];
+
     setSaving(true);
     try {
-      await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted });
+      await pinApi.updateMedicalData(pinToken, medicalData, contactsToSubmit, { isMinor, consentAccepted }, vehiclesToSubmit);
       toast.success('Datos guardados exitosamente');
       setIsActive(true);
       setStatus('ACTIVE');
@@ -1155,6 +1226,10 @@ export default function ConfigPage() {
       <OwnerView
         medicalData={medicalData}
         contacts={contacts}
+        vehicles={vehicles}
+        userDisabled={userDisabled}
+        onTogglePrivacy={handleTogglePrivacy}
+        togglingPrivacy={togglingPrivacy}
         onEdit={() => setEditMode(true)}
         onInstallApp={handleInstallApp}
         onDownloadImage={handleDownloadImage}
@@ -2244,6 +2319,198 @@ export default function ConfigPage() {
                   </button>
                 </div>
               </SectionCard>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <label className="flex items-center justify-between p-4 sm:p-5 cursor-pointer hover:bg-gray-50/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <Car className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900">Mis Vehículos</h3>
+                      <p className="text-xs text-gray-500">Hasta 3 vehículos</p>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={vehicleSectionEnabled}
+                      onChange={(e) => {
+                        setVehicleSectionEnabled(e.target.checked);
+                        if (!e.target.checked) setVehicles([]);
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </div>
+                </label>
+
+                {vehicleSectionEnabled && (
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-4 border-t border-gray-100 pt-4">
+                    {vehicles.map((vehicle, index) => (
+                      <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <Car className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <span className="text-sm font-semibold text-gray-700">Vehículo {index + 1}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeVehicle(index)}
+                            className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-sm font-semibold text-gray-700">Tipo de Vehículo</label>
+                          <div className="flex gap-2">
+                            {(['AUTO', 'MOTO', 'BICICLETA'] as const).map((t) => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => updateVehicle(index, 'type', t)}
+                                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all border ${
+                                  vehicle.type === t
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                }`}
+                              >
+                                {t === 'AUTO' ? 'Auto' : t === 'MOTO' ? 'Moto' : 'Bicicleta'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <InputField
+                            label="Marca"
+                            type="text"
+                            value={vehicle.brand}
+                            onChange={(e) => updateVehicle(index, 'brand', e.target.value)}
+                            placeholder="Ej: Honda, Toyota"
+                          />
+                          <InputField
+                            label="Modelo"
+                            type="text"
+                            value={vehicle.model}
+                            onChange={(e) => updateVehicle(index, 'model', e.target.value)}
+                            placeholder="Ej: Civic, Corolla"
+                          />
+                        </div>
+
+                        {vehicle.type !== 'BICICLETA' && (
+                          <InputField
+                            label="Año"
+                            type="text"
+                            inputMode="numeric"
+                            value={vehicle.year || ''}
+                            onChange={(e) => updateVehicle(index, 'year', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                            placeholder="Ej: 2024"
+                          />
+                        )}
+
+                        <InputField
+                          label="Color"
+                          type="text"
+                          value={vehicle.color}
+                          onChange={(e) => updateVehicle(index, 'color', e.target.value)}
+                          placeholder="Ej: Rojo, Negro"
+                        />
+
+                        {vehicle.type !== 'BICICLETA' && (
+                          <InputField
+                            label="Placa"
+                            type="text"
+                            value={vehicle.plate || ''}
+                            onChange={(e) => updateVehicle(index, 'plate', e.target.value.toUpperCase())}
+                            placeholder="Ej: ABC-1234"
+                          />
+                        )}
+
+                        {vehicle.type === 'MOTO' && (
+                          <InputField
+                            label="Cilindraje (opcional)"
+                            type="text"
+                            value={vehicle.cylinder || ''}
+                            onChange={(e) => updateVehicle(index, 'cylinder', e.target.value)}
+                            placeholder="Ej: 150cc, 250cc"
+                          />
+                        )}
+
+                        {vehicle.type === 'BICICLETA' && (
+                          <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-gray-700">Tipo de Bicicleta</label>
+                            <div className="flex gap-2 flex-wrap">
+                              {['Montaña', 'Ruta', 'Urbana', 'Eléctrica'].map((bt) => (
+                                <button
+                                  key={bt}
+                                  type="button"
+                                  onClick={() => updateVehicle(index, 'bikeType', bt)}
+                                  className={`flex-1 min-w-[80px] h-10 rounded-xl text-sm font-medium transition-all border ${
+                                    vehicle.bikeType === bt
+                                      ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                                      : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                  }`}
+                                >
+                                  {bt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {vehicle.type !== 'BICICLETA' && (
+                          <>
+                            <div className="space-y-1.5">
+                              <label className="block text-sm font-semibold text-gray-700">Aseguradora</label>
+                              <select
+                                value={vehicle.insurerId || ''}
+                                onChange={(e) => updateVehicle(index, 'insurerId', e.target.value)}
+                                className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                              >
+                                <option value="">Sin aseguradora</option>
+                                {insurers.map((ins) => (
+                                  <option key={ins.id} value={ins.id}>{ins.name}</option>
+                                ))}
+                              </select>
+                              {vehicle.insurerId && (
+                                <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
+                                  <Phone className="w-3.5 h-3.5" />
+                                  <span>
+                                    Emergencias: {insurers.find(i => i.id === vehicle.insurerId)?.phone || '—'}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <InputField
+                              label="Número de Póliza"
+                              type="text"
+                              value={vehicle.policyNumber || ''}
+                              onChange={(e) => updateVehicle(index, 'policyNumber', e.target.value)}
+                              placeholder="Ej: POL-123456"
+                            />
+                          </>
+                        )}
+                      </div>
+                    ))}
+
+                    {vehicles.length < 3 && (
+                      <button
+                        type="button"
+                        onClick={addVehicle}
+                        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-all min-h-[44px]"
+                      >
+                        <Plus className="w-4 h-4" />
+                        {vehicles.length === 0 ? 'Agregar mi primer vehículo' : 'Agregar otro vehículo'}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
                 <label className="flex items-start gap-3 cursor-pointer">

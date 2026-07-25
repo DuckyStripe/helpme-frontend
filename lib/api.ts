@@ -227,18 +227,18 @@ export const tagsApi = {
     return api.getPublic<any>(`/tags/${uuid}/view`);
   },
 
-  async sendAlert(uuid: string, contactId: string, location: { lat: number; lng: number; address?: string }) {
+  async sendAlert(uuid: string, contactId: string, location: { lat: number; lng: number; address?: string }, rescuerPhone?: string, rescuerComment?: string) {
     return api.post<{ success: boolean; contactName: string; locationSent: boolean; locationWarning?: string }>(
       `/tags/${uuid}/alert`,
-      { contactId, location }
+      { contactId, location, rescuerPhone, rescuerComment }
     );
   },
 
-  async sendAlertToAll(uuid: string, location: { lat: number; lng: number; address?: string }) {
+  async sendAlertToAll(uuid: string, location: { lat: number; lng: number; address?: string }, rescuerPhone?: string, rescuerComment?: string) {
     return api.post<{
       success: boolean;
       results: { contactName: string; success: boolean; locationSent: boolean; error?: string }[];
-    }>(`/tags/${uuid}/alert-all`, { location });
+    }>(`/tags/${uuid}/alert-all`, { location, rescuerPhone, rescuerComment });
   },
 
   async getScans(id: string) {
@@ -247,6 +247,10 @@ export const tagsApi = {
 
   async unlockPin(id: string) {
     return api.post<any>(`/tags/${id}/unlock-pin`);
+  },
+
+  async validateUnlockCode(uuid: string, code: string) {
+    return api.post<any>(`/tags/${uuid}/unlock`, { code });
   },
 };
 
@@ -304,7 +308,8 @@ export const pinApi = {
     token: string,
     medicalData: any,
     contacts: any[],
-    consent: { isMinor: boolean; consentAccepted: boolean }
+    consent: { isMinor: boolean; consentAccepted: boolean },
+    vehicles?: any[]
   ) {
     const res = await fetch(`${API_BASE}/tags/config/data`, {
       method: 'PUT',
@@ -312,7 +317,7 @@ export const pinApi = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ medicalData, contacts, ...consent }),
+      body: JSON.stringify({ medicalData, contacts, vehicles, ...consent }),
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error?.message || 'Request failed');
@@ -337,6 +342,31 @@ export const pinApi = {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  },
+
+  async toggleUserDisabled(uuid: string, token: string, disabled: boolean) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/config/disable`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ disabled }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { userDisabled: boolean };
+  },
+
+  async validateUnlockCode(uuid: string, code: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/unlock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { success: boolean };
   },
 };
 
@@ -430,5 +460,26 @@ export const scanApi = {
     } catch {
       // Silencioso
     }
+  },
+};
+
+export const insurersApi = {
+  async listActive() {
+    return api.getPublic<any[]>('/insurers');
+  },
+  async listAll() {
+    return api.get<{ insurers: any[] }>('/insurers/all');
+  },
+  async create(data: { name: string; phone: string; sortOrder?: number }) {
+    return api.post<any>('/insurers', data);
+  },
+  async update(id: string, data: { name?: string; phone?: string; active?: boolean; sortOrder?: number }) {
+    return api.put<any>(`/insurers/${id}`, data);
+  },
+  async toggleActive(id: string) {
+    return api.post<any>(`/insurers/${id}/toggle`);
+  },
+  async remove(id: string) {
+    return api.delete<any>(`/insurers/${id}`);
   },
 };
