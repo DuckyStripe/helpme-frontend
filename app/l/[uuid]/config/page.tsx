@@ -588,6 +588,15 @@ export default function ConfigPage() {
         }
         if (json.data.contacts && json.data.contacts.length > 0) {
           setContacts(json.data.contacts);
+          const verifiedMap: Record<number, { phone: string; status: 'verifying' | 'success' | 'error' | 'verified'; error?: string; cooldownUntil?: number }> = {};
+          json.data.contacts.forEach((c: any, idx: number) => {
+            if (c.verified) {
+              verifiedMap[idx] = { phone: c.phone, status: 'verified' };
+            }
+          });
+          if (Object.keys(verifiedMap).length > 0) {
+            setContactVerified((prev) => ({ ...prev, ...verifiedMap }));
+          }
         }
       } else {
         toast.error(json.error?.message || 'Tag no encontrado');
@@ -763,6 +772,15 @@ export default function ConfigPage() {
       }
       if (data.contacts && data.contacts.length > 0) {
         setContacts(data.contacts);
+        const verifiedMap: Record<number, { phone: string; status: 'verifying' | 'success' | 'error' | 'verified'; error?: string; cooldownUntil?: number }> = {};
+        data.contacts.forEach((c: any, idx: number) => {
+          if (c.verified) {
+            verifiedMap[idx] = { phone: c.phone, status: 'verified' };
+          }
+        });
+        if (Object.keys(verifiedMap).length > 0) {
+          setContactVerified((prev) => ({ ...prev, ...verifiedMap }));
+        }
       }
       return Boolean(data.medicalData?.userName);
     } catch {
@@ -983,7 +1001,7 @@ export default function ConfigPage() {
 
     const unverified = filledContacts.filter((c) => {
       const v = contactVerified[c.index];
-      return !v || v.phone !== c.phone || v.status !== 'success';
+      return !v || v.phone !== c.phone || v.status !== 'verified';
     });
     if (unverified.length > 0) {
       const unverifiedErrors: Record<number, string> = {};
