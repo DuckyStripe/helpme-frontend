@@ -60,6 +60,7 @@ interface ViewerData {
     previousHospitalizations?: string;
     previousSurgeries?: string;
     previousTrauma?: string;
+    wantsPublicCare?: boolean;
   } | null;
   contacts: {
     id: string;
@@ -851,8 +852,34 @@ export default function ViewerPage() {
               )}
 
               {md.insuranceType === 'SIN_SEGURO' && (
-                <div className="text-center py-3">
-                  <p className="text-sm text-blue-200">Sin seguridad social</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                      <ShieldPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-green-200 font-bold uppercase tracking-wider">Sin seguro médico</p>
+                      <p className="text-sm font-bold text-white">Atención de Urgencia Disponible</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-white/20 space-y-2">
+                    <p className="text-xs text-green-100 leading-relaxed">
+                      Por ley, los hospitales públicos y privados deben atender emergencias sin importar seguro o pago.
+                    </p>
+                    <p className="text-xs text-green-100 leading-relaxed">
+                      Tras estabilizar, el paciente será canalizado a la red pública (IMSS-Bienestar, SESA)
+                      para tratamiento gratuito o con cuotas basadas en estudio socioeconómico.
+                    </p>
+                    {md.wantsPublicCare && (
+                      <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2 mt-2">
+                        <CheckCircle className="w-4 h-4 text-green-200" />
+                        <p className="text-xs text-white font-semibold">
+                          El paciente acepta ser canalizado a la red pública
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

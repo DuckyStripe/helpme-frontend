@@ -71,6 +71,7 @@ export interface MedicalData {
   previousHospitalizations: string;
   previousSurgeries: string;
   previousTrauma: string;
+  wantsPublicCare: boolean;
 }
 
 const emptyMedicalData: MedicalData = {
@@ -106,6 +107,7 @@ const emptyMedicalData: MedicalData = {
   previousHospitalizations: '',
   previousSurgeries: '',
   previousTrauma: '',
+  wantsPublicCare: false,
 };
 
 function resizeImageToDataUrl(file: File, maxSize: number, quality: number): Promise<string> {
@@ -1831,8 +1833,34 @@ export default function ConfigPage() {
                   )}
 
                   {medicalData.insuranceType === 'SIN_SEGURO' && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                      <p className="text-sm text-gray-600">No cuentas con seguridad social. Tus datos de emergencia seran visibles para cualquier rescatista.</p>
+                    <div className="space-y-4">
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-green-800 mb-2">Atención de Urgencia Obligatoria</p>
+                        <p className="text-[11px] text-green-700 leading-relaxed">
+                          Por ley, los hospitales públicos (IMSS-Bienestar, Secretaría de Salud / SESA) y las áreas de
+                          urgencias de hospitales privados están obligados a brindar atención médica inmediata si la vida
+                          está en riesgo, sin condicionarla a pagos o afiliación previa.
+                        </p>
+                        <p className="text-[11px] text-green-700 leading-relaxed mt-2">
+                          Una vez estabilizado, si no cuentas con seguridad social, serás canalizado al sistema
+                          IMSS-Bienestar o a hospitales de la red pública local para continuar tu tratamiento de manera
+                          gratuita o con cuotas de recuperación basadas en un estudio socioeconómico.
+                        </p>
+                      </div>
+
+                      <div className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <input
+                          type="checkbox"
+                          id="wantsPublicCare"
+                          checked={medicalData.wantsPublicCare}
+                          onChange={(e) => updateMedicalField('wantsPublicCare', e.target.checked)}
+                          className="mt-0.5 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                        />
+                        <label htmlFor="wantsPublicCare" className="text-sm text-gray-700 cursor-pointer leading-relaxed">
+                          Acepto ser canalizado a la red pública de salud (IMSS-Bienestar, SESA, etc.) para recibir
+                          atención médica gratuita tras una emergencia.
+                        </label>
+                      </div>
                     </div>
                   )}
                 </div>
