@@ -17,6 +17,7 @@ import { TableSkeleton, PageLoader } from '@/components/ui/Skeleton';
 import {
   QrCode, Plus, Copy, ExternalLink, Ban, Play, Loader2, Check,
   UserMinus, Hash, Calendar, Eye, ScanLine, Unlock, CreditCard,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function TagsPage() {
@@ -49,6 +50,11 @@ export default function TagsPage() {
   const [changePlanTag, setChangePlanTag] = useState<{ id: string; uuid: string; plan: PlanType } | null>(null);
   const [newPlan, setNewPlan] = useState<PlanType>('PRINCIPAL');
   const [changingPlan, setChangingPlan] = useState(false);
+
+  const [showSendInstructions, setShowSendInstructions] = useState(false);
+  const [sendInstructionsTag, setSendInstructionsTag] = useState<{ id: string; uuid: string; plan: PlanType } | null>(null);
+  const [sendInstructionsPhone, setSendInstructionsPhone] = useState('');
+  const [sendingInstructions, setSendingInstructions] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -151,6 +157,35 @@ export default function TagsPage() {
       toast.error(err.message || 'Error al crear tags');
     } finally {
       setCreating(false);
+    }
+  }
+
+  function openSendInstructions(tag: any) {
+    setSendInstructionsTag({ id: tag.id, uuid: tag.uuid, plan: tag.plan || 'PRINCIPAL' });
+    setSendInstructionsPhone('');
+    setShowSendInstructions(true);
+  }
+
+  async function handleSendInstructions() {
+    if (!sendInstructionsTag || !/^\d{10}$/.test(sendInstructionsPhone)) {
+      toast.error('Ingresa un teléfono válido de 10 dígitos');
+      return;
+    }
+    setSendingInstructions(true);
+    try {
+      const res = await tagsApi.sendInstructions(sendInstructionsTag.id, sendInstructionsPhone);
+      if (res.data?.whatsappStatus === 'sent') {
+        toast.success(res.data.whatsappMessage);
+      } else {
+        toast.error(`No se enviaron instrucciones por WhatsApp: ${res.data.whatsappMessage}`);
+      }
+      setShowSendInstructions(false);
+      setSendInstructionsTag(null);
+      setSendInstructionsPhone('');
+    } catch (err: any) {
+      toast.error(err.message || 'Error al enviar instrucciones');
+    } finally {
+      setSendingInstructions(false);
     }
   }
 
@@ -462,6 +497,15 @@ export default function TagsPage() {
                           <Copy className="w-3.5 h-3.5" />
                           <span className="hidden lg:inline">Copiar URL</span>
                         </button>
+                        {tag.status === 'VIRGIN' && (
+                          <button
+                            onClick={() => openSendInstructions(tag)}
+                            className="p-1.5 text-gray-500 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors"
+                            title="Enviar instrucciones por WhatsApp"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <a
                           href={`/L/${tag.uuid}`}
                           target="_blank"
@@ -665,6 +709,44 @@ export default function TagsPage() {
             >
               {changingPlan ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
               {changingPlan ? 'Cambiando...' : 'Cambiar Plan'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showSendInstructions} onClose={() => setShowSendInstructions(false)} title="Enviar Instrucciones por WhatsApp" size="sm">
+        <div className="space-y-5">
+          <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-3">
+            <p className="text-xs text-gray-500 mb-1">Tag</p>
+            <p className="font-mono text-sm text-gray-200">{sendInstructionsTag?.uuid ? shortUuid(sendInstructionsTag.uuid) : ''}</p>
+            <p className="text-xs text-gray-400 mt-1">Plan: {PLAN_LABELS[sendInstructionsTag?.plan as PlanType] || sendInstructionsTag?.plan || 'Sin plan'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono del destinatario</label>
+            <input
+              type="text"
+              maxLength={10}
+              placeholder="10 dígitos, ej: 5512345678"
+              value={sendInstructionsPhone}
+              onChange={(e) => setSendInstructionsPhone(e.target.value.replace(/\D/g, ''))}
+              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+            />
+            <p className="text-xs text-gray-500 mt-1">Se enviarán instrucciones de configuración. Este número NO se guarda en el sistema.</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowSendInstructions(false)}
+              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSendInstructions}
+              disabled={sendingInstructions || sendInstructionsPhone.length !== 10}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-600 text-white font-medium rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
+            >
+              {sendingInstructions ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+              {sendingInstructions ? 'Enviando...' : 'Enviar instrucciones'}
             </button>
           </div>
         </div>

@@ -174,6 +174,10 @@ export const tagsApi = {
     return api.post<any>('/tags', { quantity: quantity || 1, sellerId, plan, ownerPhone });
   },
 
+  async sendInstructions(tagId: string, phone: string) {
+    return api.post<any>(`/tags/${tagId}/send-instructions`, { phone });
+  },
+
   async assign(tagId: string, sellerId: string) {
     return api.post<any>(`/tags/${tagId}/assign`, { sellerId });
   },
