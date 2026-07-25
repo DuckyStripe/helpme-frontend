@@ -9,7 +9,7 @@ import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
   Heart, User, Calendar, PhoneCall, MessageCircle,
-  CheckCircle, Clock, RefreshCw,
+  CheckCircle, Clock, RefreshCw, Cpu, Eye,
 } from 'lucide-react';
 
 // Ventana de exposición: tras este tiempo la ficha se oculta del DOM y hay
@@ -41,6 +41,12 @@ interface ViewerData {
     umf?: string;
     hereditaryConditions?: string;
     photo?: string;
+    pacemakerICD?: string;
+    implantContraceptive?: string;
+    implantMammary?: string;
+    orthopedicImplants?: string;
+    cochlearImplant?: string;
+    ocularProsthesis?: string;
   } | null;
   contacts: {
     id: string;
@@ -305,6 +311,13 @@ export default function ViewerPage() {
   const hasConditions = md.conditions && md.conditions.trim() !== '';
   const hasMedications = md.medications && md.medications.trim() !== '';
   const hasHereditary = md.hereditaryConditions && md.hereditaryConditions.trim() !== '';
+  const hasPacemaker = md.pacemakerICD && md.pacemakerICD !== 'No';
+  const hasImplantContraceptive = md.implantContraceptive && md.implantContraceptive !== 'No';
+  const hasImplantMammary = md.implantMammary && md.implantMammary !== 'No';
+  const hasOrthopedicImplants = md.orthopedicImplants && md.orthopedicImplants !== 'No';
+  const hasCochlearImplant = md.cochlearImplant && md.cochlearImplant !== 'No';
+  const hasOcularProsthesis = md.ocularProsthesis && md.ocularProsthesis !== 'No';
+  const hasAnyDevice = hasPacemaker || hasImplantContraceptive || hasImplantMammary || hasOrthopedicImplants || hasCochlearImplant || hasOcularProsthesis;
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex items-start justify-center p-0 sm:p-4 sm:items-center">
@@ -430,6 +443,78 @@ export default function ViewerPage() {
             )}
           </div>
         </section>
+
+        {/* ALERTAS CRITICAS - Dispositivos Implantados */}
+        {hasAnyDevice && (
+          <section className="px-5 pt-5">
+            <h2 className="text-xs font-black text-red-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Alertas Criticas - Dispositivos Implantados
+            </h2>
+            <div className="space-y-2">
+              {hasPacemaker && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border-2 border-red-300 shadow-sm">
+                  <Activity className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-red-900">Marcapasos / Cardiodesfibrilador Implantable</p>
+                    {md.pacemakerICD && md.pacemakerICD !== 'Si' && <p className="text-xs text-red-700 mt-1">{md.pacemakerICD}</p>}
+                    <p className="text-[11px] text-red-600 mt-1.5 font-semibold">Interfiere con colocacion directa de paletas o parches de desfibrilacion</p>
+                  </div>
+                </div>
+              )}
+              {hasImplantContraceptive && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border-2 border-amber-300 shadow-sm">
+                  <ShieldPlus className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-amber-900">Implante Anticonceptivo Subdermico</p>
+                    {md.implantContraceptive && md.implantContraceptive !== 'Si' && <p className="text-xs text-amber-700 mt-1">{md.implantContraceptive}</p>}
+                    <p className="text-[11px] text-amber-600 mt-1.5 font-semibold">Interfiere con vias intravenosas y manguito de presion arterial en el brazo afectado</p>
+                  </div>
+                </div>
+              )}
+              {hasImplantMammary && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border-2 border-amber-300 shadow-sm">
+                  <ShieldPlus className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-amber-900">Implantes Mamarios</p>
+                    {md.implantMammary && md.implantMammary !== 'Si' && <p className="text-xs text-amber-700 mt-1">{md.implantMammary}</p>}
+                    <p className="text-[11px] text-amber-600 mt-1.5 font-semibold">Interfiere con compresiones toracicas (RCP) y parches de desfibrilacion por cambio en impedancia</p>
+                  </div>
+                </div>
+              )}
+              {hasOrthopedicImplants && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-50 border-2 border-orange-300 shadow-sm">
+                  <ShieldPlus className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-orange-900">Implantes Ortopedicos Metalicos / Neuroestimuladores</p>
+                    {md.orthopedicImplants && md.orthopedicImplants !== 'Si' && <p className="text-xs text-orange-700 mt-1">{md.orthopedicImplants}</p>}
+                    <p className="text-[11px] text-orange-600 mt-1.5 font-semibold">Interfiere con manipulacion de extremidades traumatizadas y equipos electromagneticos de rescate</p>
+                  </div>
+                </div>
+              )}
+              {hasCochlearImplant && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border-2 border-blue-300 shadow-sm">
+                  <Cpu className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-blue-900">Implante Coclear / Dispositivo Auditivo</p>
+                    {md.cochlearImplant && md.cochlearImplant !== 'Si' && <p className="text-xs text-blue-700 mt-1">{md.cochlearImplant}</p>}
+                    <p className="text-[11px] text-blue-600 mt-1.5 font-semibold">Interfiere con collares cervicales, inmovilizadores de cabeza y cascos</p>
+                  </div>
+                </div>
+              )}
+              {hasOcularProsthesis && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50 border-2 border-indigo-300 shadow-sm">
+                  <Eye className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-indigo-900">Protesis Ocular</p>
+                    {md.ocularProsthesis && md.ocularProsthesis !== 'Si' && <p className="text-xs text-indigo-700 mt-1">{md.ocularProsthesis}</p>}
+                    <p className="text-[11px] text-indigo-600 mt-1.5 font-semibold">Interfiere con evaluacion neurologica de urgencia (reflejos pupilares)</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* INFORMACIÓN PERSONAL - Debajo de tipo de sangre */}
         <section className="px-5 pt-5">

@@ -43,6 +43,12 @@ export interface MedicalData {
   religion?: string;
   organDonor?: string;
   umf?: string;
+  pacemakerICD?: string;
+  implantContraceptive?: string;
+  implantMammary?: string;
+  orthopedicImplants?: string;
+  cochlearImplant?: string;
+  ocularProsthesis?: string;
 }
 
 export interface EmergencyContact {

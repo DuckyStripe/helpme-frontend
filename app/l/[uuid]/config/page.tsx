@@ -39,6 +39,12 @@ export interface MedicalData {
   pob: string;
   umf: string;
   photo: string;
+  pacemakerICD: string;
+  implantContraceptive: string;
+  implantMammary: string;
+  orthopedicImplants: string;
+  cochlearImplant: string;
+  ocularProsthesis: string;
 }
 
 const emptyMedicalData: MedicalData = {
@@ -58,6 +64,12 @@ const emptyMedicalData: MedicalData = {
   pob: '',
   umf: '',
   photo: '',
+  pacemakerICD: '',
+  implantContraceptive: '',
+  implantMammary: '',
+  orthopedicImplants: '',
+  cochlearImplant: '',
+  ocularProsthesis: '',
 };
 
 function resizeImageToDataUrl(file: File, maxSize: number, quality: number): Promise<string> {
@@ -397,6 +409,18 @@ export default function ConfigPage() {
   const [customHereditary, setCustomHereditary] = useState('');
   const [hasAllergies, setHasAllergies] = useState<boolean | null>(null);
   const [hasHereditary, setHasHereditary] = useState<boolean | null>(null);
+  const [hasPacemaker, setHasPacemaker] = useState<boolean | null>(null);
+  const [pacemakerDetails, setPacemakerDetails] = useState('');
+  const [hasImplantContraceptive, setHasImplantContraceptive] = useState<boolean | null>(null);
+  const [implantContraceptiveDetails, setImplantContraceptiveDetails] = useState('');
+  const [hasImplantMammary, setHasImplantMammary] = useState<boolean | null>(null);
+  const [implantMammaryDetails, setImplantMammaryDetails] = useState('');
+  const [hasOrthopedicImplants, setHasOrthopedicImplants] = useState<boolean | null>(null);
+  const [orthopedicImplantsDetails, setOrthopedicImplantsDetails] = useState('');
+  const [hasCochlearImplant, setHasCochlearImplant] = useState<boolean | null>(null);
+  const [cochlearImplantDetails, setCochlearImplantDetails] = useState('');
+  const [hasOcularProsthesis, setHasOcularProsthesis] = useState<boolean | null>(null);
+  const [ocularProsthesisDetails, setOcularProsthesisDetails] = useState('');
   const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
   const [contactErrors, setContactErrors] = useState<Record<number, string>>({});
   const [contactVerified, setContactVerified] = useState<
@@ -511,6 +535,54 @@ export default function ConfigPage() {
                 };
               });
               setSelectedHereditary(parsed);
+            }
+          }
+          if (json.data.medicalData.pacemakerICD) {
+            if (json.data.medicalData.pacemakerICD === 'No') {
+              setHasPacemaker(false);
+            } else {
+              setHasPacemaker(true);
+              setPacemakerDetails(json.data.medicalData.pacemakerICD);
+            }
+          }
+          if (json.data.medicalData.implantContraceptive) {
+            if (json.data.medicalData.implantContraceptive === 'No') {
+              setHasImplantContraceptive(false);
+            } else {
+              setHasImplantContraceptive(true);
+              setImplantContraceptiveDetails(json.data.medicalData.implantContraceptive);
+            }
+          }
+          if (json.data.medicalData.implantMammary) {
+            if (json.data.medicalData.implantMammary === 'No') {
+              setHasImplantMammary(false);
+            } else {
+              setHasImplantMammary(true);
+              setImplantMammaryDetails(json.data.medicalData.implantMammary);
+            }
+          }
+          if (json.data.medicalData.orthopedicImplants) {
+            if (json.data.medicalData.orthopedicImplants === 'No') {
+              setHasOrthopedicImplants(false);
+            } else {
+              setHasOrthopedicImplants(true);
+              setOrthopedicImplantsDetails(json.data.medicalData.orthopedicImplants);
+            }
+          }
+          if (json.data.medicalData.cochlearImplant) {
+            if (json.data.medicalData.cochlearImplant === 'No') {
+              setHasCochlearImplant(false);
+            } else {
+              setHasCochlearImplant(true);
+              setCochlearImplantDetails(json.data.medicalData.cochlearImplant);
+            }
+          }
+          if (json.data.medicalData.ocularProsthesis) {
+            if (json.data.medicalData.ocularProsthesis === 'No') {
+              setHasOcularProsthesis(false);
+            } else {
+              setHasOcularProsthesis(true);
+              setOcularProsthesisDetails(json.data.medicalData.ocularProsthesis);
             }
           }
         }
@@ -638,6 +710,54 @@ export default function ConfigPage() {
               };
             });
             setSelectedHereditary(parsed);
+          }
+        }
+        if (data.medicalData.pacemakerICD) {
+          if (data.medicalData.pacemakerICD === 'No') {
+            setHasPacemaker(false);
+          } else {
+            setHasPacemaker(true);
+            setPacemakerDetails(data.medicalData.pacemakerICD);
+          }
+        }
+        if (data.medicalData.implantContraceptive) {
+          if (data.medicalData.implantContraceptive === 'No') {
+            setHasImplantContraceptive(false);
+          } else {
+            setHasImplantContraceptive(true);
+            setImplantContraceptiveDetails(data.medicalData.implantContraceptive);
+          }
+        }
+        if (data.medicalData.implantMammary) {
+          if (data.medicalData.implantMammary === 'No') {
+            setHasImplantMammary(false);
+          } else {
+            setHasImplantMammary(true);
+            setImplantMammaryDetails(data.medicalData.implantMammary);
+          }
+        }
+        if (data.medicalData.orthopedicImplants) {
+          if (data.medicalData.orthopedicImplants === 'No') {
+            setHasOrthopedicImplants(false);
+          } else {
+            setHasOrthopedicImplants(true);
+            setOrthopedicImplantsDetails(data.medicalData.orthopedicImplants);
+          }
+        }
+        if (data.medicalData.cochlearImplant) {
+          if (data.medicalData.cochlearImplant === 'No') {
+            setHasCochlearImplant(false);
+          } else {
+            setHasCochlearImplant(true);
+            setCochlearImplantDetails(data.medicalData.cochlearImplant);
+          }
+        }
+        if (data.medicalData.ocularProsthesis) {
+          if (data.medicalData.ocularProsthesis === 'No') {
+            setHasOcularProsthesis(false);
+          } else {
+            setHasOcularProsthesis(true);
+            setOcularProsthesisDetails(data.medicalData.ocularProsthesis);
           }
         }
       }
@@ -1340,6 +1460,303 @@ export default function ConfigPage() {
                 complete={hasAllergies !== null && hasHereditary !== null}
               >
                 <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-2">
+                    <p className="text-xs font-semibold text-blue-800 mb-1">Dispositivos Medicos Implantados</p>
+                    <p className="text-[11px] text-blue-600">Estos dispositivos pueden interferir con procedimientos de emergencia como RCP, desfibrilacion o inmovilizacion.</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Marcapasos o Cardiodesfibrilador Implantable</label>
+                    <div className="flex gap-2">
+                      {['Si', 'No'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasPacemaker(true);
+                            } else {
+                              setHasPacemaker(false);
+                              setPacemakerDetails('');
+                              updateMedicalField('pacemakerICD', 'No');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                            (opt === 'Si' && hasPacemaker === true) || (opt === 'No' && hasPacemaker === false)
+                              ? opt === 'Si'
+                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasPacemaker === true && (
+                      <textarea
+                        value={pacemakerDetails}
+                        onChange={(e) => {
+                          setPacemakerDetails(e.target.value);
+                          updateMedicalField('pacemakerICD', e.target.value);
+                        }}
+                        rows={2}
+                        placeholder="Tipo, modelo, fecha de implante, lado..."
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                      />
+                    )}
+                    {hasPacemaker === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin marcapasos</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {medicalData.gender === 'Femenino' && (
+                    <>
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">Implante Anticonceptivo Subdermico</label>
+                        <div className="flex gap-2">
+                          {['Si', 'No'].map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => {
+                                if (opt === 'Si') {
+                                  setHasImplantContraceptive(true);
+                                } else {
+                                  setHasImplantContraceptive(false);
+                                  setImplantContraceptiveDetails('');
+                                  updateMedicalField('implantContraceptive', 'No');
+                                }
+                              }}
+                              className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                                (opt === 'Si' && hasImplantContraceptive === true) || (opt === 'No' && hasImplantContraceptive === false)
+                                  ? opt === 'Si'
+                                    ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                    : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                        {hasImplantContraceptive === true && (
+                          <textarea
+                            value={implantContraceptiveDetails}
+                            onChange={(e) => {
+                              setImplantContraceptiveDetails(e.target.value);
+                              updateMedicalField('implantContraceptive', e.target.value);
+                            }}
+                            rows={2}
+                            placeholder="Lado del brazo, fecha de colocacion..."
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                          />
+                        )}
+                        {hasImplantContraceptive === false && (
+                          <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium">Sin implante anticonceptivo</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">Implantes Mamarios</label>
+                        <div className="flex gap-2">
+                          {['Si', 'No'].map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => {
+                                if (opt === 'Si') {
+                                  setHasImplantMammary(true);
+                                } else {
+                                  setHasImplantMammary(false);
+                                  setImplantMammaryDetails('');
+                                  updateMedicalField('implantMammary', 'No');
+                                }
+                              }}
+                              className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                                (opt === 'Si' && hasImplantMammary === true) || (opt === 'No' && hasImplantMammary === false)
+                                  ? opt === 'Si'
+                                    ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                    : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                        {hasImplantMammary === true && (
+                          <textarea
+                            value={implantMammaryDetails}
+                            onChange={(e) => {
+                              setImplantMammaryDetails(e.target.value);
+                              updateMedicalField('implantMammary', e.target.value);
+                            }}
+                            rows={2}
+                            placeholder="Tipo, fecha de colocacion..."
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                          />
+                        )}
+                        {hasImplantMammary === false && (
+                          <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium">Sin implantes mamarios</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Implantes Ortopedicos Metalicos o Neuroestimuladores</label>
+                    <div className="flex gap-2">
+                      {['Si', 'No'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasOrthopedicImplants(true);
+                            } else {
+                              setHasOrthopedicImplants(false);
+                              setOrthopedicImplantsDetails('');
+                              updateMedicalField('orthopedicImplants', 'No');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                            (opt === 'Si' && hasOrthopedicImplants === true) || (opt === 'No' && hasOrthopedicImplants === false)
+                              ? opt === 'Si'
+                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasOrthopedicImplants === true && (
+                      <textarea
+                        value={orthopedicImplantsDetails}
+                        onChange={(e) => {
+                          setOrthopedicImplantsDetails(e.target.value);
+                          updateMedicalField('orthopedicImplants', e.target.value);
+                        }}
+                        rows={2}
+                        placeholder="Ubicacion, tipo de implante..."
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                      />
+                    )}
+                    {hasOrthopedicImplants === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin implantes ortopedicos</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Implante Coclear u Otro Dispositivo Auditivo</label>
+                    <div className="flex gap-2">
+                      {['Si', 'No'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasCochlearImplant(true);
+                            } else {
+                              setHasCochlearImplant(false);
+                              setCochlearImplantDetails('');
+                              updateMedicalField('cochlearImplant', 'No');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                            (opt === 'Si' && hasCochlearImplant === true) || (opt === 'No' && hasCochlearImplant === false)
+                              ? opt === 'Si'
+                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasCochlearImplant === true && (
+                      <textarea
+                        value={cochlearImplantDetails}
+                        onChange={(e) => {
+                          setCochlearImplantDetails(e.target.value);
+                          updateMedicalField('cochlearImplant', e.target.value);
+                        }}
+                        rows={2}
+                        placeholder="Lado (izquierdo/derecho/ambos), tipo..."
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                      />
+                    )}
+                    {hasCochlearImplant === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin implante coclear</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Protesis Ocular</label>
+                    <div className="flex gap-2">
+                      {['Si', 'No'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasOcularProsthesis(true);
+                            } else {
+                              setHasOcularProsthesis(false);
+                              setOcularProsthesisDetails('');
+                              updateMedicalField('ocularProsthesis', 'No');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                            (opt === 'Si' && hasOcularProsthesis === true) || (opt === 'No' && hasOcularProsthesis === false)
+                              ? opt === 'Si'
+                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasOcularProsthesis === true && (
+                      <textarea
+                        value={ocularProsthesisDetails}
+                        onChange={(e) => {
+                          setOcularProsthesisDetails(e.target.value);
+                          updateMedicalField('ocularProsthesis', e.target.value);
+                        }}
+                        rows={2}
+                        placeholder="Ojo afectado (izquierdo/derecho)..."
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                      />
+                    )}
+                    {hasOcularProsthesis === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin protesis ocular</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Alergias</label>
                     <div className="flex gap-2">
