@@ -237,7 +237,7 @@ export default function TagsPage() {
   return (
     <DashboardLayout user={user}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-100">Tags</h1>
           <p className="text-sm text-gray-500 mt-1">Gestiona los tags NFC/QR del sistema</p>
@@ -245,7 +245,7 @@ export default function TagsPage() {
         {isAdmin && (
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors sm:w-auto w-full"
           >
             <Plus className="w-4 h-4" />
             Crear Tags
@@ -255,7 +255,7 @@ export default function TagsPage() {
 
       {/* Vendor Mini Dashboard */}
       {!isAdmin && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
             <p className="text-sm text-gray-500 mb-1">Total asignados</p>
             <p className="text-3xl font-bold text-gray-200">{vendorStats.total}</p>
@@ -273,10 +273,10 @@ export default function TagsPage() {
 
       {/* Status counts - solo admin */}
       {isAdmin && (
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 sm:flex-wrap sm:gap-4">
           <button
             onClick={() => handleFilterChange({ ...filters, status: 'ALL' })}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
               filters.status === 'ALL' ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
@@ -287,7 +287,7 @@ export default function TagsPage() {
             <button
               key={status}
               onClick={() => handleFilterChange({ ...filters, status: filters.status === status ? 'ALL' : status })}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
                 filters.status === status ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
@@ -328,7 +328,8 @@ export default function TagsPage() {
         />
       ) : (
         <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="border-b border-gray-700/50">
                 {isAdmin && (
@@ -438,6 +439,7 @@ export default function TagsPage() {
               ))}
             </tbody>
           </table>
+          </div>
 
           <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
         </div>

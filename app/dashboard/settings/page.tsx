@@ -211,9 +211,9 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-gray-500">Última actualización: {formatDate(updatedAt)}</p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={handleTest}
                   disabled={testing}

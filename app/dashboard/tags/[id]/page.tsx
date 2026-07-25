@@ -130,17 +130,17 @@ export default function TagDetailPage() {
   return (
     <DashboardLayout user={user}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-4 min-w-0">
           <button
             onClick={() => router.back()}
-            className="p-2 text-gray-500 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold text-gray-100">Detalle del Tag</h1>
-            <p className="font-mono text-sm text-gray-500">{tag.uuid}</p>
+            <p className="font-mono text-sm text-gray-500 truncate">{tag.uuid}</p>
           </div>
         </div>
         <StatusBadge status={tag.status} size="md" />
@@ -309,7 +309,8 @@ export default function TagDetailPage() {
         {scans.length === 0 ? (
           <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin escaneos registrados</div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
             <thead>
               <tr className="border-b border-gray-700/50">
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
@@ -339,6 +340,7 @@ export default function TagDetailPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
       )}

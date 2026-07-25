@@ -234,22 +234,22 @@ export default function SellersPage() {
   return (
     <DashboardLayout user={user}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-100">Vendedores</h1>
           <p className="text-sm text-gray-500 mt-1">Gestiona los vendedores y sus tags asignados</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <button
             onClick={() => setShowAssign(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gray-700/50 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600/50"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-700/50 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600/50"
           >
             <Tag className="w-4 h-4" />
             Asignar Tags
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Nuevo Vendedor
