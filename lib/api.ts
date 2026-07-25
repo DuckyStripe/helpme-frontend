@@ -231,6 +231,17 @@ export const tagsApi = {
     return api.getPublic<any>(`/tags/${uuid}/view`);
   },
 
+  async getQrViewer(uuid: string) {
+    return api.getPublic<any>(`/tags/${uuid}/qr-view`);
+  },
+
+  async sendQrAlert(uuid: string, location: { lat: number; lng: number; address?: string }, rescuerPhone?: string, rescuerComment?: string) {
+    return api.post<{
+      success: boolean;
+      results: { contactName: string; success: boolean; locationSent: boolean; error?: string }[];
+    }>(`/tags/${uuid}/qr-alert`, { location, rescuerPhone, rescuerComment });
+  },
+
   async sendAlert(uuid: string, contactId: string, location: { lat: number; lng: number; address?: string }, rescuerPhone?: string, rescuerComment?: string) {
     return api.post<{ success: boolean; contactName: string; locationSent: boolean; locationWarning?: string }>(
       `/tags/${uuid}/alert`,
@@ -556,6 +567,24 @@ export const scanApi = {
   }) {
     try {
       await fetch(`${API_BASE}/tags/${uuid}/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch {
+      // Silencioso
+    }
+  },
+
+  async registerQrScan(uuid: string, data: {
+    latitude?: number;
+    longitude?: number;
+    city?: string;
+    country?: string;
+    userAgent?: string;
+  }) {
+    try {
+      await fetch(`${API_BASE}/tags/${uuid}/qr-scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

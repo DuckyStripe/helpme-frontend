@@ -6,10 +6,11 @@ import { tagsApi, scanApi } from '@/lib/api';
 import { calculateAge } from '@/lib/utils';
 import { getPlanLimits, type PlanType } from '@/lib/plans';
 import LocationPickerModal from '@/components/LocationPickerModal';
+import LongPressButton from '@/components/ui/LongPressButton';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
-  Heart, User, Calendar, PhoneCall, MessageCircle,
+  Heart, User, Calendar, PhoneCall,
   CheckCircle, Clock, RefreshCw, Cpu, Eye, Key, ShieldOff,
 } from 'lucide-react';
 
@@ -108,6 +109,7 @@ export default function ViewerPage() {
   const [unlockCode, setUnlockCode] = useState('');
   const [unlockError, setUnlockError] = useState('');
   const [unlocking, setUnlocking] = useState(false);
+  const [alertSending, setAlertSending] = useState(false);
 
   useEffect(() => {
     if (!alertFeedback) return;
@@ -247,35 +249,42 @@ export default function ViewerPage() {
   async function handleLocationConfirm(location: { lat: number; lng: number; address: string }) {
     if (!locationPicker) return;
 
-    const rescuerPhoneDigits = rescuerPhone.replace(/\D/g, '');
-    const rescuerPhoneFormatted = rescuerPhoneDigits.length > 0 ? rescuerPhone : undefined;
-    const rescuerCommentText = rescuerComment.trim().length > 0 ? rescuerComment.trim() : undefined;
+    setAlertSending(true);
+    try {
+      const rescuerPhoneDigits = rescuerPhone.replace(/\D/g, '');
+      const rescuerPhoneFormatted = rescuerPhoneDigits.length > 0 ? rescuerPhone : undefined;
+      const rescuerCommentText = rescuerComment.trim().length > 0 ? rescuerComment.trim() : undefined;
 
-    const result = await tagsApi.sendAlertToAll(uuid, location, rescuerPhoneFormatted, rescuerCommentText);
-    setLocationPicker(null);
-    setRescuerName('');
-    setRescuerPhone('');
-    setRescuerComment('');
+      const result = await tagsApi.sendAlertToAll(uuid, location, rescuerPhoneFormatted, rescuerCommentText);
+      setLocationPicker(null);
+      setRescuerName('');
+      setRescuerPhone('');
+      setRescuerComment('');
 
-    const succeeded = result.results.filter((r) => r.success);
-    const failed = result.results.filter((r) => !r.success);
-    const missingLocation = result.results.filter((r) => r.success && !r.locationSent);
+      const succeeded = result.results.filter((r) => r.success);
+      const failed = result.results.filter((r) => !r.success);
+      const missingLocation = result.results.filter((r) => r.success && !r.locationSent);
 
-    let message: string;
-    if (failed.length === 0) {
-      message = `Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}`;
-    } else if (succeeded.length === 0) {
-      message = `No se pudo enviar la alerta a ningún contacto (${failed.map((r) => r.contactName).join(', ')})`;
-    } else {
-      message = `Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}. No se pudo avisar a ${failed
-        .map((r) => r.contactName)
-        .join(', ')}.`;
+      let message: string;
+      if (failed.length === 0) {
+        message = `Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}`;
+      } else if (succeeded.length === 0) {
+        message = `No se pudo enviar la alerta a ningún contacto (${failed.map((r) => r.contactName).join(', ')})`;
+      } else {
+        message = `Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}. No se pudo avisar a ${failed
+          .map((r) => r.contactName)
+          .join(', ')}.`;
+      }
+      if (missingLocation.length > 0) {
+        message += ` (No se pudo compartir la ubicación con ${missingLocation.map((r) => r.contactName).join(', ')}, considera llamarles)`;
+      }
+
+      setAlertFeedback({ type: succeeded.length > 0 ? 'success' : 'error', message });
+    } catch (err: any) {
+      setAlertFeedback({ type: 'error', message: err.message || 'Error al enviar la alerta' });
+    } finally {
+      setAlertSending(false);
     }
-    if (missingLocation.length > 0) {
-      message += ` (No se pudo compartir la ubicación con ${missingLocation.map((r) => r.contactName).join(', ')}, considera llamarles)`;
-    }
-
-    setAlertFeedback({ type: succeeded.length > 0 ? 'success' : 'error', message });
   }
 
   if (loading) {
@@ -1054,22 +1063,18 @@ export default function ViewerPage() {
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                   Enviar Alerta por WhatsApp
                 </p>
-              <button
-                onClick={handleWhatsAppAlert}
-                className="w-full flex items-center justify-between gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="w-6 h-6" />
-                  <div className="text-left">
-                    <p className="text-sm font-bold">Alertar a todos los contactos</p>
-                    <p className="text-xs font-normal opacity-90">
-                      Se enviará a los {data.contacts.length} contacto{data.contacts.length > 1 ? 's' : ''} de emergencia
-                    </p>
-                  </div>
-                </div>
-                <Phone className="w-5 h-5" />
-              </button>
-            </div>
+                <LongPressButton
+                  duration={3000}
+                  onLongPress={handleWhatsAppAlert}
+                  disabled={alertSending}
+                  loading={!!locationPicker || alertSending}
+                  label="Mantener presionado para alertar"
+                  countdownLabel="Preparando alerta..."
+                />
+                <p className="text-xs text-center text-gray-400">
+                  Se enviará a los {data.contacts.length} contacto{data.contacts.length > 1 ? 's' : ''} de emergencia
+                </p>
+              </div>
             </section>
           );
         })()}
