@@ -23,6 +23,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [generatingKey, setGeneratingKey] = useState(false);
+  const [revealingKey, setRevealingKey] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
@@ -118,6 +119,25 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleRevealKey() {
+    setRevealingKey(true);
+    setTestResult(null);
+    try {
+      const result = await settingsApi.revealOpenwaKey();
+      if (result.ok && result.apiKey) {
+        setApiKey(result.apiKey);
+        setShowApiKey(true);
+        setTestResult({ ok: true, message: 'API Key obtenida. Cópiala ahora.' });
+      } else {
+        setTestResult({ ok: false, message: result.message || 'No hay API Key configurada' });
+      }
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message || 'No se pudo obtener la API Key' });
+    } finally {
+      setRevealingKey(false);
+    }
+  }
+
   function formatDate(dateStr: string | null) {
     if (!dateStr) return 'Nunca';
     return new Date(dateStr).toLocaleString('es-MX', {
@@ -210,6 +230,18 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500">
                   Obligatoria: OpenWA requiere esta key en cada llamada.
                 </p>
+                {hasApiKey && (
+                  <button
+                    type="button"
+                    onClick={handleRevealKey}
+                    disabled={revealingKey}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Revelar la API Key guardada en la base de datos"
+                  >
+                    {revealingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+                    {revealingKey ? 'Obteniendo...' : 'Revelar guardada'}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleGenerateKey}

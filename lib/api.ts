@@ -487,6 +487,10 @@ export const settingsApi = {
   async generateOpenwaKey() {
     return api.post<{ ok: boolean; message: string; apiKey?: string }>('/settings/openwa/generate-key', {});
   },
+
+  async revealOpenwaKey() {
+    return api.get<{ ok: boolean; message: string; apiKey?: string }>('/settings/openwa/reveal-key');
+  },
 };
 
 export const usersApi = {
