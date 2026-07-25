@@ -44,11 +44,7 @@ async function reverseGeocode(lat: number, lng: number, retries = 2): Promise<st
     if (nearby) address += `${nearby}, `;
     if (road) {
       address += road;
-      if (houseNumber) {
-        address += ` ${houseNumber}`;
-      } else {
-        address += ' (sin número exacto en el mapa, usa la ubicación GPS)';
-      }
+      if (houseNumber) address += ` ${houseNumber}`;
     } else if (nearby) {
       address = address.replace(/, $/, '');
     }
@@ -107,13 +103,8 @@ export default function LocationPickerModal({
     
     reverseGeocode(lat, lng).then((result) => {
       if (!cancelled) {
-        if (result) {
-          setAddress(result);
-          setGeocodeError(false);
-        } else {
-          setAddress(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
-          setGeocodeError(true);
-        }
+        setAddress(result);
+        setGeocodeError(!result);
         setLoadingAddress(false);
       }
     });
@@ -131,13 +122,8 @@ export default function LocationPickerModal({
     setLoadingAddress(true);
     setGeocodeError(false);
     reverseGeocode(lat, lng).then((result) => {
-      if (result) {
-        setAddress(result);
-        setGeocodeError(false);
-      } else {
-        setAddress(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
-        setGeocodeError(true);
-      }
+      setAddress(result);
+      setGeocodeError(!result);
       setLoadingAddress(false);
     });
   }
@@ -153,7 +139,10 @@ export default function LocationPickerModal({
     setSending(true);
     setError(null);
     try {
-      const finalAddress = address || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+      // El pin GPS (lat/lng) es siempre la fuente exacta; la calle es solo referencia
+      // (OpenStreetMap no siempre tiene el número de casa registrado en México).
+      const coordsLine = `📍 GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)} (exacto)`;
+      const finalAddress = address ? `${coordsLine}\nReferencia: ${address}` : coordsLine;
       await onConfirm({ lat, lng, address: finalAddress });
     } catch (err: any) {
       setError(err?.message || 'No se pudo enviar la alerta. Intenta de nuevo.');
@@ -198,20 +187,22 @@ export default function LocationPickerModal({
           <div className="bg-gray-50 rounded-xl p-3 flex items-start gap-2">
             <MapPin className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-900 leading-snug">
+                GPS confirmado: {lat.toFixed(5)}, {lng.toFixed(5)}
+              </p>
               {loadingAddress ? (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Buscando dirección...</span>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>Buscando calle de referencia...</span>
                 </div>
               ) : (
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm text-gray-800 leading-snug break-words">
-                    {geocodeError && (
-                      <span className="text-amber-600 block mb-1">
-                        ⚠️ No se pudo obtener la dirección
-                      </span>
-                    )}
-                    {address}
+                <div className="flex items-start justify-between gap-2 mt-1">
+                  <p className="text-xs text-gray-500 leading-snug break-words">
+                    {geocodeError
+                      ? '⚠️ Sin calle de referencia disponible (el pin sigue siendo exacto)'
+                      : address
+                      ? `Referencia: ${address}`
+                      : 'Sin calle de referencia en el mapa (el pin sigue siendo exacto)'}
                   </p>
                   {geocodeError && (
                     <button
@@ -227,8 +218,8 @@ export default function LocationPickerModal({
             </div>
           </div>
           <p className="text-[11px] text-gray-400 leading-snug">
-            La dirección se obtiene mediante OpenStreetMap. El mensaje se envía desde el servidor 
-            de HelpMe directamente al contacto de confianza.
+            El pin del mapa (coordenadas GPS) es lo que abre el rescatista en Google Maps y siempre
+            es exacto. La calle es solo una referencia y puede faltar en zonas sin datos de OpenStreetMap.
           </p>
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
