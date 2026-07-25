@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { pinApi, insurersApi, tagsApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import { getPlanLimits, type PlanType } from '@/lib/plans';
+import { calculateAge } from '@/lib/utils';
 import {
   Shield, Lock, Activity, Plus, Trash2, Save, CheckCircle, Loader2, AlertTriangle,
   User, Eye, EyeOff, ChevronDown, ChevronUp,
@@ -455,7 +456,8 @@ export default function ConfigPage() {
     Record<number, { phone: string; status: 'verifying' | 'success' | 'error' | 'verified'; error?: string; cooldownUntil?: number }>
   >({});
   const [personalOpenKey, setPersonalOpenKey] = useState(0);
-  const [isMinor, setIsMinor] = useState(false);
+  const age = calculateAge(medicalData.dob);
+  const isMinor = age !== null && age < 18;
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [consentError, setConsentError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -3180,20 +3182,6 @@ export default function ConfigPage() {
               })()}
 
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="is-minor"
-                    checked={isMinor}
-                    onChange={(e) => setIsMinor(e.target.checked)}
-                    className="mt-1 w-4 h-4 accent-red-600 focus:ring-2 focus:ring-red-500/30"
-                  />
-                  <span className="text-sm text-gray-700">
-                    Estos datos corresponden a un <strong>menor de edad</strong> y yo soy su
-                    madre, padre o tutor legal.
-                  </span>
-                </label>
-
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
