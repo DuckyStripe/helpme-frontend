@@ -1,12 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ToastContainer from "@/components/ToastContainer";
+
+export const viewport: Viewport = {
+  themeColor: "#DC2626",
+};
 
 export const metadata: Metadata = {
   title: "HelpMe - Identificación de Emergencia para Bikers",
   description: "Plataforma de identificación de emergencia para motociclistas. En caso de accidente, los paramedicos podrán acceder a tu información médica vital.",
   manifest: "/manifest.json",
-  themeColor: "#DC2626",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

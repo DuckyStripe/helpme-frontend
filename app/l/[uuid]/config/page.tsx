@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { pinApi, insurersApi } from '@/lib/api';
+import { pinApi, insurersApi, tagsApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import { getPlanLimits, type PlanType } from '@/lib/plans';
 import {
@@ -1319,6 +1319,7 @@ export default function ConfigPage() {
   }
 
   if (pinToken && formTransition && !editMode) {
+    const limits = getPlanLimits(tagPlan);
     const verifiedContacts = contacts.filter((c) => c.verified && (c.name.trim() || c.phone.trim()));
     if (alerts.length === 0) {
       loadAlerts();

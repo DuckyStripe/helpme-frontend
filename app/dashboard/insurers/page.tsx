@@ -6,7 +6,7 @@ import { toast } from '@/lib/toast';
 import {
   Car, Plus, Edit2, Trash2, Phone, Shield, Loader2, AlertCircle, CheckCircle, X,
 } from 'lucide-react';
-import { Modal } from '@/components/ui/Modal';
+import Modal from '@/components/ui/Modal';
 
 interface Insurer {
   id: string;
