@@ -16,7 +16,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { TableSkeleton, PageLoader } from '@/components/ui/Skeleton';
 import {
   QrCode, Plus, Copy, ExternalLink, Ban, Play, Loader2, Check,
-  UserMinus, Hash, Calendar, Eye, ScanLine, Unlock,
+  UserMinus, Hash, Calendar, Eye, ScanLine, Unlock, CreditCard,
 } from 'lucide-react';
 
 export default function TagsPage() {
@@ -29,22 +29,25 @@ export default function TagsPage() {
   const [limit] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ status: 'ALL', sellerId: '', search: '', dateFrom: '', dateTo: '' });
+  const [filters, setFilters] = useState({ status: 'ALL', sellerId: '', search: '', dateFrom: '', dateTo: '', plan: '' });
   const [sellers, setSellers] = useState<any[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [vendorStats, setVendorStats] = useState({ total: 0, virgin: 0, activated: 0 });
 
-  // Create modal
   const [showCreate, setShowCreate] = useState(false);
   const [createQty, setCreateQty] = useState(10);
   const [createSellerId, setCreateSellerId] = useState('');
   const [createPlan, setCreatePlan] = useState<PlanType>('PRINCIPAL');
   const [creating, setCreating] = useState(false);
 
-  // Assign modal
   const [showAssign, setShowAssign] = useState(false);
   const [assignSellerId, setAssignSellerId] = useState('');
   const [assigning, setAssigning] = useState(false);
+
+  const [showChangePlan, setShowChangePlan] = useState(false);
+  const [changePlanTag, setChangePlanTag] = useState<{ id: string; uuid: string; plan: PlanType } | null>(null);
+  const [newPlan, setNewPlan] = useState<PlanType>('PRINCIPAL');
+  const [changingPlan, setChangingPlan] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -88,6 +91,7 @@ export default function TagsPage() {
       if (filters.search) params.search = filters.search;
       if (filters.dateFrom) params.dateFrom = filters.dateFrom;
       if (filters.dateTo) params.dateTo = filters.dateTo;
+      if (filters.plan) params.plan = filters.plan;
 
       const data = await tagsApi.list(params);
       setTags(data.tags);
@@ -208,6 +212,32 @@ export default function TagsPage() {
     }
   }
 
+  function openChangePlan(tag: any) {
+    setChangePlanTag({ id: tag.id, uuid: tag.uuid, plan: tag.plan });
+    setNewPlan(tag.plan || 'PRINCIPAL');
+    setShowChangePlan(true);
+  }
+
+  async function handleChangePlan() {
+    if (!changePlanTag) return;
+    if (newPlan === changePlanTag.plan) {
+      toast.info('El plan ya es el mismo');
+      return;
+    }
+    setChangingPlan(true);
+    try {
+      await tagsApi.renewPlan(changePlanTag.id, newPlan);
+      toast.success(`Plan cambiado a ${PLAN_LABELS[newPlan]}`);
+      setShowChangePlan(false);
+      setChangePlanTag(null);
+      loadTags();
+    } catch (err: any) {
+      toast.error(err.message || 'Error al cambiar plan');
+    } finally {
+      setChangingPlan(false);
+    }
+  }
+
   function toggleSelect(id: string) {
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
@@ -239,7 +269,6 @@ export default function TagsPage() {
 
   return (
     <DashboardLayout user={user}>
-      {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-100">Tags</h1>
@@ -256,7 +285,6 @@ export default function TagsPage() {
         )}
       </div>
 
-      {/* Vendor Mini Dashboard */}
       {!isAdmin && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
@@ -274,7 +302,6 @@ export default function TagsPage() {
         </div>
       )}
 
-      {/* Status counts - solo admin */}
       {isAdmin && (
         <div className="flex gap-2 mb-6 overflow-x-auto pb-1 sm:flex-wrap sm:gap-4">
           <button
@@ -301,12 +328,16 @@ export default function TagsPage() {
         </div>
       )}
 
-      {/* Filters */}
       <div className="mb-4">
-        <FilterBar onFilterChange={handleFilterChange} sellers={isAdmin ? sellers.map(s => ({ id: s.id, name: s.name })) : []} adminId={isAdmin ? user.id : undefined} adminName={isAdmin ? user.name : undefined} />
+        <FilterBar
+          onFilterChange={handleFilterChange}
+          sellers={isAdmin ? sellers.map(s => ({ id: s.id, name: s.name })) : []}
+          adminId={isAdmin ? user.id : undefined}
+          adminName={isAdmin ? user.name : undefined}
+          plans={['PRINCIPAL', 'PRO', 'ULTRA']}
+        />
       </div>
 
-      {/* Bulk actions - solo admin */}
       {isAdmin && (
         <div className="mb-4">
           <BulkActionsBar
@@ -319,150 +350,161 @@ export default function TagsPage() {
         </div>
       )}
 
-      {/* Table */}
       {loading ? (
         <TableSkeleton rows={5} />
       ) : tags.length === 0 ? (
         <EmptyState
           icon={QrCode}
           title="No hay tags"
-          description={filters.status !== 'ALL' || filters.search ? 'No se encontraron tags con los filtros aplicados' : 'Crea tu primer tag para comenzar'}
+          description={filters.status !== 'ALL' || filters.search || filters.plan ? 'No se encontraron tags con los filtros aplicados' : 'Crea tu primer tag para comenzar'}
           action={isAdmin ? { label: 'Crear Tags', onClick: () => setShowCreate(true) } : undefined}
         />
       ) : (
         <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[720px]">
-            <thead>
-              <tr className="border-b border-gray-700/50">
-                {isAdmin && (
-                  <th className="px-6 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selected.size === tags.length && tags.length > 0}
-                      onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
-                    />
-                  </th>
-                )}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> UUID</span>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                {isAdmin && (
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <span className="flex items-center gap-1.5"><UserMinus className="w-3.5 h-3.5" /> Vendedor</span>
-                  </th>
-                )}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Vistas</span>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5"><ScanLine className="w-3.5 h-3.5" /> Escaneos</span>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Creado</span>
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700/30">
-              {tags.map(tag => (
-                <tr key={tag.id} className="hover:bg-gray-700/20 transition-colors">
+            <table className="w-full text-sm min-w-[800px]">
+              <thead>
+                <tr className="border-b border-gray-700/50">
                   {isAdmin && (
-                    <td className="px-6 py-3">
+                    <th className="px-4 py-3 text-left w-10">
                       <input
                         type="checkbox"
-                        checked={selected.has(tag.id)}
-                        onChange={() => toggleSelect(tag.id)}
+                        checked={selected.size === tags.length && tags.length > 0}
+                        onChange={toggleSelectAll}
                         className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
                       />
-                    </td>
+                    </th>
                   )}
-                  <td className="px-6 py-3">
-                    <span className="font-mono text-xs text-gray-300">{shortUuid(tag.uuid)}</span>
-                  </td>
-                  <td className="px-6 py-3">
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={tag.status} />
-                      {tag.plan && (
-                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> UUID</span>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                  {isAdmin && (
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <span className="flex items-center gap-1.5"><UserMinus className="w-3.5 h-3.5" /> Vendedor</span>
+                    </th>
+                  )}
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="flex items-center justify-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Vistas</span>
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="flex items-center justify-center gap-1.5"><ScanLine className="w-3.5 h-3.5" /> Escaneos</span>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Creado</span>
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700/30">
+                {tags.map(tag => (
+                  <tr key={tag.id} className="hover:bg-gray-700/20 transition-colors">
+                    {isAdmin && (
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(tag.id)}
+                          onChange={() => toggleSelect(tag.id)}
+                          className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
+                        />
+                      </td>
+                    )}
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs text-gray-300">{shortUuid(tag.uuid)}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={tag.status} />
+                        {tag.status === 'ACTIVE' && tag.userDisabled && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                            Privado
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {tag.plan ? (
+                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
                           {PLAN_LABELS[tag.plan as PlanType] || tag.plan}
                         </span>
+                      ) : (
+                        <span className="text-gray-500 text-xs">—</span>
                       )}
-                      {tag.status === 'ACTIVE' && tag.userDisabled && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                          Privado
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  {isAdmin && (
-                    <td className="px-6 py-3 text-sm text-gray-400">{tag.seller?.name || '—'}</td>
-                  )}
-                  <td className="px-6 py-3 text-sm text-gray-400">{tag.viewCount}</td>
-                  <td className="px-6 py-3 text-sm text-gray-400">{tag.scanCount}</td>
-                  <td className="px-6 py-3 text-sm text-gray-500">{new Date(tag.createdAt).toLocaleDateString('es-MX')}</td>
-                  <td className="px-6 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => copyLink(tag.uuid)}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
-                        title="Copiar URL para NFC"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        Copiar URL
-                      </button>
-                      <a
-                        href={`/L/${tag.uuid}`}
-                        target="_blank"
-                        className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
-                        title="Ver tag"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                      {isAdmin && tag.status !== 'VIRGIN' && tag.status !== 'SUSPENDED' && (
+                    </td>
+                    {isAdmin && (
+                      <td className="px-4 py-3 text-sm text-gray-400">{tag.seller?.name || '—'}</td>
+                    )}
+                    <td className="px-4 py-3 text-sm text-gray-400 text-center">{tag.viewCount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-400 text-center">{tag.scanCount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{new Date(tag.createdAt).toLocaleDateString('es-MX')}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
-                          onClick={() => handleUnlockPin(tag.id)}
-                          className="p-1.5 text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
-                          title="Desbloquear PIN"
+                          onClick={() => copyLink(tag.uuid)}
+                          className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
+                          title="Copiar URL para NFC"
                         >
-                          <Unlock className="w-3.5 h-3.5" />
+                          <Copy className="w-3.5 h-3.5" />
+                          <span className="hidden lg:inline">Copiar URL</span>
                         </button>
-                      )}
-                      {isAdmin && tag.status !== 'SUSPENDED' && (
-                        <button
-                          onClick={() => handleSuspend(tag.id)}
-                          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Suspender"
-                        >
-                          <Ban className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      {isAdmin && tag.status === 'SUSPENDED' && (
-                        <button
-                          onClick={() => handleResume(tag.id)}
+                        <a
+                          href={`/L/${tag.uuid}`}
+                          target="_blank"
                           className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
-                          title="Reanudar"
+                          title="Ver tag"
                         >
-                          <Play className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                        {isAdmin && (
+                          <button
+                            onClick={() => openChangePlan(tag)}
+                            className="p-1.5 text-gray-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                            title="Cambiar plan"
+                          >
+                            <CreditCard className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {isAdmin && tag.status !== 'VIRGIN' && tag.status !== 'SUSPENDED' && (
+                          <button
+                            onClick={() => handleUnlockPin(tag.id)}
+                            className="p-1.5 text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
+                            title="Desbloquear PIN"
+                          >
+                            <Unlock className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {isAdmin && tag.status !== 'SUSPENDED' && (
+                          <button
+                            onClick={() => handleSuspend(tag.id)}
+                            className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Suspender"
+                          >
+                            <Ban className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {isAdmin && tag.status === 'SUSPENDED' && (
+                          <button
+                            onClick={() => handleResume(tag.id)}
+                            className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                            title="Reanudar"
+                          >
+                            <Play className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
         </div>
       )}
 
-      {/* Create Modal */}
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Crear Tags" size="sm">
         <div className="space-y-5">
           <div>
@@ -524,7 +566,6 @@ export default function TagsPage() {
         </div>
       </Modal>
 
-      {/* Assign Modal */}
       <Modal isOpen={showAssign} onClose={() => setShowAssign(false)} title="Asignar Vendedor" size="sm">
         <div className="space-y-5">
           <p className="text-sm text-gray-400">Asignar {selected.size} tag{selected.size > 1 ? 's' : ''} a:</p>
@@ -552,6 +593,49 @@ export default function TagsPage() {
             >
               {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Asignar
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showChangePlan} onClose={() => setShowChangePlan(false)} title="Cambiar Plan del Tag" size="sm">
+        <div className="space-y-5">
+          <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-3">
+            <p className="text-xs text-gray-500 mb-1">Tag</p>
+            <p className="font-mono text-sm text-gray-200">{changePlanTag?.uuid ? shortUuid(changePlanTag.uuid) : ''}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Plan actual</label>
+            <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full ${PLAN_COLORS[changePlanTag?.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[changePlanTag?.plan as PlanType]?.text || 'text-gray-700'}`}>
+              {PLAN_LABELS[changePlanTag?.plan as PlanType] || changePlanTag?.plan || 'Sin plan'}
+            </span>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Nuevo plan</label>
+            <select
+              value={newPlan}
+              onChange={(e) => setNewPlan(e.target.value as PlanType)}
+              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            >
+              <option value="PRINCIPAL">Principal ($149)</option>
+              <option value="PRO">Pro ($449)</option>
+              <option value="ULTRA">Ultra ($699)</option>
+            </select>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowChangePlan(false)}
+              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleChangePlan}
+              disabled={changingPlan || newPlan === changePlanTag?.plan}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+            >
+              {changingPlan ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+              {changingPlan ? 'Cambiando...' : 'Cambiar Plan'}
             </button>
           </div>
         </div>

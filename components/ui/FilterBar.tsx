@@ -10,30 +10,33 @@ interface FilterBarProps {
     search: string;
     dateFrom: string;
     dateTo: string;
+    plan: string;
   }) => void;
   sellers?: Array<{ id: string; name: string }>;
   adminId?: string;
   adminName?: string;
+  plans?: string[];
 }
 
-export default function FilterBar({ onFilterChange, sellers = [], adminId, adminName: _adminName }: FilterBarProps) {
+export default function FilterBar({ onFilterChange, sellers = [], adminId, adminName: _adminName, plans = [] }: FilterBarProps) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState('ALL');
   const [sellerId, setSellerId] = useState('');
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [plan, setPlan] = useState('');
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    onFilterChange({ status, sellerId, search, dateFrom, dateTo });
+    onFilterChange({ status, sellerId, search, dateFrom, dateTo, plan });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, sellerId, dateFrom, dateTo]);
+  }, [status, sellerId, dateFrom, dateTo, plan]);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      onFilterChange({ status, sellerId, search, dateFrom, dateTo });
+      onFilterChange({ status, sellerId, search, dateFrom, dateTo, plan });
     }, 300);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,13 +48,13 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
     setSearch('');
     setDateFrom('');
     setDateTo('');
+    setPlan('');
   }
 
-  const hasFilters = status !== 'ALL' || sellerId || search || dateFrom || dateTo;
+  const hasFilters = status !== 'ALL' || sellerId || search || dateFrom || dateTo || plan;
 
   return (
     <div className="space-y-3">
-      {/* Search row */}
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -86,7 +89,6 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
         )}
       </div>
 
-      {/* Expanded filters */}
       {open && (
         <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
@@ -116,6 +118,19 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
               )}
               {sellers.map(s => (
                 <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Plan</label>
+            <select
+              value={plan}
+              onChange={(e) => setPlan(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            >
+              <option value="">Todos</option>
+              {plans.map(p => (
+                <option key={p} value={p}>{p}</option>
               ))}
             </select>
           </div>
