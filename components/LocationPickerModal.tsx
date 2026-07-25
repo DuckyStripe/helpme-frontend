@@ -22,7 +22,7 @@ async function reverseGeocode(lat: number, lng: number, retries = 2): Promise<st
 
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=19&addressdetails=1`,
       { 
         headers: { 'Accept-Language': 'es' },
         signal: controller.signal

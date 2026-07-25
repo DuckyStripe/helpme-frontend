@@ -171,6 +171,9 @@ export default function ViewerPage() {
     scanApi.registerScan(uuid, { userAgent });
   }
 
+  // Sobre este umbral (metros) el fix GPS se considera poco confiable y se pide confirmar/mover el pin
+  const ACCURACY_THRESHOLD_METERS = 75;
+
   async function detectPosition(): Promise<{ lat: number; lng: number; approximate: boolean; error?: string }> {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       return { ...DEFAULT_MAP_CENTER, approximate: true, error: 'Geolocalización no disponible' };
@@ -179,35 +182,35 @@ export default function ViewerPage() {
     return new Promise((resolve) => {
       // Primer intento con alta precisión
       navigator.geolocation.getCurrentPosition(
-        (position) => resolve({ 
-          lat: position.coords.latitude, 
-          lng: position.coords.longitude, 
-          approximate: false 
+        (position) => resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          approximate: position.coords.accuracy > ACCURACY_THRESHOLD_METERS,
         }),
         async (error) => {
           // Si falla, intentar con baja precisión
           if (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE) {
             navigator.geolocation.getCurrentPosition(
-              (position) => resolve({ 
-                lat: position.coords.latitude, 
-                lng: position.coords.longitude, 
-                approximate: true 
+              (position) => resolve({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                approximate: true,
               }),
-              () => resolve({ 
-                ...DEFAULT_MAP_CENTER, 
-                approximate: true, 
-                error: error.code === error.PERMISSION_DENIED 
-                  ? 'Permiso de ubicación denegado' 
+              () => resolve({
+                ...DEFAULT_MAP_CENTER,
+                approximate: true,
+                error: error.code === error.PERMISSION_DENIED
+                  ? 'Permiso de ubicación denegado'
                   : 'No se pudo obtener ubicación'
               }),
               { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
             );
           } else {
-            resolve({ 
-              ...DEFAULT_MAP_CENTER, 
-              approximate: true, 
-              error: error.code === error.PERMISSION_DENIED 
-                ? 'Permiso de ubicación denegado' 
+            resolve({
+              ...DEFAULT_MAP_CENTER,
+              approximate: true,
+              error: error.code === error.PERMISSION_DENIED
+                ? 'Permiso de ubicación denegado'
                 : 'No se pudo obtener ubicación'
             });
           }
