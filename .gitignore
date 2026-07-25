@@ -41,3 +41,4 @@ next-env.d.ts
 .agents/
 skills-lock.json
 .claude/skills/responsive-design/SKILL.md
+.claude/skills/web-design-guidelines/SKILL.md

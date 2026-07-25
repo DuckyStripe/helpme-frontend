@@ -8,7 +8,7 @@ import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact as ContactIcon,
   Phone, Stethoscope, Pill, User, Calendar, Printer, Download, Pencil,
   Heart, CheckCircle, PhoneCall, Smartphone, Loader2, Cpu, Eye, Car, ShieldOff,
-  Siren, Lock, MapPin, Send,
+  Siren, Lock, MapPin, Send, MoreVertical,
 } from 'lucide-react';
 
 interface OwnerViewProps {
@@ -67,6 +67,9 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
   const [geolocationError, setGeolocationError] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [routeOrigin, setRouteOrigin] = useState('');
@@ -184,6 +187,17 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
     };
   }, []);
 
+  useEffect(() => {
+    if (!showMoreMenu) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMoreMenu]);
+
   function requestGeolocation(): Promise<{ lat: number; lng: number } | null> {
     return new Promise((resolve) => {
       if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -271,56 +285,69 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
                       });
                     }
                   }}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95 [touch-action:manipulation]"
                   aria-label="Compartir perfil por WhatsApp"
                   title="Compartir perfil"
                 >
                   <Phone className="w-5 h-5" />
                 </button>
               )}
-              {tagUuid && (
+              <div className="relative" ref={moreMenuRef}>
                 <button
-                  onClick={() => window.open(`/l/${tagUuid}`, '_blank')}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
-                  aria-label="Vista previa del rescatista"
-                  title="Vista previa"
+                  onClick={() => setShowMoreMenu((v) => !v)}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95 [touch-action:manipulation]"
+                  aria-label="Más opciones"
+                  aria-haspopup="menu"
+                  aria-expanded={showMoreMenu}
+                  title="Más opciones"
                 >
-                  <Eye className="w-5 h-5" />
+                  <MoreVertical className="w-5 h-5" />
                 </button>
-              )}
-              <button
-                onClick={onInstallApp}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
-                aria-label="Agregar a pantalla de inicio"
-                title="Agregar a pantalla de inicio"
-              >
-                <Smartphone className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleDownload}
-                disabled={downloading}
-                className={`p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95 disabled:opacity-60 ${!limits.hasDownloads ? 'hidden' : ''}`}
-                aria-label="Descargar imagen de mi ficha"
-                title="Descargar imagen"
-              >
-                {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
-                aria-label="Imprimir ficha"
-                title="Imprimir"
-              >
-                <Printer className="w-5 h-5" />
-              </button>
-              <button
-                onClick={onEdit}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
-                aria-label="Editar mis datos"
-                title="Editar"
-              >
-                <Pencil className="w-5 h-5" />
-              </button>
+                {showMoreMenu && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-20 text-gray-700"
+                  >
+                    {tagUuid && (
+                      <button
+                        role="menuitem"
+                        onClick={() => { setShowMoreMenu(false); window.open(`/l/${tagUuid}`, '_blank'); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors [touch-action:manipulation]"
+                      >
+                        <Eye className="w-4 h-4 text-gray-400" />
+                        Vista previa del rescatista
+                      </button>
+                    )}
+                    <button
+                      role="menuitem"
+                      onClick={() => { setShowMoreMenu(false); onInstallApp(); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors [touch-action:manipulation]"
+                    >
+                      <Smartphone className="w-4 h-4 text-gray-400" />
+                      Agregar a pantalla de inicio
+                    </button>
+                    {limits.hasDownloads && (
+                      <button
+                        role="menuitem"
+                        onClick={() => { setShowMoreMenu(false); handleDownload(); }}
+                        disabled={downloading}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60 [touch-action:manipulation]"
+                      >
+                        {downloading ? <Loader2 className="w-4 h-4 animate-spin text-gray-400" /> : <Download className="w-4 h-4 text-gray-400" />}
+                        Descargar imagen
+                      </button>
+                    )}
+                    <button
+                      role="menuitem"
+                      onClick={() => { setShowMoreMenu(false); window.print(); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors [touch-action:manipulation]"
+                    >
+                      <Printer className="w-4 h-4 text-gray-400" />
+                      Imprimir
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -808,7 +835,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
                 onTouchEnd={cancelHold}
                 onTouchCancel={cancelHold}
                 disabled={sendingAlert}
-                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 active:scale-95 transition-all disabled:opacity-50 relative overflow-hidden min-h-[56px]"
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 active:scale-95 transition-all disabled:opacity-50 relative overflow-hidden min-h-[56px] [touch-action:manipulation]"
               >
                 {isHolding && (
                   <div
@@ -834,28 +861,27 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
             </div>
           )}
 
-          <div className="flex gap-3">
+          <button
+            onClick={onEdit}
+            className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors min-h-[48px] [touch-action:manipulation]"
+          >
+            <Pencil className="w-4 h-4" />
+            <span>Editar mis Datos</span>
+          </button>
+
+          {onChangePin && limits.hasPrivateMode && (
             <button
-              onClick={onEdit}
-              className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3.5 px-6 rounded-xl transition-colors min-h-[48px]"
+              onClick={onChangePin}
+              className="w-full flex items-center justify-center gap-1.5 text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors [touch-action:manipulation]"
             >
-              <Pencil className="w-4 h-4" />
-              <span>Editar mis Datos</span>
+              <Lock className="w-3.5 h-3.5" />
+              Cambiar PIN
             </button>
-            {onChangePin && limits.hasPrivateMode && (
-              <button
-                onClick={onChangePin}
-                className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3.5 px-4 rounded-xl transition-colors min-h-[48px]"
-                title="Cambiar PIN"
-              >
-                <Lock className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          )}
         </section>
 
         {limits.hasRouteMode && (
-          <section className="px-5 pb-5 no-print">
+          <section className="px-5 pb-5 no-print border-t border-gray-100 pt-5">
             {activeRoute ? (
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
@@ -888,7 +914,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
             ) : (
               <button
                 onClick={() => setShowRouteModal(true)}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors shadow-lg shadow-blue-600/20 min-h-[48px]"
+                className="w-full flex items-center justify-center gap-2 bg-white border-2 border-blue-200 hover:bg-blue-50 text-blue-700 font-semibold py-3 px-6 rounded-xl transition-colors min-h-[48px] [touch-action:manipulation]"
               >
                 <MapPin className="w-5 h-5" />
                 Modo Ruta
