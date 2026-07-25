@@ -368,6 +368,20 @@ export const pinApi = {
     if (!res.ok) throw new Error(json.error?.message || 'Request failed');
     return json.data as { success: boolean };
   },
+
+  async changePin(uuid: string, token: string, currentPin: string, newPin: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/config/pin`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ currentPin, newPin }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { success: boolean };
+  },
 };
 
 export const settingsApi = {

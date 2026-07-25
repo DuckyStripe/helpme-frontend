@@ -897,6 +897,69 @@ export default function ConfigPage() {
     }
   }
 
+  const [sendingAlert, setSendingAlert] = useState(false);
+
+  async function handleSendAlert(comment: string, location: { lat: number; lng: number; address?: string }) {
+    setSendingAlert(true);
+    try {
+      const result = await tagsApi.sendAlertToAll(uuid, location, undefined, comment);
+      const succeeded = result.results.filter((r) => r.success);
+      const failed = result.results.filter((r) => !r.success);
+      if (failed.length === 0) {
+        toast.success(`Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}`);
+      } else if (succeeded.length === 0) {
+        toast.error(`No se pudo enviar la alerta a ningún contacto`);
+      } else {
+        toast.success(`Alerta enviada a ${succeeded.map((r) => r.contactName).join(', ')}. Falló: ${failed.map((r) => r.contactName).join(', ')}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'No se pudo enviar la alerta');
+    } finally {
+      setSendingAlert(false);
+    }
+  }
+
+  const [changingPin, setChangingPin] = useState(false);
+  const [changePinCurrent, setChangePinCurrent] = useState('');
+  const [changePinNew, setChangePinNew] = useState('');
+  const [changePinConfirm, setChangePinConfirm] = useState('');
+  const [changePinError, setChangePinError] = useState('');
+  const [showChangePinModal, setShowChangePinModal] = useState(false);
+
+  async function handleChangePin() {
+    setChangePinError('');
+    if (changePinCurrent.length !== 6 || !/^\d+$/.test(changePinCurrent)) {
+      setChangePinError('El PIN actual debe tener 6 dígitos');
+      return;
+    }
+    if (changePinNew.length !== 6 || !/^\d+$/.test(changePinNew)) {
+      setChangePinError('El nuevo PIN debe tener 6 dígitos');
+      return;
+    }
+    if (changePinNew !== changePinConfirm) {
+      setChangePinError('Los nuevos PIN no coinciden');
+      return;
+    }
+    if (changePinCurrent === changePinNew) {
+      setChangePinError('El nuevo PIN debe ser diferente al actual');
+      return;
+    }
+
+    setChangingPin(true);
+    try {
+      await pinApi.changePin(uuid, pinToken!, changePinCurrent, changePinNew);
+      toast.success('PIN cambiado exitosamente');
+      setShowChangePinModal(false);
+      setChangePinCurrent('');
+      setChangePinNew('');
+      setChangePinConfirm('');
+    } catch (err: any) {
+      setChangePinError(err.message || 'Error al cambiar el PIN');
+    } finally {
+      setChangingPin(false);
+    }
+  }
+
   function removeContact(index: number) {
     if (contacts.length > 1) {
       setContacts((prev) => prev.filter((_, i) => i !== index));
@@ -1222,6 +1285,7 @@ export default function ConfigPage() {
   }
 
   if (pinToken && formTransition && !editMode) {
+    const verifiedContacts = contacts.filter((c) => c.verified && (c.name.trim() || c.phone.trim()));
     return (
       <OwnerView
         medicalData={medicalData}
@@ -1230,6 +1294,10 @@ export default function ConfigPage() {
         userDisabled={userDisabled}
         onTogglePrivacy={handleTogglePrivacy}
         togglingPrivacy={togglingPrivacy}
+        hasVerifiedContacts={verifiedContacts.length > 0}
+        onSendAlert={handleSendAlert}
+        sendingAlert={sendingAlert}
+        onChangePin={() => setShowChangePinModal(true)}
         onEdit={() => setEditMode(true)}
         onInstallApp={handleInstallApp}
         onDownloadImage={handleDownloadImage}
@@ -2595,6 +2663,73 @@ export default function ConfigPage() {
       </div>
     );
   }
+
+  {showChangePinModal && (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowChangePinModal(false)}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-2xl mb-4">
+            <Lock className="w-7 h-7 text-gray-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900">Cambiar PIN</h3>
+          <p className="text-sm text-gray-500 mt-2">Ingresa tu PIN actual y el nuevo PIN</p>
+        </div>
+
+        <div className="space-y-3">
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={6}
+            value={changePinCurrent}
+            onChange={(e) => { setChangePinCurrent(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
+            placeholder="PIN actual"
+            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all font-mono text-center text-lg tracking-widest"
+          />
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={6}
+            value={changePinNew}
+            onChange={(e) => { setChangePinNew(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
+            placeholder="Nuevo PIN"
+            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all font-mono text-center text-lg tracking-widest"
+          />
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={6}
+            value={changePinConfirm}
+            onChange={(e) => { setChangePinConfirm(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
+            placeholder="Confirmar nuevo PIN"
+            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all font-mono text-center text-lg tracking-widest"
+          />
+        </div>
+
+        {changePinError && (
+          <div className="flex items-center gap-1.5 text-red-600 text-xs font-medium mt-3">
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+            {changePinError}
+          </div>
+        )}
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={() => { setShowChangePinModal(false); setChangePinCurrent(''); setChangePinNew(''); setChangePinConfirm(''); setChangePinError(''); }}
+            className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleChangePin}
+            disabled={changingPin}
+            className="flex-1 py-3 px-4 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {changingPin ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cambiar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
   // PIN Screen
   return (

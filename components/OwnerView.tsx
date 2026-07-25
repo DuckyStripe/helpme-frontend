@@ -1,12 +1,11 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { calculateAge } from '@/lib/utils';
 import type { MedicalData, Contact, Vehicle } from '@/app/l/[uuid]/config/page';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact as ContactIcon,
   Phone, Stethoscope, Pill, User, Calendar, Printer, Download, Pencil,
   Heart, CheckCircle, PhoneCall, Smartphone, Loader2, Cpu, Eye, Car, ShieldOff,
+  Siren, Lock, X, MapPin, Send,
 } from 'lucide-react';
 
 interface OwnerViewProps {
@@ -16,12 +15,16 @@ interface OwnerViewProps {
   userDisabled?: boolean;
   onTogglePrivacy?: () => void;
   togglingPrivacy?: boolean;
+  hasVerifiedContacts?: boolean;
+  onSendAlert?: (comment: string, location: { lat: number; lng: number; address?: string }) => Promise<void>;
+  sendingAlert?: boolean;
+  onChangePin?: () => void;
   onEdit: () => void;
   onInstallApp: () => void;
   onDownloadImage: () => Promise<void>;
 }
 
-export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
+export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, hasVerifiedContacts = false, onSendAlert, sendingAlert = false, onChangePin, onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
   const age = calculateAge(md.dob);
   const hasAllergies = md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna';
   const hasConditions = md.conditions && md.conditions.trim().length > 0;
@@ -36,6 +39,14 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
   const hasAnyDevice = hasPacemaker || hasImplantContraceptive || hasImplantMammary || hasOrthopedicImplants || hasCochlearImplant || hasOcularProsthesis;
   const realContacts = contacts.filter((c) => c.name.trim() || c.phone.trim());
   const [downloading, setDownloading] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertComment, setAlertComment] = useState('');
+  const [alertLocation, setAlertLocation] = useState('');
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [isHolding, setIsHolding] = useState(false);
+  const [geolocationError, setGeolocationError] = useState(false);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   async function handleDownload() {
     setDownloading(true);
@@ -44,6 +55,83 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
     } finally {
       setDownloading(false);
     }
+  }
+
+  function startHold() {
+    setIsHolding(true);
+    setHoldProgress(0);
+    let progress = 0;
+    progressIntervalRef.current = setInterval(() => {
+      progress += 100 / 30;
+      if (progress >= 100) {
+        progress = 100;
+        if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      }
+      setHoldProgress(progress);
+    }, 100);
+    holdTimerRef.current = setTimeout(() => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+      setIsHolding(false);
+      setShowAlertModal(true);
+    }, 3000);
+  }
+
+  function cancelHold() {
+    setIsHolding(false);
+    setHoldProgress(0);
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    };
+  }, []);
+
+  function requestGeolocation(): Promise<{ lat: number; lng: number } | null> {
+    return new Promise((resolve) => {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+        setGeolocationError(true);
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {
+          setGeolocationError(true);
+          resolve(null);
+        },
+        { enableHighAccuracy: false, timeout: 10000 }
+      );
+    });
+  }
+
+  async function handleSendAlert() {
+    if (!onSendAlert) return;
+
+    let location: { lat: number; lng: number; address?: string } | null = null;
+    if (!geolocationError) {
+      const geo = await requestGeolocation();
+      if (geo) {
+        location = geo;
+      }
+    }
+
+    if (!location && alertLocation.trim()) {
+      location = { lat: 0, lng: 0, address: alertLocation.trim() };
+    }
+
+    if (!location) {
+      return;
+    }
+
+    await onSendAlert(alertComment.trim(), location);
+    setShowAlertModal(false);
+    setAlertComment('');
+    setAlertLocation('');
+    setGeolocationError(false);
   }
 
   return (
@@ -515,20 +603,127 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
           </section>
         )}
 
-        <section className="no-print px-5 pb-5">
-          <button
-            onClick={onEdit}
-            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 active:scale-95 transition-all"
-          >
-            <Pencil className="w-5 h-5" />
-            <span>Editar mis Datos</span>
-          </button>
+        <section className="no-print px-5 pb-5 space-y-3">
+          {hasVerifiedContacts && onSendAlert && (
+            <div className="relative">
+              <button
+                onMouseDown={startHold}
+                onMouseUp={cancelHold}
+                onMouseLeave={cancelHold}
+                onTouchStart={startHold}
+                onTouchEnd={cancelHold}
+                onTouchCancel={cancelHold}
+                disabled={sendingAlert}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 active:scale-95 transition-all disabled:opacity-50 relative overflow-hidden min-h-[56px]"
+              >
+                {isHolding && (
+                  <div
+                    className="absolute left-0 top-0 h-full bg-red-800/30 transition-all duration-100"
+                    style={{ width: `${holdProgress}%` }}
+                  />
+                )}
+                {sendingAlert ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Siren className="w-5 h-5" />
+                )}
+                <span>{isHolding ? 'Mantén presionado...' : '🚨 Enviar Alerta de Emergencia'}</span>
+              </button>
+              {isHolding && holdProgress < 100 && (
+                <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-red-600 rounded-full transition-all duration-100"
+                    style={{ width: `${holdProgress}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              onClick={onEdit}
+              className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3.5 px-6 rounded-xl transition-colors min-h-[48px]"
+            >
+              <Pencil className="w-4 h-4" />
+              <span>Editar mis Datos</span>
+            </button>
+            {onChangePin && (
+              <button
+                onClick={onChangePin}
+                className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3.5 px-4 rounded-xl transition-colors min-h-[48px]"
+                title="Cambiar PIN"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </section>
 
         <footer className="bg-gray-50 border-t border-gray-200 p-5 flex flex-col items-center gap-2 text-gray-500">
           <p className="text-xs font-medium">Esta es tu ficha, tal como la verá quien te asista en una emergencia.</p>
         </footer>
       </main>
+
+      {showAlertModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowAlertModal(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 rounded-2xl mb-4">
+                <Siren className="w-7 h-7 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Enviar Alerta de Emergencia</h3>
+              <p className="text-sm text-gray-500 mt-2">Se enviará tu información médica y ubicación a tus contactos de emergencia.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">¿Qué está pasando? (opcional)</label>
+                <textarea
+                  value={alertComment}
+                  onChange={(e) => setAlertComment(e.target.value)}
+                  rows={2}
+                  placeholder="Ej: Me siento mal, necesito ayuda..."
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {geolocationError ? 'Ubicación aproximada (obligatorio)' : 'Ubicación aproximada (opcional)'}
+                </label>
+                <div className="flex gap-2">
+                  <MapPin className="w-5 h-5 text-gray-400 mt-3 flex-shrink-0" />
+                  <input
+                    type="text"
+                    value={alertLocation}
+                    onChange={(e) => setAlertLocation(e.target.value)}
+                    placeholder="Ej: Calle Reforma 123, CDMX"
+                    className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { setShowAlertModal(false); setAlertComment(''); setAlertLocation(''); setGeolocationError(false); }}
+                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSendAlert}
+                disabled={sendingAlert || (!alertLocation.trim() && !geolocationError)}
+                className="flex-1 py-3 px-4 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Enviar Alerta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
