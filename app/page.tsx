@@ -23,6 +23,11 @@ import {
   User,
   Phone,
   FileText,
+  Siren,
+  Unlock,
+  Hand,
+  HeartPulse,
+  BadgeCheck,
 } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '525530541062';
@@ -49,6 +54,7 @@ function Header() {
   const navLinks = [
     { href: '#problema', label: 'Problema' },
     { href: '#solucion', label: 'Solución' },
+    { href: '#alerta-sos', label: 'Alerta SOS' },
     { href: '#como-funciona', label: 'Cómo Funciona' },
     { href: '#beneficios', label: 'Beneficios' },
     { href: '#precio', label: 'Precio' },
@@ -224,6 +230,9 @@ function SolutionSection() {
           <p className="text-lg text-gray-600 leading-relaxed">
             Un paquete con tecnología NFC y QR que cualquier rescatista puede escanear para ver tus datos médicos al instante. Sin app, sin registro, sin internet.
           </p>
+          <p className="text-base text-gray-500 leading-relaxed mt-4">
+            Tu perfil incluye tipo de sangre, alergias, medicamentos, CURP, NSS, clínica del IMSS/UMF, antecedentes heredofamiliares, donación de órganos y foto de identificación. Si no cuentas con seguro médico, te canalizamos automáticamente a la red pública de salud más cercana.
+          </p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-12 max-w-3xl mx-auto">
@@ -249,13 +258,66 @@ function SolutionSection() {
   );
 }
 
+function RescuerAlertSection() {
+  const steps = [
+    {
+      icon: QrCode,
+      title: 'El rescatista escanea',
+      description: 'Cualquier persona que te encuentre, aunque no te conozca, escanea tu NFC o QR.',
+    },
+    {
+      icon: Hand,
+      title: 'Mantiene presionado el botón de alerta',
+      description: 'Confirmación de larga duración: evita alertas falsas o accidentales.',
+    },
+    {
+      icon: MessageCircle,
+      title: 'HelpMe avisa a tus contactos',
+      description: 'Enviamos WhatsApp con tu ubicación en tiempo real desde un número de HelpMe, no del rescatista.',
+    },
+  ];
+
+  return (
+    <section id="alerta-sos" className="py-20 sm:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-2xl mb-8">
+            <Siren className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6">
+            Cualquiera puede alertar a tus contactos, sin dar su número
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            No solo tú recibes avisos: si un rescatista te encuentra, puede notificar a toda tu red de emergencia en segundos con tu ubicación exacta. Disponible en planes Pro y Ultra.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {steps.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="bg-gray-50 border border-gray-100 rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-600 rounded-xl mb-6">
+                <Icon className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
+              <p className="text-gray-600">{description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HowItWorksSection() {
   const steps = [
     {
       number: 1,
       icon: MessageCircle,
       title: 'Escríbenos por WhatsApp',
-      description: 'Escríbenos por WhatsApp y coordina tu entrega en CDMX.',
+      description: 'Escríbenos por WhatsApp y coordina tu entrega en CDMX. Recibes bienvenida e instrucciones automáticas.',
     },
     {
       number: 2,
@@ -361,6 +423,26 @@ function BenefitsSection() {
       icon: MessageCircle,
       title: 'Alertas desde HelpMe, no desde tu celular',
       description: 'Los mensajes de emergencia se envían desde números de HelpMe a tus contactos. El paramédico no necesita dar su número ni usar su WhatsApp.',
+    },
+    {
+      icon: Unlock,
+      title: 'Código de desbloqueo de emergencia',
+      description: 'Si activas el modo privado, tus contactos de confianza tienen un código propio para desbloquear tus datos ante un paramédico. Te avisamos cuando se usa.',
+    },
+    {
+      icon: BadgeCheck,
+      title: 'Contactos verificados',
+      description: 'Confirmamos por WhatsApp que el número de cada contacto de emergencia es real antes de que quede registrado.',
+    },
+    {
+      icon: HeartPulse,
+      title: 'Modo Ruta',
+      description: 'En viajes largos, HelpMe puede enviar alertas automáticas a tus contactos si algo no marcha bien en el camino.',
+    },
+    {
+      icon: Hand,
+      title: 'Sin seguro médico, igual te cubrimos',
+      description: 'Si no tienes aseguradora registrada, canalizamos automáticamente al rescatista hacia la red pública de salud más cercana.',
     },
   ];
 
@@ -618,6 +700,18 @@ function FAQSection() {
       question: '¿Las alertas se envían desde el celular del paramédico?',
       answer: 'No. Las alertas se envían desde números de HelpMe directamente a tus contactos de emergencia. El paramédico solo escanea y presiona "Enviar alerta" — no necesita usar su WhatsApp ni dar su número personal.',
     },
+    {
+      question: '¿Qué pasa si alguien más escanea mi tag y quiere ayudarme?',
+      answer: 'Cualquier persona que te encuentre puede mantener presionado el botón de alerta (evita alertas accidentales) para notificar a todos tus contactos de emergencia con tu ubicación en tiempo real, sin dar su número personal.',
+    },
+    {
+      question: '¿Cómo sé que mis contactos de emergencia van a recibir la alerta?',
+      answer: 'Al registrar un contacto, le enviamos un mensaje de prueba por WhatsApp para confirmar que el número es real y está activo antes de guardarlo.',
+    },
+    {
+      question: '¿Qué pasa si no tengo seguro médico?',
+      answer: 'No hay problema. Si no registras una aseguradora, HelpMe canaliza automáticamente al rescatista hacia la red pública de salud más cercana.',
+    },
   ];
 
   return (
@@ -741,6 +835,7 @@ export default function LandingPage() {
         <HeroSection />
         <ProblemSection />
         <SolutionSection />
+        <RescuerAlertSection />
         <HowItWorksSection />
         <BenefitsSection />
         <PricingSection />

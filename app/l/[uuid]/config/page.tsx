@@ -874,13 +874,14 @@ export default function ConfigPage() {
     }
   }
 
-  function updateMedicalField(field: keyof MedicalData, value: string) {
+  function updateMedicalField<K extends keyof MedicalData>(field: K, value: MedicalData[K]) {
     setMedicalData((prev) => ({ ...prev, [field]: value }));
     if (field === 'userName' || field === 'dob' || field === 'bloodType' || field === 'emergencyPhone') {
+      const errorField = field as 'userName' | 'dob' | 'bloodType' | 'emergencyPhone';
       setErrors((prev) => {
-        if (!prev[field]) return prev;
+        if (!prev[errorField]) return prev;
         const next = { ...prev };
-        delete next[field];
+        delete next[errorField];
         return next;
       });
     }

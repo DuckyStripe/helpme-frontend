@@ -400,6 +400,11 @@ export default function QrViewerPage() {
         <LocationPickerModal
           initialLat={locationPicker.lat}
           initialLng={locationPicker.lng}
+          recipientLabel={
+            data
+              ? `${data.contactCount} contacto${data.contactCount > 1 ? 's' : ''} de emergencia`
+              : 'tus contactos de emergencia'
+          }
           approximate={locationPicker.approximate}
           onConfirm={handleLocationConfirm}
           onCancel={() => setLocationPicker(null)}

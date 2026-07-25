@@ -483,6 +483,10 @@ export const settingsApi = {
   async testOpenwa() {
     return api.post<{ ok: boolean; message: string; status?: string }>('/settings/openwa/test', {});
   },
+
+  async generateOpenwaKey() {
+    return api.post<{ ok: boolean; message: string; apiKey?: string }>('/settings/openwa/generate-key', {});
+  },
 };
 
 export const usersApi = {

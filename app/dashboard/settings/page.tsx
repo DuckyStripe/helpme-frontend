@@ -7,7 +7,7 @@ import { toast } from '@/lib/toast';
 import type { User } from '@/types';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { PageLoader } from '@/components/ui/Skeleton';
-import { MessageCircle, Loader2, Save, Eye, EyeOff, CheckCircle2, Wifi, AlertTriangle } from 'lucide-react';
+import { MessageCircle, Loader2, Save, Eye, EyeOff, CheckCircle2, Wifi, AlertTriangle, KeyRound } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -22,6 +22,7 @@ export default function SettingsPage() {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [generatingKey, setGeneratingKey] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
@@ -96,6 +97,24 @@ export default function SettingsPage() {
       setTestResult({ ok: false, message: err.message || 'No se pudo probar la conexión' });
     } finally {
       setTesting(false);
+    }
+  }
+
+  async function handleGenerateKey() {
+    setGeneratingKey(true);
+    setTestResult(null);
+    try {
+      const result = await settingsApi.generateOpenwaKey();
+      if (result.ok && result.apiKey) {
+        setApiKey(result.apiKey);
+        setTestResult({ ok: true, message: 'Nueva API Key generada. Guárdala inmediatamente antes de cambiar de página.' });
+      } else {
+        setTestResult({ ok: false, message: result.message || 'No se pudo generar la API Key' });
+      }
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message || 'No se pudo generar la API Key' });
+    } finally {
+      setGeneratingKey(false);
     }
   }
 
@@ -185,6 +204,21 @@ export default function SettingsPage() {
                   tabIndex={-1}
                 >
                   {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5">
+                <p className="text-xs text-gray-500">
+                  Obligatoria: OpenWA requiere esta key en cada llamada.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleGenerateKey}
+                  disabled={generatingKey || !hasApiKey}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Generar nueva API Key desde el portal de OpenWA"
+                >
+                  {generatingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
+                  {generatingKey ? 'Generando...' : 'Generar desde portal'}
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1.5">
