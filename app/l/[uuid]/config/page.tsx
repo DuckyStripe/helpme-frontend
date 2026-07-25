@@ -1011,6 +1011,7 @@ export default function ConfigPage() {
     if (field === 'phone') {
       setContactVerified((prev) => {
         if (!prev[index]) return prev;
+        if (prev[index].phone === value) return prev;
         const next = { ...prev };
         delete next[index];
         return next;
@@ -1165,6 +1166,8 @@ export default function ConfigPage() {
 
     const unverified = filledContacts.filter((c) => {
       const v = contactVerified[c.index];
+      const alreadyVerified = c.verified === true && v?.phone === c.phone;
+      if (alreadyVerified) return false;
       return !v || v.phone !== c.phone || v.status !== 'verified';
     });
     if (unverified.length > 0) {
