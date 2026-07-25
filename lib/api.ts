@@ -170,8 +170,8 @@ export const authApi = {
 };
 
 export const tagsApi = {
-  async create(quantity?: number, sellerId?: string, plan?: string) {
-    return api.post<any>('/tags', { quantity: quantity || 1, sellerId, plan });
+  async create(quantity?: number, sellerId?: string, plan?: string, ownerPhone?: string) {
+    return api.post<any>('/tags', { quantity: quantity || 1, sellerId, plan, ownerPhone });
   },
 
   async assign(tagId: string, sellerId: string) {

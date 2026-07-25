@@ -38,6 +38,7 @@ export default function TagsPage() {
   const [createQty, setCreateQty] = useState(10);
   const [createSellerId, setCreateSellerId] = useState('');
   const [createPlan, setCreatePlan] = useState<PlanType>('PRINCIPAL');
+  const [createOwnerPhone, setCreateOwnerPhone] = useState('');
   const [creating, setCreating] = useState(false);
 
   const [showAssign, setShowAssign] = useState(false);
@@ -125,14 +126,26 @@ export default function TagsPage() {
       toast.error('Cantidad debe ser entre 1 y 500');
       return;
     }
+    if (createQty === 1 && createOwnerPhone && !/^\d{10}$/.test(createOwnerPhone)) {
+      toast.error('El teléfono debe tener 10 dígitos');
+      return;
+    }
     setCreating(true);
     try {
-      await tagsApi.create(createQty, createSellerId || undefined, createPlan);
+      const res = await tagsApi.create(createQty, createSellerId || undefined, createPlan, createQty === 1 ? createOwnerPhone : undefined);
       toast.success(`${createQty} tag${createQty > 1 ? 's' : ''} creado${createQty > 1 ? 's' : ''} exitosamente`);
+      if (res.data?.whatsappStatus === 'sent') {
+        toast.success(res.data.whatsappMessage);
+      } else if (res.data?.whatsappStatus === 'failed') {
+        toast.error(`No se enviaron instrucciones por WhatsApp: ${res.data.whatsappMessage}`);
+      } else if (createQty === 1 && !createOwnerPhone) {
+        toast.info('No se enviaron instrucciones porque no se proporcionó un teléfono de destinatario.');
+      }
       setShowCreate(false);
       setCreateQty(10);
       setCreateSellerId('');
       setCreatePlan('PRINCIPAL');
+      setCreateOwnerPhone('');
       loadTags();
     } catch (err: any) {
       toast.error(err.message || 'Error al crear tags');
@@ -531,6 +544,22 @@ export default function TagsPage() {
             />
             <p className="text-xs text-gray-500 mt-1">Máximo 500 tags por lote</p>
           </div>
+          {createQty === 1 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Teléfono del destinatario <span className="text-gray-500">(opcional)</span>
+              </label>
+              <input
+                type="text"
+                maxLength={10}
+                placeholder="10 dígitos, ej: 5512345678"
+                value={createOwnerPhone}
+                onChange={(e) => setCreateOwnerPhone(e.target.value.replace(/\D/g, ''))}
+                className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              />
+              <p className="text-xs text-gray-500 mt-1">Se enviarán instrucciones de configuración por WhatsApp. Este número NO se guarda en el sistema.</p>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Asignar a</label>
             <select
