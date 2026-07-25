@@ -1412,6 +1412,7 @@ export default function ConfigPage() {
   }
 
   if (pinToken && formTransition && editMode) {
+    const limits = getPlanLimits(tagPlan);
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50 p-4 sm:p-6">
         <div className="max-w-lg mx-auto">
@@ -3235,6 +3236,16 @@ export default function ConfigPage() {
                     </>
                   )}
                 </button>
+                {limits.hasPrivateMode && (
+                  <button
+                    type="button"
+                    onClick={() => setShowChangePinModal(true)}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Cambiar PIN
+                  </button>
+                )}
                 {isActive && (
                   <button
                     type="button"
@@ -3246,79 +3257,81 @@ export default function ConfigPage() {
                   </button>
                 )}
               </div>
+
+              {showChangePinModal && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowChangePinModal(false)}>
+                  <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+                    <div className="text-center mb-6">
+                      <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-2xl mb-4">
+                        <Lock className="w-7 h-7 text-gray-600" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900">Cambiar PIN</h3>
+                      <p className="text-sm text-gray-500 mt-2">Ingresa tu PIN actual y el nuevo PIN</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={changePinCurrent}
+                        onChange={(e) => { setChangePinCurrent(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
+                        placeholder="PIN actual"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                      />
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={changePinNew}
+                        onChange={(e) => { setChangePinNew(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
+                        placeholder="Nuevo PIN"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                      />
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={changePinConfirm}
+                        onChange={(e) => { setChangePinConfirm(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
+                        placeholder="Confirmar nuevo PIN"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                      />
+                    </div>
+
+                    {changePinError && (
+                      <div className="flex items-center gap-1.5 text-red-600 text-xs font-medium mt-3">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                        {changePinError}
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => { setShowChangePinModal(false); setChangePinCurrent(''); setChangePinNew(''); setChangePinConfirm(''); setChangePinError(''); }}
+                        className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleChangePin}
+                        disabled={changingPin}
+                        className="flex-1 py-3 px-4 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+                      >
+                        {changingPin ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cambiar'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </form>
           </div>
         </div>
       </div>
     );
   }
-
-  if (showChangePinModal) return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowChangePinModal(false)}>
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-2xl mb-4">
-            <Lock className="w-7 h-7 text-gray-600" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900">Cambiar PIN</h3>
-          <p className="text-sm text-gray-500 mt-2">Ingresa tu PIN actual y el nuevo PIN</p>
-        </div>
-
-        <div className="space-y-3">
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={6}
-            value={changePinCurrent}
-            onChange={(e) => { setChangePinCurrent(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
-            placeholder="PIN actual"
-            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all font-mono text-center text-lg tracking-widest"
-          />
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={6}
-            value={changePinNew}
-            onChange={(e) => { setChangePinNew(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
-            placeholder="Nuevo PIN"
-            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all font-mono text-center text-lg tracking-widest"
-          />
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={6}
-            value={changePinConfirm}
-            onChange={(e) => { setChangePinConfirm(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
-            placeholder="Confirmar nuevo PIN"
-            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all font-mono text-center text-lg tracking-widest"
-          />
-        </div>
-
-        {changePinError && (
-          <div className="flex items-center gap-1.5 text-red-600 text-xs font-medium mt-3">
-            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-            {changePinError}
-          </div>
-        )}
-
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={() => { setShowChangePinModal(false); setChangePinCurrent(''); setChangePinNew(''); setChangePinConfirm(''); setChangePinError(''); }}
-            className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleChangePin}
-            disabled={changingPin}
-            className="flex-1 py-3 px-4 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {changingPin ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cambiar'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   // PIN Screen
   return (
