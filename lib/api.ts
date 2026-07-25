@@ -170,8 +170,8 @@ export const authApi = {
 };
 
 export const tagsApi = {
-  async create(quantity?: number, sellerId?: string) {
-    return api.post<any>('/tags', { quantity: quantity || 1, sellerId });
+  async create(quantity?: number, sellerId?: string, plan?: string) {
+    return api.post<any>('/tags', { quantity: quantity || 1, sellerId, plan });
   },
 
   async assign(tagId: string, sellerId: string) {
@@ -255,6 +255,10 @@ export const tagsApi = {
 
   async validateUnlockCode(uuid: string, code: string) {
     return api.post<any>(`/tags/${uuid}/unlock`, { code });
+  },
+
+  async renewPlan(tagId: string, plan: string) {
+    return api.post<any>(`/tags/${tagId}/renew`, { plan });
   },
 };
 
@@ -385,6 +389,70 @@ export const pinApi = {
     const json = await res.json();
     if (!res.ok) throw new Error(json.error?.message || 'Request failed');
     return json.data as { success: boolean };
+  },
+
+  async getOwnerScans(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/owner/scans`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { scans: any[] };
+  },
+
+  async getOwnerAlerts(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/owner/alerts`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { alerts: any[] };
+  },
+
+  async startRoute(uuid: string, token: string, origin: string, destination: string, estimatedMinutes: number, bufferMinutes?: number) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/route/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ origin, destination, estimatedMinutes, bufferMinutes }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data;
+  },
+
+  async confirmRoute(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/route/confirm`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { success: boolean };
+  },
+
+  async cancelRoute(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/route/cancel`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { success: boolean };
+  },
+
+  async getActiveRoute(uuid: string, token: string) {
+    const res = await fetch(`${API_BASE}/tags/${uuid}/route/active`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || 'Request failed');
+    return json.data as { activeRoute: any | null };
   },
 };
 

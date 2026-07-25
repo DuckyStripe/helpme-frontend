@@ -393,46 +393,156 @@ function BenefitsSection() {
 }
 
 function PricingSection() {
+  const plans = [
+    {
+      name: 'Principal',
+      price: '$149',
+      period: 'MXN',
+      hardware: 'Digital',
+      hardwareDesc: 'Sin NFC físico',
+      cta: 'Pedir Plan Principal',
+      popular: false,
+      features: [
+        { text: 'Perfil médico completo', included: true },
+        { text: 'Datos hereditarios e implantes', included: true },
+        { text: '1 contacto de emergencia', included: true },
+        { text: 'Botón SOS con GPS + WhatsApp', included: true },
+        { text: 'Vista pública para rescatistas', included: true },
+        { text: 'QR visible en pantalla', included: true },
+        { text: 'Tarjeta médica visible', included: true },
+        { text: 'Compartir perfil por WhatsApp', included: true },
+        { text: 'Instalable como PWA', included: true },
+        { text: 'NFC físico', included: false },
+        { text: 'Modo privado con PIN', included: false },
+        { text: 'Historial de alertas', included: false },
+        { text: 'Descarga de QR/tarjeta', included: false },
+      ],
+    },
+    {
+      name: 'Pro',
+      price: '$449',
+      period: 'MXN',
+      hardware: '1 NFC + 1 QR',
+      hardwareDesc: 'Tag físico + sticker',
+      cta: 'Pedir Plan Pro',
+      popular: true,
+      features: [
+        { text: 'Todo lo del Principal', included: true },
+        { text: 'Hasta 3 contactos de emergencia', included: true },
+        { text: '1 tag NFC físico', included: true },
+        { text: '1 sticker QR de respaldo', included: true },
+        { text: 'Modo privado con PIN de 6 dígitos', included: true },
+        { text: 'Alerta desde rescatista', included: true },
+        { text: 'Historial de alertas', included: true },
+        { text: 'Historial de escaneos', included: true },
+        { text: 'Notificación al escanear', included: true },
+        { text: 'QR descargable (PNG)', included: true },
+        { text: 'Tarjeta médica descargable', included: true },
+      ],
+    },
+    {
+      name: 'Ultra',
+      price: '$699',
+      period: 'MXN',
+      hardware: '4 NFC + 4 QR',
+      hardwareDesc: 'Máxima protección',
+      cta: 'Pedir Plan Ultra',
+      popular: false,
+      features: [
+        { text: 'Todo lo del Pro', included: true },
+        { text: 'Hasta 5 contactos de emergencia', included: true },
+        { text: '4 tags NFC + 4 stickers QR', included: true },
+        { text: 'Hasta 3 vehículos con aseguradora', included: true },
+        { text: 'Modo Ruta con alertas automáticas', included: true },
+        { text: 'Recordatorio semestral de datos', included: true },
+        { text: 'Reporte mensual de actividad', included: true },
+      ],
+    },
+  ];
+
   return (
     <section id="precio" className="py-20 sm:py-28 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-            Todo lo que necesitas en un solo paquete
+            Elige tu nivel de protección
           </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Todos los planes incluyen perfil médico cifrado y vista para rescatistas.
+          </p>
         </div>
 
-        <div className="max-w-lg mx-auto">
-          <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-3xl p-8 sm:p-10 text-white shadow-2xl shadow-red-600/30">
-            <div className="space-y-4 mb-8">
-              {[
-                'Tarjeta NFC con QR impreso',
-                'Pegatina NFC para casco',
-                'Sticker de ubicación',
-                'Tarjeta de instrucciones',
-                'Activación y soporte incluido',
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-red-200 flex-shrink-0" />
-                  <span className="font-medium">{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-4 bg-white text-red-600 font-bold text-center text-lg rounded-xl hover:bg-gray-100 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/50"
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          {plans.map((plan) => (
+            <div
+              key={plan.name}
+              className={`relative rounded-3xl p-8 flex flex-col ${
+                plan.popular
+                  ? 'bg-gradient-to-br from-red-600 to-red-700 text-white shadow-2xl shadow-red-600/30 scale-105 border-2 border-red-500'
+                  : 'bg-white border border-gray-200 shadow-lg'
+              }`}
             >
-              Pedir por WhatsApp
-            </a>
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide">
+                    Más popular
+                  </span>
+                </div>
+              )}
 
-            <p className="mt-6 text-center text-sm text-red-200">
-              Entregas personales en CDMX · Coordinamos por WhatsApp
-            </p>
-          </div>
+              <div className="mb-6">
+                <h3 className={`text-xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
+                  Plan {plan.name}
+                </h3>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-4xl font-extrabold ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
+                    {plan.price}
+                  </span>
+                  <span className={`text-sm ${plan.popular ? 'text-red-200' : 'text-gray-500'}`}>
+                    {plan.period}
+                  </span>
+                </div>
+                <div className={`mt-2 text-sm font-medium ${plan.popular ? 'text-red-200' : 'text-gray-600'}`}>
+                  {plan.hardware} · {plan.hardwareDesc}
+                </div>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-grow">
+                {plan.features.map((feature) => (
+                  <li key={feature.text} className="flex items-start gap-2">
+                    {feature.included ? (
+                      <CheckCircle2 className={`w-5 h-5 flex-shrink-0 mt-0.5 ${plan.popular ? 'text-red-200' : 'text-emerald-500'}`} />
+                    ) : (
+                      <svg className={`w-5 h-5 flex-shrink-0 mt-0.5 ${plan.popular ? 'text-red-300' : 'text-gray-300'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
+                    <span className={`text-sm ${plan.popular ? 'text-red-100' : 'text-gray-700'} ${!feature.included ? 'opacity-50' : ''}`}>
+                      {feature.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, quiero el Plan ${plan.name} 🏍️`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`block w-full py-3.5 font-bold text-center text-lg rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 ${
+                  plan.popular
+                    ? 'bg-white text-red-600 hover:bg-gray-100 hover:scale-105 focus:ring-white/50'
+                    : 'bg-red-600 text-white hover:bg-red-700 hover:scale-105 focus:ring-red-400'
+                }`}
+              >
+                {plan.cta}
+              </a>
+            </div>
+          ))}
         </div>
+
+        <p className="mt-12 text-center text-sm text-gray-500">
+          Entregas personales en CDMX · Coordinamos por WhatsApp
+        </p>
       </div>
     </section>
   );

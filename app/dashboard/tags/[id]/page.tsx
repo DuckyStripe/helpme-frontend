@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { authApi, tagsApi, clearTokens } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { User, TagStatus, EmergencyContact } from '@/types';
+import { type PlanType, PLAN_LABELS, PLAN_COLORS } from '@/lib/plans';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { PageLoader } from '@/components/ui/Skeleton';
@@ -104,6 +105,16 @@ export default function TagDetailPage() {
       loadData();
     } catch (err: any) {
       toast.error(err.message || 'Error al desbloquear PIN');
+    }
+  }
+
+  async function handleRenew(newPlan: PlanType) {
+    try {
+      await tagsApi.renewPlan(id, newPlan);
+      toast.success(`Plan actualizado a ${PLAN_LABELS[newPlan]}`);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Error al renovar plan');
     }
   }
 
@@ -303,6 +314,75 @@ export default function TagDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Plan Info */}
+      {isAdmin && (
+        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 mb-6">
+          <h2 className="text-sm font-medium text-gray-400 mb-4">Plan y Vencimiento</h2>
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Plan actual</p>
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
+                {PLAN_LABELS[tag.plan as PlanType] || tag.plan || 'N/A'}
+              </span>
+            </div>
+            {tag.previousPlan && (
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Plan anterior</p>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-500/10 text-amber-400">
+                  {PLAN_LABELS[tag.previousPlan as PlanType] || tag.previousPlan} (degradado)
+                </span>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Vencimiento</p>
+              <p className="text-sm text-gray-200">
+                {tag.expiresAt
+                  ? new Date(tag.expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
+                  : 'Sin activar'}
+              </p>
+            </div>
+            {tag.expiresAt && (() => {
+              const now = new Date();
+              const exp = new Date(tag.expiresAt);
+              const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              return (
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Estado</p>
+                  <p className={`text-sm font-medium ${diffDays > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {diffDays > 0 ? `${diffDays} días restantes` : 'Vencido'}
+                  </p>
+                </div>
+              );
+            })()}
+          </div>
+
+          <div className="border-t border-gray-700/50 pt-4 mt-4">
+            <p className="text-xs text-gray-500 mb-3">Renovar / Cambiar plan</p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <button
+                onClick={() => handleRenew('PRINCIPAL')}
+                className="px-4 py-2.5 bg-gray-700/50 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
+              >
+                Principal — $99/año
+              </button>
+              <button
+                onClick={() => handleRenew('PRO')}
+                className="px-4 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-sm font-medium rounded-lg transition-colors"
+              >
+                Pro — $299/año
+              </button>
+              <button
+                onClick={() => handleRenew('ULTRA')}
+                className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-medium rounded-lg transition-colors"
+              >
+                Ultra — $449/año
+              </button>
+            </div>
+            <p className="text-xs text-gray-600 mt-2">El nuevo año corre desde la fecha de renovación. Si el tag estaba degradado, se restaura el plan original.</p>
+          </div>
+        </div>
+      )}
 
       {/* Scan History - solo admin */}
       {isAdmin && (

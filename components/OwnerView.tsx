@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { calculateAge } from '@/lib/utils';
 import type { MedicalData, Contact, Vehicle } from '@/app/l/[uuid]/config/page';
+import { getPlanLimits, type PlanType, PLAN_LABELS } from '@/lib/plans';
+import { pinApi } from '@/lib/api';
+import { toast } from '@/lib/toast';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact as ContactIcon,
   Phone, Stethoscope, Pill, User, Calendar, Printer, Download, Pencil,
@@ -34,9 +37,14 @@ interface OwnerViewProps {
   onEdit: () => void;
   onInstallApp: () => void;
   onDownloadImage: () => Promise<void>;
+  tagPlan?: PlanType;
+  tagUuid?: string;
+  previousPlan?: PlanType | null;
+  expiresAt?: string | null;
 }
 
-export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, hasVerifiedContacts = false, onSendAlert, sendingAlert = false, onChangePin, alerts = [], onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
+export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, hasVerifiedContacts = false, onSendAlert, sendingAlert = false, onChangePin, alerts = [], onEdit, onInstallApp, onDownloadImage, tagPlan = 'PRINCIPAL', tagUuid, previousPlan, expiresAt }: OwnerViewProps) {
+  const limits = getPlanLimits(tagPlan);
   const age = calculateAge(md.dob);
   const hasAllergies = md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna';
   const hasConditions = md.conditions && md.conditions.trim().length > 0;
@@ -59,6 +67,79 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
   const [geolocationError, setGeolocationError] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [showRouteModal, setShowRouteModal] = useState(false);
+  const [routeOrigin, setRouteOrigin] = useState('');
+  const [routeDestination, setRouteDestination] = useState('');
+  const [routeMinutes, setRouteMinutes] = useState(30);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [activeRoute, setActiveRoute] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (limits.hasRouteMode && tagUuid) loadActiveRoute();
+  }, [limits.hasRouteMode, tagUuid]);
+
+  async function loadActiveRoute() {
+    if (!tagUuid) return;
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('pin_token') : null;
+      if (!stored) return;
+      const result = await pinApi.getActiveRoute(tagUuid, stored);
+      setActiveRoute(result.activeRoute);
+    } catch { /* not active */ }
+  }
+
+  async function handleStartRoute() {
+    if (!routeOrigin.trim() || !routeDestination.trim() || !tagUuid) return;
+    setRouteLoading(true);
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('pin_token') : null;
+      if (!stored) { toast.error('Sesión expirada'); return; }
+      await pinApi.startRoute(tagUuid, stored, routeOrigin, routeDestination, routeMinutes);
+      toast.success('Ruta iniciada. Tus contactos han sido notificados.');
+      setShowRouteModal(false);
+      setRouteOrigin('');
+      setRouteDestination('');
+      setRouteMinutes(30);
+      await loadActiveRoute();
+    } catch (err: any) {
+      toast.error(err.message || 'Error al iniciar ruta');
+    } finally {
+      setRouteLoading(false);
+    }
+  }
+
+  async function handleConfirmRoute() {
+    if (!tagUuid) return;
+    setRouteLoading(true);
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('pin_token') : null;
+      if (!stored) { toast.error('Sesión expirada'); return; }
+      await pinApi.confirmRoute(tagUuid, stored);
+      toast.success('Llegada confirmada. Tus contactos han sido notificados.');
+      setActiveRoute(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Error al confirmar llegada');
+    } finally {
+      setRouteLoading(false);
+    }
+  }
+
+  async function handleCancelRoute() {
+    if (!tagUuid) return;
+    setRouteLoading(true);
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('pin_token') : null;
+      if (!stored) { toast.error('Sesión expirada'); return; }
+      await pinApi.cancelRoute(tagUuid, stored);
+      toast.success('Ruta cancelada');
+      setActiveRoute(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Error al cancelar ruta');
+    } finally {
+      setRouteLoading(false);
+    }
+  }
 
   async function handleDownload() {
     setDownloading(true);
@@ -173,6 +254,39 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
               </div>
             </div>
             <div className="no-print flex items-center gap-2">
+              {tagUuid && (
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/l/${tagUuid}`;
+                    const text = `Mira mi perfil de emergencia: ${url}`;
+                    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                    try {
+                      window.open(waUrl, '_blank');
+                    } catch {
+                      navigator.clipboard.writeText(text).then(() => {
+                        toast.success('Link copiado al portapapeles');
+                      }).catch(() => {
+                        toast.error('No se pudo compartir');
+                      });
+                    }
+                  }}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
+                  aria-label="Compartir perfil por WhatsApp"
+                  title="Compartir perfil"
+                >
+                  <Phone className="w-5 h-5" />
+                </button>
+              )}
+              {tagUuid && (
+                <button
+                  onClick={() => window.open(`/l/${tagUuid}`, '_blank')}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
+                  aria-label="Vista previa del rescatista"
+                  title="Vista previa"
+                >
+                  <Eye className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={onInstallApp}
                 className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95"
@@ -184,7 +298,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95 disabled:opacity-60"
+                className={`p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors active:scale-95 disabled:opacity-60 ${!limits.hasDownloads ? 'hidden' : ''}`}
                 aria-label="Descargar imagen de mi ficha"
                 title="Descargar imagen"
               >
@@ -209,7 +323,25 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
             </div>
           </div>
 
-          {onTogglePrivacy && (
+          {previousPlan && (
+            <div className="mb-3 bg-amber-500/20 backdrop-blur-sm border border-amber-400/30 rounded-xl p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-300 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-amber-200">Plan degradado</p>
+                  <p className="text-xs text-amber-300/80 mt-0.5">
+                    Tu plan {PLAN_LABELS[previousPlan]} venció. Ahora tienes funciones del plan Principal.
+                    {expiresAt && ` Venció el ${new Date(expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}.`}
+                  </p>
+                  <p className="text-xs text-amber-200 mt-1 font-medium">
+                    Renueva para recuperar todas las funciones de {PLAN_LABELS[previousPlan]}.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {onTogglePrivacy && limits.hasPrivateMode && (
             <div className="mb-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {userDisabled ? (
@@ -541,7 +673,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
           </section>
         )}
 
-        {vehicles.length > 0 && (
+        {limits.hasVehicles && vehicles.length > 0 && (
           <section className="px-5 pt-5 pb-5">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Car className="w-4 h-4" />
@@ -615,7 +747,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
           </section>
         )}
 
-        {alerts.length > 0 && (
+        {limits.hasAlertHistory && alerts.length > 0 && (
           <section className="px-5 pt-5 pb-5">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Siren className="w-4 h-4" />
@@ -709,7 +841,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
               <Pencil className="w-4 h-4" />
               <span>Editar mis Datos</span>
             </button>
-            {onChangePin && (
+            {onChangePin && limits.hasPrivateMode && (
               <button
                 onClick={onChangePin}
                 className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3.5 px-4 rounded-xl transition-colors min-h-[48px]"
@@ -720,6 +852,49 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
             )}
           </div>
         </section>
+
+        {limits.hasRouteMode && (
+          <section className="px-5 pb-5 no-print">
+            {activeRoute ? (
+              <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-emerald-800">Ruta Activa</p>
+                    <p className="text-xs text-emerald-600">{activeRoute.origin} → {activeRoute.destination}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleConfirmRoute}
+                    disabled={routeLoading}
+                    className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors disabled:opacity-50 text-sm"
+                  >
+                    {routeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                    Confirmar Llegada
+                  </button>
+                  <button
+                    onClick={handleCancelRoute}
+                    disabled={routeLoading}
+                    className="flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 px-4 rounded-xl transition-colors disabled:opacity-50 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowRouteModal(true)}
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors shadow-lg shadow-blue-600/20 min-h-[48px]"
+              >
+                <MapPin className="w-5 h-5" />
+                Modo Ruta
+              </button>
+            )}
+          </section>
+        )}
 
         <footer className="bg-gray-50 border-t border-gray-200 p-5 flex flex-col items-center gap-2 text-gray-500">
           <p className="text-xs font-medium">Esta es tu ficha, tal como la verá quien te asista en una emergencia.</p>
@@ -780,6 +955,72 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
               >
                 {sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Enviar Alerta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRouteModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowRouteModal(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-2xl mb-4">
+                <MapPin className="w-7 h-7 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Modo Ruta</h3>
+              <p className="text-sm text-gray-500 mt-2">Tus contactos serán notificados cuando inicies y confirmes tu llegada.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Origen</label>
+                <input
+                  type="text"
+                  value={routeOrigin}
+                  onChange={(e) => setRouteOrigin(e.target.value)}
+                  placeholder="Ej: Casa, Oficina..."
+                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                <input
+                  type="text"
+                  value={routeDestination}
+                  onChange={(e) => setRouteDestination(e.target.value)}
+                  placeholder="Ej: Casa, Gimnasio..."
+                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo estimado (minutos)</label>
+                <input
+                  type="number"
+                  min={5}
+                  max={480}
+                  value={routeMinutes}
+                  onChange={(e) => setRouteMinutes(parseInt(e.target.value) || 30)}
+                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                />
+                <p className="text-xs text-gray-400 mt-1">Se agregará un buffer de ±10 minutos para la alerta automática</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowRouteModal(false)}
+                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleStartRoute}
+                disabled={routeLoading || !routeOrigin.trim() || !routeDestination.trim()}
+                className="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {routeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Iniciar Ruta
               </button>
             </div>
           </div>

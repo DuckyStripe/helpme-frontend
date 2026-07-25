@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { tagsApi, scanApi } from '@/lib/api';
 import { calculateAge } from '@/lib/utils';
+import { getPlanLimits, type PlanType } from '@/lib/plans';
 import LocationPickerModal from '@/components/LocationPickerModal';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
@@ -22,6 +23,7 @@ const DEFAULT_MAP_CENTER = { lat: 19.4326, lng: -99.1332 };
 
 interface ViewerData {
   uuid: string;
+  plan?: PlanType;
   status: string;
   userDisabled?: boolean;
   viewCount: number;
@@ -887,12 +889,14 @@ export default function ViewerPage() {
         )}
 
         {/* BOTONES DE ACCIÓN */}
-        <section className="px-5 pt-5 space-y-3 no-print">
-          {data.contacts.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                Enviar Alerta por WhatsApp
-              </p>
+        {(() => {
+          const limits = getPlanLimits(data.plan || 'PRINCIPAL');
+          return limits.hasRescuerAlert && data.contacts.length > 0 && (
+            <section className="px-5 pt-5 space-y-3 no-print">
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  Enviar Alerta por WhatsApp
+                </p>
               <button
                 onClick={handleWhatsAppAlert}
                 className="w-full flex items-center justify-between gap-3 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
@@ -909,9 +913,9 @@ export default function ViewerPage() {
                 <Phone className="w-5 h-5" />
               </button>
             </div>
-          )}
-
-        </section>
+            </section>
+          );
+        })()}
 
         {/* FOOTER */}
         <footer className="bg-gray-50 border-t border-gray-200 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500">

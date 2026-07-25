@@ -1,25 +1,40 @@
 {
-  "name": "CuidaMe - Ficha Médica de Emergencia",
-  "short_name": "CuidaMe",
-  "description": "Ficha médica digital de emergencia para motociclistas",
-  "theme_color": "#DC2626",
-  "background_color": "#ffffff",
+  "name": "HelpMe - Identificación Médica de Emergencia",
+  "short_name": "HelpMe",
+  "description": "Lleva tus datos médicos siempre contigo. Sin app. Sin registro. Solo escanea.",
+  "start_url": "/dashboard",
   "display": "standalone",
-  "orientation": "portrait",
-  "start_url": "/",
-  "scope": "/",
+  "background_color": "#0a0a0a",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/icons/icon-192.svg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/icons/icon-512.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mi Ficha SOS",
+      "short_name": "SOS",
+      "description": "Abrir mi ficha médica de emergencia",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icons/icon-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml",
+          "purpose": "any"
+        }
+      ]
     }
   ]
 }

@@ -4,10 +4,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { pinApi, insurersApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
+import { getPlanLimits, type PlanType } from '@/lib/plans';
 import {
   Shield, Lock, Activity, Plus, Trash2, Save, CheckCircle, Loader2, AlertTriangle,
   User, FileText, Eye, EyeOff, ChevronDown, ChevronUp,
-  Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle, Car, Phone, ShieldOff,
+  Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle, Car, Phone,
 } from 'lucide-react';
 import OwnerView from '@/components/OwnerView';
 
@@ -38,6 +39,7 @@ export interface Vehicle {
 }
 
 export interface MedicalData {
+  ownerPhone: string;
   userName: string;
   dob: string;
   gender: string;
@@ -63,6 +65,7 @@ export interface MedicalData {
 }
 
 const emptyMedicalData: MedicalData = {
+  ownerPhone: '',
   userName: '',
   dob: '',
   gender: '',
@@ -436,7 +439,7 @@ export default function ConfigPage() {
   const [cochlearImplantDetails, setCochlearImplantDetails] = useState('');
   const [hasOcularProsthesis, setHasOcularProsthesis] = useState<boolean | null>(null);
   const [ocularProsthesisDetails, setOcularProsthesisDetails] = useState('');
-  const [errors, setErrors] = useState<Partial<Record<'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<'ownerPhone' | 'userName' | 'dob' | 'bloodType' | 'emergencyPhone', string>>>({});
   const [contactErrors, setContactErrors] = useState<Record<number, string>>({});
   const [contactVerified, setContactVerified] = useState<
     Record<number, { phone: string; status: 'verifying' | 'success' | 'error' | 'verified'; error?: string; cooldownUntil?: number }>
@@ -453,6 +456,9 @@ export default function ConfigPage() {
   const [insurers, setInsurers] = useState<Array<{ id: string; name: string; phone: string }>>([]);
   const [userDisabled, setUserDisabled] = useState(false);
   const [togglingPrivacy, setTogglingPrivacy] = useState(false);
+  const [tagPlan, setTagPlan] = useState<PlanType>('PRINCIPAL');
+  const [previousPlan, setPreviousPlan] = useState<PlanType | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   const personalSectionRef = useRef<HTMLDivElement>(null);
   const userNameRef = useRef<HTMLInputElement>(null);
@@ -521,6 +527,9 @@ export default function ConfigPage() {
       const json = await res.json();
       if (res.ok) {
         setStatus(json.data.status);
+        if (json.data.plan) setTagPlan(json.data.plan);
+        if (json.data.previousPlan) setPreviousPlan(json.data.previousPlan);
+        if (json.data.expiresAt) setExpiresAt(json.data.expiresAt);
         if (json.data.status === 'VIRGIN') {
           setPinMode('create');
         } else {
@@ -674,6 +683,10 @@ export default function ConfigPage() {
       toast.success('PIN creado exitosamente');
       const loginRes = await pinApi.pinLogin(uuid, pin);
       setPinToken(loginRes.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('pin_token', loginRes.token);
+        localStorage.setItem('last_active_tag_uuid', uuid);
+      }
       setStatus(loginRes.status as TagStatus);
       await loadConfigData(loginRes.token);
       setEditMode(true);
@@ -696,6 +709,10 @@ export default function ConfigPage() {
     try {
       const res = await pinApi.pinLogin(uuid, pin);
       setPinToken(res.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('pin_token', res.token);
+        localStorage.setItem('last_active_tag_uuid', uuid);
+      }
       setStatus(res.status as TagStatus);
       const hasData = await loadConfigData(res.token);
       setEditMode(!hasData);
@@ -862,11 +879,17 @@ export default function ConfigPage() {
   }
 
   function addContact() {
+    const limits = getPlanLimits(tagPlan);
+    if (contacts.length >= limits.maxContacts) {
+      toast.error(`Tu plan permite máximo ${limits.maxContacts} contacto${limits.maxContacts > 1 ? 's' : ''}`);
+      return;
+    }
     setContacts((prev) => [...prev, { name: '', relationship: '', phone: '' }]);
   }
 
   function addVehicle() {
-    if (vehicles.length >= 3) return;
+    const limits = getPlanLimits(tagPlan);
+    if (vehicles.length >= limits.maxVehicles) return;
     setVehicles((prev) => [...prev, { type: 'AUTO', brand: '', model: '', year: '', color: '', plate: '', insurerId: '', policyNumber: '', cylinder: '', bikeType: '' }]);
   }
 
@@ -1097,6 +1120,7 @@ export default function ConfigPage() {
     e.preventDefault();
 
     const newErrors: typeof errors = {};
+    if (!medicalData.ownerPhone.trim() || medicalData.ownerPhone.length !== 10) newErrors.ownerPhone = 'Ingresa tu numero de 10 digitos';
     if (!medicalData.userName.trim()) newErrors.userName = 'Ingresa el nombre completo';
     if (!medicalData.dob) newErrors.dob = 'Selecciona la fecha de nacimiento';
     if (!medicalData.bloodType) newErrors.bloodType = 'Selecciona el tipo de sangre';
@@ -1305,16 +1329,20 @@ export default function ConfigPage() {
         contacts={contacts}
         vehicles={vehicles}
         userDisabled={userDisabled}
-        onTogglePrivacy={handleTogglePrivacy}
+        onTogglePrivacy={limits.hasPrivateMode ? handleTogglePrivacy : undefined}
         togglingPrivacy={togglingPrivacy}
         hasVerifiedContacts={verifiedContacts.length > 0}
-        onSendAlert={handleSendAlert}
+        onSendAlert={limits.hasRescuerAlert ? handleSendAlert : undefined}
         sendingAlert={sendingAlert}
-        onChangePin={() => setShowChangePinModal(true)}
-        alerts={alerts}
+        onChangePin={limits.hasPrivateMode ? () => setShowChangePinModal(true) : undefined}
+        alerts={limits.hasAlertHistory ? alerts : []}
         onEdit={() => setEditMode(true)}
         onInstallApp={handleInstallApp}
         onDownloadImage={handleDownloadImage}
+        tagPlan={tagPlan}
+        tagUuid={uuid}
+        previousPlan={previousPlan}
+        expiresAt={expiresAt}
       />
     );
   }
@@ -1405,6 +1433,18 @@ export default function ConfigPage() {
                       )}
                     </div>
                   </div>
+
+                  <InputField
+                    label="Mi Telefono"
+                    required
+                    type="tel"
+                    inputMode="numeric"
+                    value={medicalData.ownerPhone}
+                    onChange={(e) => updateMedicalField('ownerPhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="10 digitos de tu numero personal"
+                    maxLength={10}
+                    error={errors.ownerPhone}
+                  />
 
                   <InputField
                     ref={userNameRef}
@@ -2391,17 +2431,33 @@ export default function ConfigPage() {
                       </div>
                     </div>
                   ))}
-                  <button
-                    type="button"
-                    onClick={addContact}
-                    className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Agregar contacto
-                  </button>
+                  {(() => {
+                    const limits = getPlanLimits(tagPlan);
+                    if (contacts.length < limits.maxContacts) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={addContact}
+                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Agregar contacto
+                        </button>
+                      );
+                    }
+                    return (
+                      <p className="text-center text-xs text-gray-400 py-2">
+                        Límite de {limits.maxContacts} contacto{limits.maxContacts > 1 ? 's' : ''} alcanzado
+                      </p>
+                    );
+                  })()}
                 </div>
               </SectionCard>
 
+              {(() => {
+                const limits = getPlanLimits(tagPlan);
+                if (!limits.hasVehicles) return null;
+                return (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <label className="flex items-center justify-between p-4 sm:p-5 cursor-pointer hover:bg-gray-50/50 transition-colors">
                   <div className="flex items-center gap-3">
@@ -2580,19 +2636,24 @@ export default function ConfigPage() {
                       </div>
                     ))}
 
-                    {vehicles.length < 3 && (
-                      <button
-                        type="button"
-                        onClick={addVehicle}
-                        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-all min-h-[44px]"
-                      >
-                        <Plus className="w-4 h-4" />
-                        {vehicles.length === 0 ? 'Agregar mi primer vehículo' : 'Agregar otro vehículo'}
-                      </button>
-                    )}
+                    {(() => {
+                      const limits = getPlanLimits(tagPlan);
+                      return vehicles.length < limits.maxVehicles && (
+                        <button
+                          type="button"
+                          onClick={addVehicle}
+                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-all min-h-[44px]"
+                        >
+                          <Plus className="w-4 h-4" />
+                          {vehicles.length === 0 ? 'Agregar mi primer vehículo' : 'Agregar otro vehículo'}
+                        </button>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
+                );
+              })()}
 
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
                 <label className="flex items-start gap-3 cursor-pointer">
@@ -2678,7 +2739,7 @@ export default function ConfigPage() {
     );
   }
 
-  {showChangePinModal && (
+  if (showChangePinModal) return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowChangePinModal(false)}>
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
         <div className="text-center mb-6">
@@ -2743,7 +2804,7 @@ export default function ConfigPage() {
         </div>
       </div>
     </div>
-  )}
+  );
 
   // PIN Screen
   return (

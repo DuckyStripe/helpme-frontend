@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authApi, tagsApi, usersApi, clearTokens } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { User, TagStatus } from '@/types';
+import { type PlanType, PLAN_LABELS, PLAN_COLORS } from '@/lib/plans';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatusBadge from '@/components/ui/StatusBadge';
 import FilterBar from '@/components/ui/FilterBar';
@@ -37,6 +38,7 @@ export default function TagsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [createQty, setCreateQty] = useState(10);
   const [createSellerId, setCreateSellerId] = useState('');
+  const [createPlan, setCreatePlan] = useState<PlanType>('PRINCIPAL');
   const [creating, setCreating] = useState(false);
 
   // Assign modal
@@ -121,11 +123,12 @@ export default function TagsPage() {
     }
     setCreating(true);
     try {
-      await tagsApi.create(createQty, createSellerId || undefined);
+      await tagsApi.create(createQty, createSellerId || undefined, createPlan);
       toast.success(`${createQty} tag${createQty > 1 ? 's' : ''} creado${createQty > 1 ? 's' : ''} exitosamente`);
       setShowCreate(false);
       setCreateQty(10);
       setCreateSellerId('');
+      setCreatePlan('PRINCIPAL');
       loadTags();
     } catch (err: any) {
       toast.error(err.message || 'Error al crear tags');
@@ -346,6 +349,7 @@ export default function TagsPage() {
                   <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> UUID</span>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
                 {isAdmin && (
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <span className="flex items-center gap-1.5"><UserMinus className="w-3.5 h-3.5" /> Vendedor</span>
@@ -382,6 +386,11 @@ export default function TagsPage() {
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-2">
                       <StatusBadge status={tag.status} />
+                      {tag.plan && (
+                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
+                          {PLAN_LABELS[tag.plan as PlanType] || tag.plan}
+                        </span>
+                      )}
                       {tag.status === 'ACTIVE' && tag.userDisabled && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -456,6 +465,18 @@ export default function TagsPage() {
       {/* Create Modal */}
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Crear Tags" size="sm">
         <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Plan</label>
+            <select
+              value={createPlan}
+              onChange={(e) => setCreatePlan(e.target.value as PlanType)}
+              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            >
+              <option value="PRINCIPAL">Principal ($149)</option>
+              <option value="PRO">Pro ($449)</option>
+              <option value="ULTRA">Ultra ($699)</option>
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Cantidad de tags</label>
             <input
