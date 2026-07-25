@@ -40,13 +40,15 @@ export default function LocationMap({ lat, lng, onChange }: LocationMapProps) {
   return (
     <MapContainer
       center={[lat, lng]}
-      zoom={17}
+      zoom={19}
+      maxZoom={19}
       scrollWheelZoom={true}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={19}
       />
       <Marker
         position={[lat, lng]}

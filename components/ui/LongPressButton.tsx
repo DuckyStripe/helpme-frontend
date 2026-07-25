@@ -47,6 +47,7 @@ export default function LongPressButton({
 
   const startPress = useCallback(() => {
     if (disabled || loading || completed) return;
+    if (timerRef.current || intervalRef.current) return;
 
     setIsPressed(true);
     setProgress(0);
@@ -102,15 +103,14 @@ export default function LongPressButton({
     <button
       type="button"
       disabled={disabled || loading}
-      onMouseDown={startPress}
-      onMouseUp={cancelPress}
-      onMouseLeave={cancelPress}
-      onTouchStart={(e) => {
+      style={{ touchAction: 'none' }}
+      onPointerDown={(e) => {
         e.preventDefault();
         startPress();
       }}
-      onTouchEnd={cancelPress}
-      onTouchCancel={cancelPress}
+      onPointerUp={cancelPress}
+      onPointerLeave={cancelPress}
+      onPointerCancel={cancelPress}
       className={`relative w-full flex items-center justify-center gap-3 font-bold py-4 px-5 rounded-2xl shadow-lg active:scale-95 transition-all select-none ${
         completed
           ? 'bg-green-600 text-white shadow-green-600/30'

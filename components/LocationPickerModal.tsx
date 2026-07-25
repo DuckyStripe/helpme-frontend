@@ -32,18 +32,27 @@ async function reverseGeocode(lat: number, lng: number, retries = 2): Promise<st
     
     if (!res.ok) throw new Error('geocode failed');
     const data = await res.json();
-    const road = data.address?.road || '';
-    const houseNumber = data.address?.house_number || '';
-    const suburb = data.address?.suburb || '';
-    const city = data.address?.city || data.address?.town || data.address?.village || '';
-    const state = data.address?.state || '';
+    const a = data.address || {};
+    const road = a.road || a.pedestrian || '';
+    const houseNumber = a.house_number || '';
+    const nearby = a.amenity || a.shop || a.building || '';
+    const neighbourhood = a.neighbourhood || a.quarter || a.suburb || '';
+    const city = a.city || a.town || a.village || '';
+    const state = a.state || '';
 
     let address = '';
+    if (nearby) address += `${nearby}, `;
     if (road) {
-      address = road;
-      if (houseNumber) address += ` ${houseNumber}`;
+      address += road;
+      if (houseNumber) {
+        address += ` ${houseNumber}`;
+      } else {
+        address += ' (sin número exacto en el mapa, usa la ubicación GPS)';
+      }
+    } else if (nearby) {
+      address = address.replace(/, $/, '');
     }
-    if (suburb) address += `, ${suburb}`;
+    if (neighbourhood) address += `, ${neighbourhood}`;
     if (city) address += `, ${city}`;
     if (state) address += `, ${state}`;
 
