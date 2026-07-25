@@ -299,10 +299,10 @@ function PinInput({ length, value, onChange, showPin }: { length: number; value:
 function AnimatedCheckmark() {
   return (
     <div className="relative w-20 h-20 mx-auto">
-      <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20" />
-      <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse opacity-30" />
+      <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20 motion-safe:animate-ping" />
+      <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse opacity-30 motion-safe:animate-pulse" />
       <div className="relative bg-gradient-to-br from-green-500 to-green-600 rounded-full w-20 h-20 flex items-center justify-center shadow-xl shadow-green-500/30">
-        <CheckCircle className="w-10 h-10 text-white animate-bounce" />
+        <CheckCircle className="w-10 h-10 text-white motion-safe:animate-bounce" />
       </div>
     </div>
   );
@@ -327,7 +327,7 @@ function SectionCard({
 
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 ${
+      className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${
         highlight ? 'border-red-400 ring-2 ring-red-400/40' : 'border-gray-100'
       }`}
     >
@@ -382,10 +382,10 @@ const InputField = React.forwardRef<
         {...props}
         ref={ref}
         aria-invalid={!!error}
-        className={`w-full h-12 px-4 border rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+        className={`w-full h-12 px-4 border rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors ${
           error
-            ? 'border-red-400 focus:ring-red-500/30 focus:border-red-500'
-            : 'border-gray-200 focus:ring-red-500/30 focus:border-red-500'
+            ? 'border-red-400 ring-1 ring-red-400'
+            : 'border-gray-200'
         } ${props.className || ''}`}
       />
       {error && (
@@ -398,22 +398,6 @@ const InputField = React.forwardRef<
   );
 });
 
-function TextAreaField({
-  label,
-  ...props
-}: {
-  label: string;
-} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-sm font-semibold text-gray-700">{label}</label>
-      <textarea
-        {...props}
-        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
-      />
-    </div>
-  );
-}
 
 export default function ConfigPage() {
   const params = useParams();
@@ -447,6 +431,12 @@ export default function ConfigPage() {
   const [customHereditary, setCustomHereditary] = useState('');
   const [hasAllergies, setHasAllergies] = useState<boolean | null>(null);
   const [hasHereditary, setHasHereditary] = useState<boolean | null>(null);
+  const [hasHospitalizations, setHasHospitalizations] = useState<boolean | null>(null);
+  const [hasSurgeries, setHasSurgeries] = useState<boolean | null>(null);
+  const [hasTrauma, setHasTrauma] = useState<boolean | null>(null);
+  const [hasMedications, setHasMedications] = useState<boolean | null>(null);
+  const [hasReligion, setHasReligion] = useState<boolean | null>(null);
+  const [hasOrganDonor, setHasOrganDonor] = useState<boolean | null>(null);
   const [hasPacemaker, setHasPacemaker] = useState<boolean | null>(null);
   const [pacemakerDetails, setPacemakerDetails] = useState('');
   const [hasImplantContraceptive, setHasImplantContraceptive] = useState<boolean | null>(null);
@@ -578,6 +568,24 @@ export default function ConfigPage() {
           }
           if (json.data.medicalData.nss && !json.data.medicalData.insuranceType) {
             updateMedicalField('insuranceType', 'IMSS');
+          }
+          if (json.data.medicalData.religion) {
+            setHasReligion(true);
+          }
+          if (json.data.medicalData.organDonor) {
+            setHasOrganDonor(json.data.medicalData.organDonor === 'Si');
+          }
+          if (json.data.medicalData.previousHospitalizations) {
+            setHasHospitalizations(true);
+          }
+          if (json.data.medicalData.previousSurgeries) {
+            setHasSurgeries(true);
+          }
+          if (json.data.medicalData.previousTrauma) {
+            setHasTrauma(true);
+          }
+          if (json.data.medicalData.medications) {
+            setHasMedications(true);
           }
           if (json.data.medicalData.allergies) {
             if (json.data.medicalData.allergies === 'Ninguna conocida') {
@@ -773,6 +781,24 @@ export default function ConfigPage() {
         }
         if (data.medicalData.nss && !data.medicalData.insuranceType) {
           updateMedicalField('insuranceType', 'IMSS');
+        }
+        if (data.medicalData.religion) {
+          setHasReligion(true);
+        }
+        if (data.medicalData.organDonor) {
+          setHasOrganDonor(data.medicalData.organDonor === 'Si');
+        }
+        if (data.medicalData.previousHospitalizations) {
+          setHasHospitalizations(true);
+        }
+        if (data.medicalData.previousSurgeries) {
+          setHasSurgeries(true);
+        }
+        if (data.medicalData.previousTrauma) {
+          setHasTrauma(true);
+        }
+        if (data.medicalData.medications) {
+          setHasMedications(true);
         }
         if (data.medicalData.allergies) {
           if (data.medicalData.allergies === 'Ninguna conocida') {
@@ -1264,7 +1290,7 @@ export default function ConfigPage() {
           <div className="relative">
             <div className="w-16 h-16 border-4 border-red-200 rounded-full animate-spin border-t-red-600" />
           </div>
-          <p className="mt-4 text-sm font-medium text-gray-500">Cargando configuracion...</p>
+          <p className="mt-4 text-sm font-medium text-gray-500">Cargando configuracion…</p>
         </div>
       </div>
     );
@@ -1408,7 +1434,7 @@ export default function ConfigPage() {
                 </div>
                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
                   <div
-                    className="h-full bg-white rounded-full transition-all duration-500"
+                    className="h-full bg-white rounded-full transition-width duration-500"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -1431,7 +1457,9 @@ export default function ConfigPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={medicalData.photo}
-                          alt="Foto"
+                          alt="Foto de perfil"
+                          width={80}
+                          height={80}
                           className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                         />
                       ) : (
@@ -1473,6 +1501,8 @@ export default function ConfigPage() {
                   <InputField
                     label="Mi Telefono"
                     required
+                    name="owner-phone"
+                    autoComplete="tel"
                     type="tel"
                     inputMode="numeric"
                     value={medicalData.ownerPhone}
@@ -1486,6 +1516,8 @@ export default function ConfigPage() {
                     ref={userNameRef}
                     label="Nombre Completo"
                     required
+                    name="user-name"
+                    autoComplete="name"
                     type="text"
                     value={medicalData.userName}
                     onChange={(e) => updateMedicalField('userName', e.target.value)}
@@ -1504,34 +1536,38 @@ export default function ConfigPage() {
                     error={errors.dob}
                   />
 
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Genero</label>
-                    <div className="flex gap-2 flex-wrap">
-                      {genders.map((g) => (
-                        <button
-                          key={g}
-                          type="button"
-                          onClick={() => updateMedicalField('gender', g)}
-                          className={`flex-1 min-w-[80px] h-11 rounded-xl text-sm font-medium transition-all border ${
-                            medicalData.gender === g
-                              ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-semibold text-gray-700">Genero</label>
+                      <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label="Genero">
+                        {genders.map((g) => (
+                          <button
+                            key={g}
+                            type="button"
+                            role="radio"
+                            aria-checked={medicalData.gender === g}
+                            onClick={() => updateMedicalField('gender', g)}
+                            className={`flex-1 min-w-[80px] h-11 rounded-xl text-sm font-medium transition-colors border ${
+                              medicalData.gender === g
+                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                            }`}
+                          >
+                            {g}
+                          </button>
+                        ))}
+                      </div>
                     {medicalData.gender === 'Otro' && (
                       <input
                         type="text"
+                        name="gender-custom"
+                        autoComplete="off"
                         value={customGender}
                         onChange={(e) => {
                           setCustomGender(e.target.value);
                           updateMedicalField('gender', e.target.value);
                         }}
                         placeholder="Especifica tu genero"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
                       />
                     )}
                   </div>
@@ -1541,13 +1577,15 @@ export default function ConfigPage() {
                       <label className="block text-sm font-semibold text-gray-700">
                         Tipo de Sangre <span className="text-red-500">*</span>
                       </label>
-                      <div className={`grid grid-cols-4 gap-2 rounded-xl ${errors.bloodType ? 'ring-2 ring-red-400 p-1.5 -m-1.5' : ''}`}>
+                      <div className={`grid grid-cols-4 gap-2 rounded-xl ${errors.bloodType ? 'ring-2 ring-red-400 p-1.5 -m-1.5' : ''}`} role="radiogroup" aria-label="Tipo de sangre">
                         {bloodTypes.map((bt) => (
                           <button
                             key={bt}
                             type="button"
+                            role="radio"
+                            aria-checked={medicalData.bloodType === bt}
                             onClick={() => updateMedicalField('bloodType', bt)}
-                            className={`h-11 rounded-xl text-sm font-bold transition-all border ${
+                            className={`h-11 rounded-xl text-sm font-bold transition-colors border ${
                               medicalData.bloodType === bt
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                 : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-red-300 hover:bg-red-50'
@@ -1567,33 +1605,73 @@ export default function ConfigPage() {
 
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Religion</label>
-                    <select
-                      value={religions.includes(medicalData.religion) ? medicalData.religion : (medicalData.religion ? 'Otra' : '')}
-                      onChange={(e) => {
-                        const selected = e.target.value;
-                        updateMedicalField('religion', selected);
-                        if (selected !== 'Otra') {
-                          setCustomReligion('');
-                        }
-                      }}
-                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                    >
-                      <option value="">Seleccionar</option>
-                      {religions.map((r) => (
-                        <option key={r} value={r}>{r}</option>
+                    <div className="flex gap-2">
+                      {(['Si', 'No'] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasReligion(true);
+                            } else {
+                              setHasReligion(false);
+                              updateMedicalField('religion', '');
+                              setCustomReligion('');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-colors border ${
+                            (opt === 'Si' && hasReligion === true) || (opt === 'No' && hasReligion === false)
+                              ? opt === 'Si'
+                                ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
                       ))}
-                    </select>
-                    {medicalData.religion === 'Otra' && (
-                      <input
-                        type="text"
-                        value={customReligion}
-                        onChange={(e) => {
-                          setCustomReligion(e.target.value);
-                          updateMedicalField('religion', e.target.value);
-                        }}
-                        placeholder="Especifica tu religion"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
-                      />
+                    </div>
+                    {hasReligion === true && (
+                      <div className="mt-2">
+                        <select
+                          value={religions.includes(medicalData.religion) ? medicalData.religion : (medicalData.religion ? 'Otra' : '')}
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            updateMedicalField('religion', selected);
+                            if (selected !== 'Otra') {
+                              setCustomReligion('');
+                            }
+                          }}
+                          name="religion"
+                          autoComplete="off"
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors"
+                        >
+                          <option value="">Seleccionar religion</option>
+                          {religions.map((r) => (
+                            <option key={r} value={r}>{r}</option>
+                          ))}
+                        </select>
+                        {medicalData.religion === 'Otra' && (
+                          <input
+                            type="text"
+                            name="religion-custom"
+                            autoComplete="off"
+                            value={customReligion}
+                            onChange={(e) => {
+                              setCustomReligion(e.target.value);
+                              updateMedicalField('religion', e.target.value);
+                            }}
+                            placeholder="Especifica tu religion"
+                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors mt-2"
+                          />
+                        )}
+                      </div>
+                    )}
+                    {hasReligion === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin religion</span>
+                      </div>
                     )}
                   </div>
                   </div>
@@ -1602,12 +1680,15 @@ export default function ConfigPage() {
                     <div className="space-y-1.5">
                       <label className="block text-sm font-semibold text-gray-700">Donador de Organos</label>
                       <div className="flex gap-2">
-                        {['Si', 'No'].map((opt) => (
+                        {(['Si', 'No'] as const).map((opt) => (
                           <button
                             key={opt}
                             type="button"
-                            onClick={() => updateMedicalField('organDonor', opt)}
-                            className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all border ${
+                            onClick={() => {
+                              updateMedicalField('organDonor', opt);
+                              setHasOrganDonor(opt === 'Si');
+                            }}
+                            className={`flex-1 h-11 rounded-xl text-sm font-medium transition-colors border ${
                               medicalData.organDonor === opt
                                 ? opt === 'Si'
                                   ? 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
@@ -1619,12 +1700,20 @@ export default function ConfigPage() {
                           </button>
                         ))}
                       </div>
+                      {hasOrganDonor === false && medicalData.organDonor === 'No' && (
+                        <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                          <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-sm font-medium">No es donador de organos</span>
+                        </div>
+                      )}
                     </div>
 
                     <InputField
                       ref={emergencyPhoneRef}
                       label="Telefono Emergencia"
                       required
+                      name="emergency-phone"
+                      autoComplete="tel"
                       type="tel"
                       inputMode="numeric"
                       value={medicalData.emergencyPhone}
@@ -1648,6 +1737,8 @@ export default function ConfigPage() {
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Tipo de Seguro</label>
                     <select
+                      name="insurance-type"
+                      autoComplete="off"
                       value={medicalData.insuranceType}
                       onChange={(e) => {
                         updateMedicalField('insuranceType', e.target.value);
@@ -1661,7 +1752,7 @@ export default function ConfigPage() {
                           updateMedicalField('insurancePhone', '');
                         }
                       }}
-                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                     >
                       <option value="">Seleccionar</option>
                       <option value="IMSS">IMSS</option>
@@ -1677,6 +1768,8 @@ export default function ConfigPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <InputField
                           label="NSS (Numero de Seguridad Social)"
+                          name="nss"
+                          autoComplete="off"
                           type="text"
                           value={medicalData.nss}
                           onChange={(e) => updateMedicalField('nss', e.target.value.replace(/\D/g, '').slice(0, 11))}
@@ -1685,6 +1778,8 @@ export default function ConfigPage() {
                         />
                         <InputField
                           label="CURP"
+                          name="curp"
+                          autoComplete="off"
                           type="text"
                           value={medicalData.curp}
                           onChange={(e) => updateMedicalField('curp', e.target.value.toUpperCase())}
@@ -1695,13 +1790,15 @@ export default function ConfigPage() {
                       <div className="space-y-1.5">
                         <label className="block text-sm font-semibold text-gray-700">UMF / Clinica</label>
                         <select
+                          name="umf"
+                          autoComplete="off"
                           value={umfClinics.includes(medicalData.umf) ? medicalData.umf : (medicalData.umf ? 'Otra' : '')}
                           onChange={(e) => {
                             const selected = e.target.value;
                             updateMedicalField('umf', selected);
                             if (selected !== 'Otra') setCustomUmf('');
                           }}
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                         >
                           <option value="">Seleccionar</option>
                           {umfClinics.map((c) => (
@@ -1711,13 +1808,15 @@ export default function ConfigPage() {
                         {medicalData.umf === 'Otra' && (
                           <input
                             type="text"
+                            name="umf-custom"
+                            autoComplete="off"
                             value={customUmf}
                             onChange={(e) => {
                               setCustomUmf(e.target.value);
                               updateMedicalField('umf', e.target.value);
                             }}
                             placeholder="Especifica tu UMF o clinica"
-                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
                           />
                         )}
                       </div>
@@ -1729,6 +1828,8 @@ export default function ConfigPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <InputField
                           label="Numero de Expediente / RFC"
+                          name="insurance-identifier"
+                          autoComplete="off"
                           type="text"
                           value={medicalData.insuranceIdentifier}
                           onChange={(e) => updateMedicalField('insuranceIdentifier', e.target.value.toUpperCase())}
@@ -1737,6 +1838,8 @@ export default function ConfigPage() {
                         />
                         <InputField
                           label="CURP"
+                          name="curp-issste"
+                          autoComplete="off"
                           type="text"
                           value={medicalData.curp}
                           onChange={(e) => updateMedicalField('curp', e.target.value.toUpperCase())}
@@ -1748,10 +1851,12 @@ export default function ConfigPage() {
                         <label className="block text-sm font-semibold text-gray-700">Dependencia / Clinica</label>
                         <input
                           type="text"
+                          name="insurance-details"
+                          autoComplete="off"
                           value={medicalData.insuranceDetails}
                           onChange={(e) => updateMedicalField('insuranceDetails', e.target.value)}
                           placeholder="Ej: ISSSTE Clinica Central, SEP, etc."
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                         />
                       </div>
                     </div>
@@ -1774,13 +1879,15 @@ export default function ConfigPage() {
                       <div className="space-y-1.5">
                         <label className="block text-sm font-semibold text-gray-700">UMF / Centro de Salud</label>
                         <select
+                          name="umf-bienestar"
+                          autoComplete="off"
                           value={umfClinics.includes(medicalData.umf) ? medicalData.umf : (medicalData.umf ? 'Otra' : '')}
                           onChange={(e) => {
                             const selected = e.target.value;
                             updateMedicalField('umf', selected);
                             if (selected !== 'Otra') setCustomUmf('');
                           }}
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                         >
                           <option value="">Seleccionar</option>
                           {umfClinics.map((c) => (
@@ -1790,13 +1897,15 @@ export default function ConfigPage() {
                         {medicalData.umf === 'Otra' && (
                           <input
                             type="text"
+                            name="umf-bienestar-custom"
+                            autoComplete="off"
                             value={customUmf}
                             onChange={(e) => {
                               setCustomUmf(e.target.value);
                               updateMedicalField('umf', e.target.value);
                             }}
                             placeholder="Especifica tu centro de salud"
-                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
                           />
                         )}
                       </div>
@@ -1808,6 +1917,8 @@ export default function ConfigPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <InputField
                           label="Nombre de la Aseguradora"
+                          name="insurance-company"
+                          autoComplete="off"
                           type="text"
                           value={medicalData.insuranceCompany}
                           onChange={(e) => updateMedicalField('insuranceCompany', e.target.value)}
@@ -1815,6 +1926,8 @@ export default function ConfigPage() {
                         />
                         <InputField
                           label="Numero de Poliza"
+                          name="insurance-policy"
+                          autoComplete="off"
                           type="text"
                           value={medicalData.insurancePolicyNumber}
                           onChange={(e) => updateMedicalField('insurancePolicyNumber', e.target.value)}
@@ -1823,6 +1936,8 @@ export default function ConfigPage() {
                       </div>
                       <InputField
                         label="Telefono de Asistencia Medica"
+                        name="insurance-phone"
+                        autoComplete="off"
                         type="tel"
                         inputMode="numeric"
                         value={medicalData.insurancePhone}
@@ -1849,19 +1964,20 @@ export default function ConfigPage() {
                         </p>
                       </div>
 
-                      <div className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <label className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4 cursor-pointer">
                         <input
                           type="checkbox"
                           id="wantsPublicCare"
+                          name="wants-public-care"
                           checked={medicalData.wantsPublicCare}
                           onChange={(e) => updateMedicalField('wantsPublicCare', e.target.checked)}
-                          className="mt-0.5 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                          className="mt-0.5 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500/30 focus:ring-offset-0"
                         />
-                        <label htmlFor="wantsPublicCare" className="text-sm text-gray-700 cursor-pointer leading-relaxed">
-                          Acepto ser canalizado a la red pública de salud (IMSS-Bienestar, SESA, etc.) para recibir
-                          atención médica gratuita tras una emergencia.
-                        </label>
-                      </div>
+                        <span className="text-sm text-gray-700 leading-relaxed">
+                          Acepto ser canalizado a la red publica de salud (IMSS-Bienestar, SESA, etc.) para recibir
+                          atencion medica gratuita tras una emergencia.
+                        </span>
+                      </label>
                     </div>
                   )}
                 </div>
@@ -1871,7 +1987,7 @@ export default function ConfigPage() {
                 icon={Activity}
                 title="Antecedentes Medicos"
                 defaultOpen={false}
-                complete={!!medicalData.previousHospitalizations || !!medicalData.previousSurgeries || !!medicalData.previousTrauma}
+                complete={hasHospitalizations !== null || hasSurgeries !== null || hasTrauma !== null}
               >
                 <div className="space-y-4">
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -1880,33 +1996,138 @@ export default function ConfigPage() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Hospitalizaciones Previas</label>
-                    <textarea
-                      value={medicalData.previousHospitalizations}
-                      onChange={(e) => updateMedicalField('previousHospitalizations', e.target.value)}
-                      placeholder="Ej: Hospitalizacion por neumonia en 2022, apendicitis en 2019..."
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
-                    />
+                    <div className="flex gap-2">
+                      {(['Si', 'No'] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasHospitalizations(true);
+                            } else {
+                              setHasHospitalizations(false);
+                              updateMedicalField('previousHospitalizations', '');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-colors border ${
+                            (opt === 'Si' && hasHospitalizations === true) || (opt === 'No' && hasHospitalizations === false)
+                              ? opt === 'Si'
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasHospitalizations === true && (
+                      <textarea
+                        name="previous-hospitalizations"
+                        autoComplete="off"
+                        value={medicalData.previousHospitalizations}
+                        onChange={(e) => updateMedicalField('previousHospitalizations', e.target.value)}
+                        placeholder="Ej: Hospitalizacion por neumonia en 2022, apendicitis en 2019..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                      />
+                    )}
+                    {hasHospitalizations === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin hospitalizaciones previas</span>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Cirugias Previas</label>
-                    <textarea
-                      value={medicalData.previousSurgeries}
-                      onChange={(e) => updateMedicalField('previousSurgeries', e.target.value)}
-                      placeholder="Ej: Apendicectomia 2019, cirugia de rodilla 2021..."
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
-                    />
+                    <div className="flex gap-2">
+                      {(['Si', 'No'] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasSurgeries(true);
+                            } else {
+                              setHasSurgeries(false);
+                              updateMedicalField('previousSurgeries', '');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-colors border ${
+                            (opt === 'Si' && hasSurgeries === true) || (opt === 'No' && hasSurgeries === false)
+                              ? opt === 'Si'
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasSurgeries === true && (
+                      <textarea
+                        name="previous-surgeries"
+                        autoComplete="off"
+                        value={medicalData.previousSurgeries}
+                        onChange={(e) => updateMedicalField('previousSurgeries', e.target.value)}
+                        placeholder="Ej: Apendicectomia 2019, cirugia de rodilla 2021..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                      />
+                    )}
+                    {hasSurgeries === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin cirugias previas</span>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Traumatismo Previo</label>
-                    <textarea
-                      value={medicalData.previousTrauma}
-                      onChange={(e) => updateMedicalField('previousTrauma', e.target.value)}
-                      placeholder="Ej: Fractura de femur 2020, traumatismo craneal 2018..."
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
-                    />
+                    <div className="flex gap-2">
+                      {(['Si', 'No'] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasTrauma(true);
+                            } else {
+                              setHasTrauma(false);
+                              updateMedicalField('previousTrauma', '');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-colors border ${
+                            (opt === 'Si' && hasTrauma === true) || (opt === 'No' && hasTrauma === false)
+                              ? opt === 'Si'
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasTrauma === true && (
+                      <textarea
+                        name="previous-trauma"
+                        autoComplete="off"
+                        value={medicalData.previousTrauma}
+                        onChange={(e) => updateMedicalField('previousTrauma', e.target.value)}
+                        placeholder="Ej: Fractura de femur 2020, traumatismo craneal 2018..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                      />
+                    )}
+                    {hasTrauma === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin traumatismo previo</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </SectionCard>
@@ -1915,7 +2136,7 @@ export default function ConfigPage() {
                 icon={Stethoscope}
                 title="Informacion Medica"
                 defaultOpen={false}
-                complete={hasAllergies !== null && hasHereditary !== null}
+                complete={hasAllergies !== null && hasHereditary !== null && hasMedications !== null}
               >
                 <div className="space-y-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-2">
@@ -2282,8 +2503,7 @@ export default function ConfigPage() {
                                   setShowAllergySelect(false);
                                 }
                               }}
-                              className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                              autoFocus
+                              className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                             >
                               <option value="">Seleccionar alergia</option>
                               <option value="Penicilina">Penicilina</option>
@@ -2314,8 +2534,7 @@ export default function ConfigPage() {
                                     }
                                   }}
                                   placeholder="Especifica la alergia"
-                                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                                  autoFocus
+                                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                                 />
                                 <button
                                   type="button"
@@ -2365,13 +2584,51 @@ export default function ConfigPage() {
                     )}
                   </div>
 
-                  <TextAreaField
-                    label="Medicamentos Actuales"
-                    value={medicalData.medications}
-                    onChange={(e) => updateMedicalField('medications', e.target.value)}
-                    rows={2}
-                    placeholder="Nombre, dosis, frecuencia..."
-                  />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Medicamentos Actuales</label>
+                    <div className="flex gap-2">
+                      {(['Si', 'No'] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            if (opt === 'Si') {
+                              setHasMedications(true);
+                            } else {
+                              setHasMedications(false);
+                              updateMedicalField('medications', '');
+                            }
+                          }}
+                          className={`flex-1 h-11 rounded-xl text-sm font-medium transition-colors border ${
+                            (opt === 'Si' && hasMedications === true) || (opt === 'No' && hasMedications === false)
+                              ? opt === 'Si'
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+                                : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    {hasMedications === true && (
+                      <textarea
+                        name="medications"
+                        autoComplete="off"
+                        value={medicalData.medications}
+                        onChange={(e) => updateMedicalField('medications', e.target.value)}
+                        placeholder="Nombre, dosis, frecuencia..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                      />
+                    )}
+                    {hasMedications === false && (
+                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">Sin medicamentos actuales</span>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-gray-700">Antecedentes Heredofamiliares</label>
@@ -2468,8 +2725,7 @@ export default function ConfigPage() {
                               onChange={(e) => {
                                 setHereditaryInput(e.target.value);
                               }}
-                              className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                              autoFocus
+                              className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                             >
                               <option value="">Seleccionar enfermedad</option>
                               {hereditaryConditions.filter(c => c !== 'Otra' && !selectedHereditary.find(h => h.name === c)).map((c) => (
@@ -2484,8 +2740,7 @@ export default function ConfigPage() {
                                   value={customHereditary}
                                   onChange={(e) => setCustomHereditary(e.target.value)}
                                   placeholder="Especifica la enfermedad"
-                                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
-                                  autoFocus
+                                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                                 />
                                 <button
                                   type="button"
@@ -2589,6 +2844,8 @@ export default function ConfigPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <InputField
                           label="Nombre"
+                          name={`contact-name-${index}`}
+                          autoComplete="name"
                           type="text"
                           value={contact.name}
                           onChange={(e) => updateContact(index, 'name', e.target.value)}
@@ -2596,6 +2853,8 @@ export default function ConfigPage() {
                         />
                         <InputField
                           label="Parentesco"
+                          name={`contact-relationship-${index}`}
+                          autoComplete="off"
                           type="text"
                           value={contact.relationship}
                           onChange={(e) => updateContact(index, 'relationship', e.target.value)}
@@ -2604,6 +2863,8 @@ export default function ConfigPage() {
                       </div>
                       <InputField
                         label="Telefono"
+                        name={`contact-phone-${index}`}
+                        autoComplete="tel"
                         type="tel"
                         inputMode="numeric"
                         value={contact.phone}
@@ -2637,7 +2898,7 @@ export default function ConfigPage() {
                               className="text-xs text-blue-600 hover:text-blue-800 underline disabled:opacity-50 disabled:hover:text-blue-600"
                             >
                               {contactVerified[index]?.status === 'verifying'
-                                ? 'Enviando...'
+                                ? 'Enviando…'
                                 : contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now()
                                   ? `Reenviar (${Math.ceil((contactVerified[index].cooldownUntil - Date.now()) / 1000)}s)`
                                   : 'Reenviar mensaje'}
@@ -2660,7 +2921,7 @@ export default function ConfigPage() {
                               <MessageCircle className="w-3.5 h-3.5" />
                             )}
                             {contactVerified[index]?.status === 'verifying'
-                              ? 'Verificando...'
+                              ? 'Verificando…'
                               : contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now()
                                 ? `Reintentar (${Math.ceil((contactVerified[index].cooldownUntil - Date.now()) / 1000)}s)`
                                 : 'Verificar por WhatsApp'}
@@ -2722,7 +2983,7 @@ export default function ConfigPage() {
                       }}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </div>
                 </label>
 
@@ -2747,14 +3008,16 @@ export default function ConfigPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-sm font-semibold text-gray-700">Tipo de Vehículo</label>
-                          <div className="flex gap-2">
+                          <label className="block text-sm font-semibold text-gray-700">Tipo de Vehiculo</label>
+                          <div className="flex gap-2" role="radiogroup" aria-label="Tipo de vehiculo">
                             {(['AUTO', 'MOTO', 'BICICLETA'] as const).map((t) => (
                               <button
                                 key={t}
                                 type="button"
+                                role="radio"
+                                aria-checked={vehicle.type === t}
                                 onClick={() => updateVehicle(index, 'type', t)}
-                                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all border ${
+                                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-colors border ${
                                   vehicle.type === t
                                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
                                     : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
@@ -2769,6 +3032,8 @@ export default function ConfigPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <InputField
                             label="Marca"
+                            name={`vehicle-brand-${index}`}
+                            autoComplete="off"
                             type="text"
                             value={vehicle.brand}
                             onChange={(e) => updateVehicle(index, 'brand', e.target.value)}
@@ -2776,6 +3041,8 @@ export default function ConfigPage() {
                           />
                           <InputField
                             label="Modelo"
+                            name={`vehicle-model-${index}`}
+                            autoComplete="off"
                             type="text"
                             value={vehicle.model}
                             onChange={(e) => updateVehicle(index, 'model', e.target.value)}
@@ -2786,6 +3053,8 @@ export default function ConfigPage() {
                         {vehicle.type !== 'BICICLETA' && (
                           <InputField
                             label="Año"
+                            name={`vehicle-year-${index}`}
+                            autoComplete="off"
                             type="text"
                             inputMode="numeric"
                             value={vehicle.year || ''}
@@ -2796,6 +3065,8 @@ export default function ConfigPage() {
 
                         <InputField
                           label="Color"
+                          name={`vehicle-color-${index}`}
+                          autoComplete="off"
                           type="text"
                           value={vehicle.color}
                           onChange={(e) => updateVehicle(index, 'color', e.target.value)}
@@ -2805,6 +3076,8 @@ export default function ConfigPage() {
                         {vehicle.type !== 'BICICLETA' && (
                           <InputField
                             label="Placa"
+                            name={`vehicle-plate-${index}`}
+                            autoComplete="off"
                             type="text"
                             value={vehicle.plate || ''}
                             onChange={(e) => updateVehicle(index, 'plate', e.target.value.toUpperCase())}
@@ -2815,6 +3088,8 @@ export default function ConfigPage() {
                         {vehicle.type === 'MOTO' && (
                           <InputField
                             label="Cilindraje (opcional)"
+                            name={`vehicle-cylinder-${index}`}
+                            autoComplete="off"
                             type="text"
                             value={vehicle.cylinder || ''}
                             onChange={(e) => updateVehicle(index, 'cylinder', e.target.value)}
@@ -2825,13 +3100,15 @@ export default function ConfigPage() {
                         {vehicle.type === 'BICICLETA' && (
                           <div className="space-y-1.5">
                             <label className="block text-sm font-semibold text-gray-700">Tipo de Bicicleta</label>
-                            <div className="flex gap-2 flex-wrap">
-                              {['Montaña', 'Ruta', 'Urbana', 'Eléctrica'].map((bt) => (
+                            <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label="Tipo de bicicleta">
+                              {['Montaña', 'Ruta', 'Urbana', 'Electrica'].map((bt) => (
                                 <button
                                   key={bt}
                                   type="button"
+                                  role="radio"
+                                  aria-checked={vehicle.bikeType === bt}
                                   onClick={() => updateVehicle(index, 'bikeType', bt)}
-                                  className={`flex-1 min-w-[80px] h-10 rounded-xl text-sm font-medium transition-all border ${
+                                  className={`flex-1 min-w-[80px] h-10 rounded-xl text-sm font-medium transition-colors border ${
                                     vehicle.bikeType === bt
                                       ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
                                       : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
@@ -2849,9 +3126,11 @@ export default function ConfigPage() {
                             <div className="space-y-1.5">
                               <label className="block text-sm font-semibold text-gray-700">Aseguradora</label>
                               <select
+                                name={`vehicle-insurer-${index}`}
+                                autoComplete="off"
                                 value={vehicle.insurerId || ''}
                                 onChange={(e) => updateVehicle(index, 'insurerId', e.target.value)}
-                                className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                                className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-colors"
                               >
                                 <option value="">Sin aseguradora</option>
                                 {insurers.map((ins) => (
@@ -2868,7 +3147,9 @@ export default function ConfigPage() {
                               )}
                             </div>
                             <InputField
-                              label="Número de Póliza"
+                              label="Numero de Poliza"
+                              name={`vehicle-policy-${index}`}
+                              autoComplete="off"
                               type="text"
                               value={vehicle.policyNumber || ''}
                               onChange={(e) => updateVehicle(index, 'policyNumber', e.target.value)}
@@ -2902,9 +3183,10 @@ export default function ConfigPage() {
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
+                    name="is-minor"
                     checked={isMinor}
                     onChange={(e) => setIsMinor(e.target.checked)}
-                    className="mt-1 w-4 h-4 accent-red-600"
+                    className="mt-1 w-4 h-4 accent-red-600 focus:ring-2 focus:ring-red-500/30"
                   />
                   <span className="text-sm text-gray-700">
                     Estos datos corresponden a un <strong>menor de edad</strong> y yo soy su
@@ -2915,12 +3197,13 @@ export default function ConfigPage() {
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
+                    name="consent-accepted"
                     checked={consentAccepted}
                     onChange={(e) => {
                       setConsentAccepted(e.target.checked);
                       if (e.target.checked) setConsentError('');
                     }}
-                    className="mt-1 w-4 h-4 accent-red-600"
+                    className="mt-1 w-4 h-4 accent-red-600 focus:ring-2 focus:ring-red-500/30"
                   />
                   <span className="text-sm text-gray-700">
                     {isMinor ? (
@@ -2955,7 +3238,7 @@ export default function ConfigPage() {
                   {saving ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Guardando...
+                      Guardando…
                     </>
                   ) : (
                     <>
@@ -3089,11 +3372,11 @@ export default function ConfigPage() {
                 onChange={pinMode === 'create' && pinStep === 'confirm' ? handleConfirmPinChange : handlePinChange}
                 showPin={showPin}
               />
-              <button
-                type="button"
-                onClick={() => setShowPin(!showPin)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-              >
+                <button
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30"
+                >
                 {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
