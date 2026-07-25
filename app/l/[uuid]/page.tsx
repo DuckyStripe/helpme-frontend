@@ -50,6 +50,15 @@ interface ViewerData {
     orthopedicImplants?: string;
     cochlearImplant?: string;
     ocularProsthesis?: string;
+    insuranceType?: string;
+    insuranceIdentifier?: string;
+    insuranceDetails?: string;
+    insurancePolicyNumber?: string;
+    insuranceCompany?: string;
+    insurancePhone?: string;
+    previousHospitalizations?: string;
+    previousSurgeries?: string;
+    previousTrauma?: string;
   } | null;
   contacts: {
     id: string;
@@ -715,8 +724,8 @@ export default function ViewerPage() {
           </div>
         </section>
 
-        {/* SEGURIDAD SOCIAL - Después de información personal */}
-        {md.nss && (
+        {/* SEGURIDAD SOCIAL */}
+        {(md.insuranceType || md.nss || md.curp) && (
           <section className="px-5 pt-5">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <ShieldPlus className="w-4 h-4" />
@@ -724,30 +733,178 @@ export default function ViewerPage() {
             </h2>
             
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-xl shadow-blue-600/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-                  <ShieldPlus className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">NSS</p>
-                  <p className="text-xl font-mono font-black text-white tracking-wider">{md.nss}</p>
-                </div>
-              </div>
-              
-              {(md.curp || md.umf) && (
-                <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
-                  {md.curp && (
+              {md.insuranceType === 'IMSS' && (
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                      <ShieldPlus className="w-5 h-5 text-white" />
+                    </div>
                     <div>
-                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
-                      <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">IMSS</p>
+                      {md.nss && <p className="text-xl font-mono font-black text-white tracking-wider">{md.nss}</p>}
+                    </div>
+                  </div>
+                  {(md.curp || md.umf) && (
+                    <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
+                      {md.curp && (
+                        <div>
+                          <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
+                          <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+                        </div>
+                      )}
+                      {md.umf && (
+                        <div className="text-right">
+                          <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF</p>
+                          <p className="text-xs font-bold text-white">{md.umf}</p>
+                        </div>
+                      )}
                     </div>
                   )}
+                </>
+              )}
+
+              {md.insuranceType === 'ISSSTE' && (
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                      <ShieldPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">ISSSTE</p>
+                      {md.insuranceIdentifier && <p className="text-lg font-bold text-white">{md.insuranceIdentifier}</p>}
+                    </div>
+                  </div>
+                  {(md.curp || md.insuranceDetails) && (
+                    <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
+                      {md.curp && (
+                        <div>
+                          <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
+                          <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+                        </div>
+                      )}
+                      {md.insuranceDetails && (
+                        <div className="text-right">
+                          <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">Dependencia</p>
+                          <p className="text-xs font-bold text-white">{md.insuranceDetails}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {md.insuranceType === 'IMSS-BIENESTAR' && (
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                      <ShieldPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">IMSS Bienestar</p>
+                      {md.curp && <p className="text-xs font-mono font-bold text-white">{md.curp}</p>}
+                    </div>
+                  </div>
                   {md.umf && (
-                    <div className="text-right">
-                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF</p>
+                    <div className="pt-3 border-t border-white/20">
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF / Centro de Salud</p>
                       <p className="text-xs font-bold text-white">{md.umf}</p>
                     </div>
                   )}
+                </>
+              )}
+
+              {md.insuranceType === 'SEGURO_PRIVADO' && (
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                      <ShieldPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Seguro Privado</p>
+                      {md.insuranceCompany && <p className="text-lg font-bold text-white">{md.insuranceCompany}</p>}
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-white/20 space-y-2">
+                    {md.insurancePolicyNumber && (
+                      <div className="flex justify-between">
+                        <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">No. Póliza</p>
+                        <p className="text-xs font-bold text-white">{md.insurancePolicyNumber}</p>
+                      </div>
+                    )}
+                    {md.insurancePhone && (
+                      <div className="flex justify-between">
+                        <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Tel. Asistencia</p>
+                        <p className="text-xs font-bold text-white">{md.insurancePhone}</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {md.insuranceType === 'SIN_SEGURO' && (
+                <div className="text-center py-3">
+                  <p className="text-sm text-blue-200">Sin seguridad social</p>
+                </div>
+              )}
+
+              {!md.insuranceType && md.nss && (
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                      <ShieldPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">NSS</p>
+                      <p className="text-xl font-mono font-black text-white tracking-wider">{md.nss}</p>
+                    </div>
+                  </div>
+                  {(md.curp || md.umf) && (
+                    <div className="pt-3 border-t border-white/20 grid grid-cols-2 gap-3">
+                      {md.curp && (
+                        <div>
+                          <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">CURP</p>
+                          <p className="text-xs font-mono font-bold text-white">{md.curp}</p>
+                        </div>
+                      )}
+                      {md.umf && (
+                        <div className="text-right">
+                          <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-0.5">UMF</p>
+                          <p className="text-xs font-bold text-white">{md.umf}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ANTECEDENTES MÉDICOS */}
+        {(md.previousHospitalizations || md.previousSurgeries || md.previousTrauma) && (
+          <section className="px-5 pt-5">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Antecedentes Médicos
+            </h2>
+            
+            <div className="space-y-2.5">
+              {md.previousHospitalizations && (
+                <div className="rounded-xl p-4 border-2 bg-amber-50 border-amber-200">
+                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-amber-700">Hospitalizaciones Previas</p>
+                  <p className="text-sm font-semibold text-amber-900">{md.previousHospitalizations}</p>
+                </div>
+              )}
+              {md.previousSurgeries && (
+                <div className="rounded-xl p-4 border-2 bg-orange-50 border-orange-200">
+                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-orange-700">Cirugías Previas</p>
+                  <p className="text-sm font-semibold text-orange-900">{md.previousSurgeries}</p>
+                </div>
+              )}
+              {md.previousTrauma && (
+                <div className="rounded-xl p-4 border-2 bg-red-50 border-red-200">
+                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-red-700">Traumatismo Previo</p>
+                  <p className="text-sm font-semibold text-red-900">{md.previousTrauma}</p>
                 </div>
               )}
             </div>

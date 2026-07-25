@@ -7,7 +7,7 @@ import { toast } from '@/lib/toast';
 import { getPlanLimits, type PlanType } from '@/lib/plans';
 import {
   Shield, Lock, Activity, Plus, Trash2, Save, CheckCircle, Loader2, AlertTriangle,
-  User, FileText, Eye, EyeOff, ChevronDown, ChevronUp,
+  User, Eye, EyeOff, ChevronDown, ChevronUp,
   Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle, Car, Phone,
 } from 'lucide-react';
 import OwnerView from '@/components/OwnerView';
@@ -62,6 +62,15 @@ export interface MedicalData {
   orthopedicImplants: string;
   cochlearImplant: string;
   ocularProsthesis: string;
+  insuranceType: string;
+  insuranceIdentifier: string;
+  insuranceDetails: string;
+  insurancePolicyNumber: string;
+  insuranceCompany: string;
+  insurancePhone: string;
+  previousHospitalizations: string;
+  previousSurgeries: string;
+  previousTrauma: string;
 }
 
 const emptyMedicalData: MedicalData = {
@@ -88,6 +97,15 @@ const emptyMedicalData: MedicalData = {
   orthopedicImplants: '',
   cochlearImplant: '',
   ocularProsthesis: '',
+  insuranceType: '',
+  insuranceIdentifier: '',
+  insuranceDetails: '',
+  insurancePolicyNumber: '',
+  insuranceCompany: '',
+  insurancePhone: '',
+  previousHospitalizations: '',
+  previousSurgeries: '',
+  previousTrauma: '',
 };
 
 function resizeImageToDataUrl(file: File, maxSize: number, quality: number): Promise<string> {
@@ -556,6 +574,9 @@ export default function ConfigPage() {
             setCustomUmf(json.data.medicalData.umf);
             updateMedicalField('umf', 'Otra');
           }
+          if (json.data.medicalData.nss && !json.data.medicalData.insuranceType) {
+            updateMedicalField('insuranceType', 'IMSS');
+          }
           if (json.data.medicalData.allergies) {
             if (json.data.medicalData.allergies === 'Ninguna conocida') {
               setHasAllergies(false);
@@ -747,6 +768,9 @@ export default function ConfigPage() {
         if (data.medicalData.umf && !umfClinics.includes(data.medicalData.umf)) {
           setCustomUmf(data.medicalData.umf);
           updateMedicalField('umf', 'Otra');
+        }
+        if (data.medicalData.nss && !data.medicalData.insuranceType) {
+          updateMedicalField('insuranceType', 'IMSS');
         }
         if (data.medicalData.allergies) {
           if (data.medicalData.allergies === 'Ninguna conocida') {
@@ -1612,67 +1636,248 @@ export default function ConfigPage() {
               </div>
 
               <SectionCard
-                icon={FileText}
-                title="Datos IMSS"
+                icon={Shield}
+                title="Seguridad Social"
                 defaultOpen={false}
-                complete={!!medicalData.curp || !!medicalData.nss}
+                complete={!!medicalData.insuranceType && medicalData.insuranceType !== 'SIN_SEGURO'}
               >
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="CURP"
-                      type="text"
-                      value={medicalData.curp}
-                      onChange={(e) => updateMedicalField('curp', e.target.value.toUpperCase())}
-                      className="uppercase"
-                      maxLength={18}
-                    />
-                    <InputField
-                      label="NSS"
-                      type="text"
-                      value={medicalData.nss}
-                      onChange={(e) => updateMedicalField('nss', e.target.value)}
-                      maxLength={11}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="Pais de Nacimiento"
-                      type="text"
-                      value={medicalData.pob}
-                      onChange={(e) => updateMedicalField('pob', e.target.value)}
-                    />
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">UMF</label>
+                    <label className="block text-sm font-semibold text-gray-700">Tipo de Seguro</label>
                     <select
-                      value={umfClinics.includes(medicalData.umf) ? medicalData.umf : (medicalData.umf ? 'Otra' : '')}
+                      value={medicalData.insuranceType}
                       onChange={(e) => {
-                        const selected = e.target.value;
-                        updateMedicalField('umf', selected);
-                        if (selected !== 'Otra') {
-                          setCustomUmf('');
+                        updateMedicalField('insuranceType', e.target.value);
+                        if (e.target.value !== 'IMSS' && e.target.value !== 'ISSSTE' && e.target.value !== 'IMSS-BIENESTAR') {
+                          updateMedicalField('nss', '');
+                          updateMedicalField('umf', '');
+                        }
+                        if (e.target.value !== 'SEGURO_PRIVADO') {
+                          updateMedicalField('insurancePolicyNumber', '');
+                          updateMedicalField('insuranceCompany', '');
+                          updateMedicalField('insurancePhone', '');
                         }
                       }}
                       className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
                     >
                       <option value="">Seleccionar</option>
-                      {umfClinics.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
+                      <option value="IMSS">IMSS</option>
+                      <option value="ISSSTE">ISSSTE</option>
+                      <option value="IMSS-BIENESTAR">IMSS Bienestar</option>
+                      <option value="SEGURO_PRIVADO">Seguro Privado</option>
+                      <option value="SIN_SEGURO">Sin seguro</option>
                     </select>
-                    {medicalData.umf === 'Otra' && (
-                      <input
-                        type="text"
-                        value={customUmf}
-                        onChange={(e) => {
-                          setCustomUmf(e.target.value);
-                          updateMedicalField('umf', e.target.value);
-                        }}
-                        placeholder="Especifica tu UMF o clinica"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
-                      />
-                    )}
                   </div>
+
+                  {medicalData.insuranceType === 'IMSS' && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <InputField
+                          label="NSS (Numero de Seguridad Social)"
+                          type="text"
+                          value={medicalData.nss}
+                          onChange={(e) => updateMedicalField('nss', e.target.value.replace(/\D/g, '').slice(0, 11))}
+                          placeholder="11 digitos"
+                          maxLength={11}
+                        />
+                        <InputField
+                          label="CURP"
+                          type="text"
+                          value={medicalData.curp}
+                          onChange={(e) => updateMedicalField('curp', e.target.value.toUpperCase())}
+                          className="uppercase"
+                          maxLength={18}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">UMF / Clinica</label>
+                        <select
+                          value={umfClinics.includes(medicalData.umf) ? medicalData.umf : (medicalData.umf ? 'Otra' : '')}
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            updateMedicalField('umf', selected);
+                            if (selected !== 'Otra') setCustomUmf('');
+                          }}
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                        >
+                          <option value="">Seleccionar</option>
+                          {umfClinics.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                        {medicalData.umf === 'Otra' && (
+                          <input
+                            type="text"
+                            value={customUmf}
+                            onChange={(e) => {
+                              setCustomUmf(e.target.value);
+                              updateMedicalField('umf', e.target.value);
+                            }}
+                            placeholder="Especifica tu UMF o clinica"
+                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {medicalData.insuranceType === 'ISSSTE' && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <InputField
+                          label="Numero de Expediente / RFC"
+                          type="text"
+                          value={medicalData.insuranceIdentifier}
+                          onChange={(e) => updateMedicalField('insuranceIdentifier', e.target.value.toUpperCase())}
+                          placeholder="Expediente o RFC con homoclave"
+                          maxLength={20}
+                        />
+                        <InputField
+                          label="CURP"
+                          type="text"
+                          value={medicalData.curp}
+                          onChange={(e) => updateMedicalField('curp', e.target.value.toUpperCase())}
+                          className="uppercase"
+                          maxLength={18}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">Dependencia / Clinica</label>
+                        <input
+                          type="text"
+                          value={medicalData.insuranceDetails}
+                          onChange={(e) => updateMedicalField('insuranceDetails', e.target.value)}
+                          placeholder="Ej: ISSSTE Clinica Central, SEP, etc."
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {medicalData.insuranceType === 'IMSS-BIENESTAR' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-blue-800 mb-1">Identificador: CURP</p>
+                        <p className="text-[11px] text-blue-600">IMSS Bienestar utiliza tu CURP como identificador unico para la atencion medica.</p>
+                      </div>
+                      <InputField
+                        label="CURP"
+                        type="text"
+                        value={medicalData.curp}
+                        onChange={(e) => updateMedicalField('curp', e.target.value.toUpperCase())}
+                        className="uppercase"
+                        maxLength={18}
+                      />
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-semibold text-gray-700">UMF / Centro de Salud</label>
+                        <select
+                          value={umfClinics.includes(medicalData.umf) ? medicalData.umf : (medicalData.umf ? 'Otra' : '')}
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            updateMedicalField('umf', selected);
+                            if (selected !== 'Otra') setCustomUmf('');
+                          }}
+                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                        >
+                          <option value="">Seleccionar</option>
+                          {umfClinics.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                        {medicalData.umf === 'Otra' && (
+                          <input
+                            type="text"
+                            value={customUmf}
+                            onChange={(e) => {
+                              setCustomUmf(e.target.value);
+                              updateMedicalField('umf', e.target.value);
+                            }}
+                            placeholder="Especifica tu centro de salud"
+                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {medicalData.insuranceType === 'SEGURO_PRIVADO' && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <InputField
+                          label="Nombre de la Aseguradora"
+                          type="text"
+                          value={medicalData.insuranceCompany}
+                          onChange={(e) => updateMedicalField('insuranceCompany', e.target.value)}
+                          placeholder="Ej: GNP, AXA, MetLife"
+                        />
+                        <InputField
+                          label="Numero de Poliza"
+                          type="text"
+                          value={medicalData.insurancePolicyNumber}
+                          onChange={(e) => updateMedicalField('insurancePolicyNumber', e.target.value)}
+                          placeholder="No. de poliza o certificado"
+                        />
+                      </div>
+                      <InputField
+                        label="Telefono de Asistencia Medica"
+                        type="tel"
+                        inputMode="numeric"
+                        value={medicalData.insurancePhone}
+                        onChange={(e) => updateMedicalField('insurancePhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="Linea de emergencia de la aseguradora"
+                        maxLength={10}
+                      />
+                    </div>
+                  )}
+
+                  {medicalData.insuranceType === 'SIN_SEGURO' && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <p className="text-sm text-gray-600">No cuentas con seguridad social. Tus datos de emergencia seran visibles para cualquier rescatista.</p>
+                    </div>
+                  )}
+                </div>
+              </SectionCard>
+
+              <SectionCard
+                icon={Activity}
+                title="Antecedentes Medicos"
+                defaultOpen={false}
+                complete={!!medicalData.previousHospitalizations || !!medicalData.previousSurgeries || !!medicalData.previousTrauma}
+              >
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-amber-800 mb-1">Importancia en Emergencias</p>
+                    <p className="text-[11px] text-amber-600">Estos antecedentes ayudan al personal medico a tomar decisiones rapidas y precisas en situaciones criticas.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Hospitalizaciones Previas</label>
+                    <textarea
+                      value={medicalData.previousHospitalizations}
+                      onChange={(e) => updateMedicalField('previousHospitalizations', e.target.value)}
+                      placeholder="Ej: Hospitalizacion por neumonia en 2022, apendicitis en 2019..."
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Cirugias Previas</label>
+                    <textarea
+                      value={medicalData.previousSurgeries}
+                      onChange={(e) => updateMedicalField('previousSurgeries', e.target.value)}
+                      placeholder="Ej: Apendicectomia 2019, cirugia de rodilla 2021..."
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">Traumatismo Previo</label>
+                    <textarea
+                      value={medicalData.previousTrauma}
+                      onChange={(e) => updateMedicalField('previousTrauma', e.target.value)}
+                      placeholder="Ej: Fractura de femur 2020, traumatismo craneal 2018..."
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
+                    />
                   </div>
                 </div>
               </SectionCard>
