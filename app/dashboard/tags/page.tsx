@@ -140,10 +140,10 @@ export default function TagsPage() {
     try {
       const res = await tagsApi.create(createQty, createSellerId || undefined, createPlan, createQty === 1 ? createOwnerPhone : undefined);
       toast.success(`${createQty} tag${createQty > 1 ? 's' : ''} creado${createQty > 1 ? 's' : ''} exitosamente`);
-      if (res.data?.whatsappStatus === 'sent') {
-        toast.success(res.data.whatsappMessage);
-      } else if (res.data?.whatsappStatus === 'failed') {
-        toast.error(`No se enviaron instrucciones por WhatsApp: ${res.data.whatsappMessage}`);
+      if (res.whatsappStatus === 'sent') {
+        toast.success(res.whatsappMessage);
+      } else if (res.whatsappStatus === 'failed') {
+        toast.error(`No se enviaron instrucciones por WhatsApp: ${res.whatsappMessage}`);
       } else if (createQty === 1 && !createOwnerPhone) {
         toast.info('No se enviaron instrucciones porque no se proporcionó un teléfono de destinatario.');
       }
@@ -174,10 +174,10 @@ export default function TagsPage() {
     setSendingInstructions(true);
     try {
       const res = await tagsApi.sendInstructions(sendInstructionsTag.id, sendInstructionsPhone);
-      if (res.data?.whatsappStatus === 'sent') {
-        toast.success(res.data.whatsappMessage);
+      if (res.whatsappStatus === 'sent') {
+        toast.success(res.whatsappMessage);
       } else {
-        toast.error(`No se enviaron instrucciones por WhatsApp: ${res.data.whatsappMessage}`);
+        toast.error(`No se enviaron instrucciones por WhatsApp: ${res.whatsappMessage}`);
       }
       setShowSendInstructions(false);
       setSendInstructionsTag(null);
