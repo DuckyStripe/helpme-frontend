@@ -609,8 +609,8 @@ export default function ConfigPage() {
   }
 
   function validatePin(value: string) {
-    if (!/^\d{4,}$/.test(value)) {
-      return 'El PIN debe tener al menos 4 digitos';
+    if (!/^\d{6}$/.test(value)) {
+      return 'El PIN debe tener exactamente 6 digitos';
     }
     return '';
   }
@@ -2352,11 +2352,11 @@ export default function ConfigPage() {
               {pinMode === 'create' ? (pinStep === 'enter' ? 'Crear PIN' : 'Confirmar PIN') : 'Ingresar PIN'}
             </h1>
             <p className="text-gray-500 text-sm mt-2">
-              {pinMode === 'create'
+               {pinMode === 'create'
                 ? pinStep === 'enter'
-                  ? 'Crea un PIN de 4 a 8 digitos para proteger tus datos'
+                  ? 'Crea un PIN de 6 digitos para proteger tus datos'
                   : 'Repite tu PIN para confirmar'
-                : 'Ingresa tu PIN para editar tus datos medicos'}
+                : 'Ingresa tu PIN de 6 digitos para editar tus datos medicos'}
             </p>
           </div>
 
@@ -2364,7 +2364,7 @@ export default function ConfigPage() {
           <form onSubmit={pinMode === 'create' ? handleCreatePin : handlePinLogin} className="space-y-6">
             <div className="relative">
               <PinInput
-                length={pinMode === 'create' && pinStep === 'confirm' ? pin.length || 4 : 8}
+                length={6}
                 value={pinMode === 'create' && pinStep === 'confirm' ? confirmPin : pin}
                 onChange={pinMode === 'create' && pinStep === 'confirm' ? handleConfirmPinChange : handlePinChange}
                 showPin={showPin}
@@ -2380,15 +2380,13 @@ export default function ConfigPage() {
 
             {/* PIN length indicator */}
             <div className="flex justify-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
                   className={`h-1 rounded-full transition-all duration-200 ${
-                    i === 0
-                      ? 'w-8 bg-red-500'
-                      : (pinMode === 'create' && pinStep === 'confirm' ? confirmPin : pin).length >= i + 4
-                      ? 'w-4 bg-red-400'
-                      : 'w-4 bg-gray-200'
+                    (pinMode === 'create' && pinStep === 'confirm' ? confirmPin : pin).length >= i + 1
+                      ? 'w-6 bg-red-500'
+                      : 'w-6 bg-gray-200'
                   }`}
                 />
               ))}
