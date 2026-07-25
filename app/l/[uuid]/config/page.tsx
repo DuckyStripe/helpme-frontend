@@ -986,7 +986,8 @@ export default function ConfigPage() {
 
   async function loadAlerts() {
     try {
-      const res = await tagsApi.getAlerts(uuid);
+      if (!pinToken) return;
+      const res = await pinApi.getOwnerAlerts(uuid, pinToken);
       setAlerts(res.alerts || []);
     } catch {
       // Silencioso
