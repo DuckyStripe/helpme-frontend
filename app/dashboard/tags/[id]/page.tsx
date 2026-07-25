@@ -11,6 +11,7 @@ import { PageLoader } from '@/components/ui/Skeleton';
 import {
   ArrowLeft, Copy, ExternalLink, Ban, Play, Shield, Unlock,
   Calendar, MapPin, Smartphone, Eye, ScanLine, User as UserIcon,
+  Siren,
 } from 'lucide-react';
 
 function parseDevice(userAgent: string): string {
@@ -36,6 +37,7 @@ export default function TagDetailPage() {
   const [tag, setTag] = useState<any>(null);
   const [viewerData, setViewerData] = useState<any>(null);
   const [scans, setScans] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,12 +50,14 @@ export default function TagDetailPage() {
       const meData = await authApi.me();
       setUser(meData.user);
 
-      const [tagData, scansData] = await Promise.all([
+      const [tagData, scansData, alertsData] = await Promise.all([
         tagsApi.get(id),
         tagsApi.getScans(id),
+        tagsApi.getAlerts(id),
       ]);
       setTag(tagData);
       setScans(scansData.scans || []);
+      setAlerts(alertsData.alerts || []);
 
       if (tagData.status === 'ACTIVE') {
         try {
@@ -335,6 +339,72 @@ export default function TagDetailPage() {
                   <td className="px-6 py-3 text-gray-400 flex items-center gap-2">
                     <Smartphone className="w-3.5 h-3.5 text-gray-500" />
                     {parseDevice(scan.userAgent || '')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        )}
+      </div>
+      )}
+
+      {/* Alert History - solo admin */}
+      {isAdmin && (
+      <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden mt-6">
+        <div className="px-6 py-4 border-b border-gray-700/50">
+          <h2 className="text-sm font-medium text-gray-400 flex items-center gap-2">
+            <Siren className="w-4 h-4" />
+            Historial de Alertas
+          </h2>
+        </div>
+        {alerts.length === 0 ? (
+          <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin alertas registradas</div>
+        ) : (
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[640px]">
+            <thead>
+              <tr className="border-b border-gray-700/50">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origen</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contactos</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Resultado</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ubicación</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-700/30">
+              {alerts.map((alert: any) => (
+                <tr key={alert.id} className="hover:bg-gray-700/20">
+                  <td className="px-6 py-3 text-gray-300 flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                    {new Date(alert.sentAt).toLocaleDateString('es-MX', {
+                      year: 'numeric', month: 'short', day: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
+                    })}
+                  </td>
+                  <td className="px-6 py-3">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                      alert.senderType === 'OWNER'
+                        ? 'bg-red-500/10 text-red-400'
+                        : 'bg-blue-500/10 text-blue-400'
+                    }`}>
+                      {alert.senderType === 'OWNER' ? 'Dueño' : 'Rescatista'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-3 text-gray-400 max-w-[200px] truncate">
+                    {alert.contacts.join(', ')}
+                  </td>
+                  <td className="px-6 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-400 text-xs">{alert.successCount}✓</span>
+                      {alert.failCount > 0 && (
+                        <span className="text-red-400 text-xs">{alert.failCount}✗</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-3 text-gray-400 flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                    {alert.location?.address || `${alert.location?.lat?.toFixed(2)}, ${alert.location?.lng?.toFixed(2)}` || 'N/A'}
                   </td>
                 </tr>
               ))}

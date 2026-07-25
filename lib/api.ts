@@ -245,6 +245,10 @@ export const tagsApi = {
     return api.get<{ scans: any[] }>(`/tags/${id}/scans`);
   },
 
+  async getAlerts(id: string) {
+    return api.get<{ alerts: any[] }>(`/tags/${id}/alerts`);
+  },
+
   async unlockPin(id: string) {
     return api.post<any>(`/tags/${id}/unlock-pin`);
   },

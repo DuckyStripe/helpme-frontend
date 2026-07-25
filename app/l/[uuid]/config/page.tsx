@@ -925,6 +925,7 @@ export default function ConfigPage() {
   const [changePinConfirm, setChangePinConfirm] = useState('');
   const [changePinError, setChangePinError] = useState('');
   const [showChangePinModal, setShowChangePinModal] = useState(false);
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   async function handleChangePin() {
     setChangePinError('');
@@ -957,6 +958,15 @@ export default function ConfigPage() {
       setChangePinError(err.message || 'Error al cambiar el PIN');
     } finally {
       setChangingPin(false);
+    }
+  }
+
+  async function loadAlerts() {
+    try {
+      const res = await tagsApi.getAlerts(uuid);
+      setAlerts(res.alerts || []);
+    } catch {
+      // Silencioso
     }
   }
 
@@ -1286,6 +1296,9 @@ export default function ConfigPage() {
 
   if (pinToken && formTransition && !editMode) {
     const verifiedContacts = contacts.filter((c) => c.verified && (c.name.trim() || c.phone.trim()));
+    if (alerts.length === 0) {
+      loadAlerts();
+    }
     return (
       <OwnerView
         medicalData={medicalData}
@@ -1298,6 +1311,7 @@ export default function ConfigPage() {
         onSendAlert={handleSendAlert}
         sendingAlert={sendingAlert}
         onChangePin={() => setShowChangePinModal(true)}
+        alerts={alerts}
         onEdit={() => setEditMode(true)}
         onInstallApp={handleInstallApp}
         onDownloadImage={handleDownloadImage}

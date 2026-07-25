@@ -19,12 +19,24 @@ interface OwnerViewProps {
   onSendAlert?: (comment: string, location: { lat: number; lng: number; address?: string }) => Promise<void>;
   sendingAlert?: boolean;
   onChangePin?: () => void;
+  alerts?: Array<{
+    id: string;
+    sentAt: string;
+    contacts: string[];
+    location?: { lat: number; lng: number; address?: string } | null;
+    comment?: string | null;
+    senderType: string;
+    rescuerPhone?: string | null;
+    rescuerComment?: string | null;
+    successCount: number;
+    failCount: number;
+  }>;
   onEdit: () => void;
   onInstallApp: () => void;
   onDownloadImage: () => Promise<void>;
 }
 
-export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, hasVerifiedContacts = false, onSendAlert, sendingAlert = false, onChangePin, onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
+export default function OwnerView({ medicalData: md, contacts, vehicles = [], userDisabled = false, onTogglePrivacy, togglingPrivacy = false, hasVerifiedContacts = false, onSendAlert, sendingAlert = false, onChangePin, alerts = [], onEdit, onInstallApp, onDownloadImage }: OwnerViewProps) {
   const age = calculateAge(md.dob);
   const hasAllergies = md.allergies && md.allergies !== 'Ninguna conocida' && md.allergies !== 'Ninguna';
   const hasConditions = md.conditions && md.conditions.trim().length > 0;
@@ -599,6 +611,55 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {alerts.length > 0 && (
+          <section className="px-5 pt-5 pb-5">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Siren className="w-4 h-4" />
+              Historial de Alertas
+            </h2>
+            <div className="space-y-2">
+              {alerts.slice(0, 10).map((alert) => {
+                const date = new Date(alert.sentAt);
+                const dateStr = date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                return (
+                  <div key={alert.id} className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          alert.senderType === 'OWNER'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {alert.senderType === 'OWNER' ? '🔴 Dueño' : '🔵 Rescatista'}
+                        </span>
+                        <span className="text-xs text-gray-500">{dateStr} {timeStr}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs">
+                        <span className="text-green-600 font-medium">{alert.successCount}✓</span>
+                        {alert.failCount > 0 && (
+                          <span className="text-red-500 font-medium">{alert.failCount}✗</span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      Enviada a: {alert.contacts.join(', ')}
+                    </p>
+                    {alert.location?.address && (
+                      <p className="text-xs text-gray-500 mt-1">📍 {alert.location.address}</p>
+                    )}
+                    {(alert.comment || alert.rescuerComment) && (
+                      <p className="text-xs text-gray-500 mt-1 italic">
+                        "{alert.comment || alert.rescuerComment}"
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
