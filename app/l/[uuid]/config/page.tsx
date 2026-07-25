@@ -491,6 +491,13 @@ export default function ConfigPage() {
     return () => clearInterval(interval);
   }, [contactVerified, cooldownTick]);
 
+  useEffect(() => {
+    if (pinToken && formTransition) {
+      loadAlerts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinToken, formTransition]);
+
   async function handleInstallApp() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -1325,9 +1332,6 @@ export default function ConfigPage() {
   if (pinToken && formTransition && !editMode) {
     const limits = getPlanLimits(tagPlan);
     const verifiedContacts = contacts.filter((c) => c.verified && (c.name.trim() || c.phone.trim()));
-    if (alerts.length === 0) {
-      loadAlerts();
-    }
     return (
       <OwnerView
         medicalData={medicalData}
