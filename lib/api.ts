@@ -438,7 +438,20 @@ export const metricsApi = {
       recentScans: any[];
       recentActivations: any[];
       activationSeries: Array<{ date: string; count: number }>;
+      scanSeries: Array<{ date: string; count: number }>;
       sellersWithMetrics: any[];
+      funnel: {
+        virginToIncompleteRate: number;
+        incompleteToActiveRate: number;
+        overallActivationRate: number;
+        avgActivationDays: number | null;
+      };
+      sellerRanking: any[];
+      inactiveSellers: Array<{ id: string; name: string; lastTagCreatedAt: string | null }>;
+      newSellersInPeriod: number;
+      scansByLocation: Array<{ city: string | null; country: string | null; count: number }>;
+      topScannedTags: Array<{ tagUuid: string; sellerName: string; scanCount: number }>;
+      security: { lockedTags: number; disabledTags: number; unverifiedContacts: number };
     }>(`/metrics?period=${period}`);
   },
 };

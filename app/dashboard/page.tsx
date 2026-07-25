@@ -12,7 +12,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { CardSkeleton, PageLoader } from '@/components/ui/Skeleton';
 import {
   QrCode, Activity, Users, ShieldCheck, Zap, ArrowUpRight,
-  Clock, MapPin, Ban,
+  Clock, MapPin, Ban, TrendingUp, Trophy, Lock, UserX, ShieldAlert,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -233,6 +233,106 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Funnel de activación */}
+      {metrics?.funnel && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          <StatCard
+            label="Virgin → Incompleto"
+            value={`${metrics.funnel.virginToIncompleteRate}%`}
+            icon={TrendingUp}
+            color="blue"
+          />
+          <StatCard
+            label="Incompleto → Activo"
+            value={`${metrics.funnel.incompleteToActiveRate}%`}
+            icon={TrendingUp}
+            color="amber"
+          />
+          <StatCard
+            label="Tasa activación global"
+            value={`${metrics.funnel.overallActivationRate}%`}
+            icon={ShieldCheck}
+            color="emerald"
+          />
+          <StatCard
+            label="Días promedio a activar"
+            value={metrics.funnel.avgActivationDays ?? '—'}
+            icon={Clock}
+            color="gray"
+          />
+        </div>
+      )}
+
+      <div className="grid lg:grid-cols-2 gap-6 mt-8">
+        {/* Ranking de vendedores */}
+        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-700/50 flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Ranking vendedores por activación
+            </h3>
+            {metrics && (
+              <span className="text-xs text-gray-500">{metrics.newSellersInPeriod} nuevos ({period})</span>
+            )}
+          </div>
+          {!metrics?.sellerRanking?.length ? (
+            <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin datos de vendedores</div>
+          ) : (
+            <div className="divide-y divide-gray-700/30">
+              {metrics.sellerRanking.slice(0, 5).map((s: any, i: number) => (
+                <div key={s.id} className="px-6 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xs text-gray-600 w-4">{i + 1}</span>
+                    <span className="text-sm text-gray-300 truncate">{s.name}</span>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="text-sm text-gray-200 font-medium">{s.activationRate}%</p>
+                    <p className="text-[10px] text-gray-600">{s.active}/{s.tagCount} tags</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {metrics?.inactiveSellers?.length > 0 && (
+            <div className="px-6 py-3 border-t border-gray-700/50 flex items-center gap-2 text-xs text-amber-400">
+              <UserX className="w-3.5 h-3.5" />
+              {metrics.inactiveSellers.length} vendedor(es) sin tags nuevos en 30 días
+            </div>
+          )}
+        </div>
+
+        {/* Escaneos por ubicación */}
+        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-700/50">
+            <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              Escaneos por ubicación
+            </h3>
+          </div>
+          {!metrics?.scansByLocation?.length ? (
+            <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin escaneos con ubicación</div>
+          ) : (
+            <div className="divide-y divide-gray-700/30">
+              {metrics.scansByLocation.slice(0, 5).map((loc: any, i: number) => (
+                <div key={i} className="px-6 py-3 flex items-center justify-between">
+                  <span className="text-sm text-gray-300">{loc.city || 'Desconocido'}, {loc.country || ''}</span>
+                  <span className="text-sm text-gray-200 font-medium">{loc.count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Seguridad y operación */}
+      {metrics?.security && (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+          <StatCard label="Tags bloqueados por PIN" value={metrics.security.lockedTags} icon={Lock} color="red" />
+          <StatCard label="Tags deshabilitados" value={metrics.security.disabledTags} icon={Ban} color="gray" />
+          <StatCard label="Contactos sin verificar" value={metrics.security.unverifiedContacts} icon={ShieldAlert} color="amber" />
+        </div>
+      )}
     </DashboardLayout>
   );
 }
