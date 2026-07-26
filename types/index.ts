@@ -19,6 +19,15 @@ export interface Tag {
     name: string;
     email: string;
   };
+  plan?: string;
+  userDisabled?: boolean;
+  expiresAt?: string;
+  activatedAt?: string;
+  previousPlan?: string;
+  pinLockedUntil?: string;
+  pinAttempts?: number;
+  instructionsSentAt?: string;
+  ownerPhone?: string;
   createdAt: string;
   updatedAt: string;
 }

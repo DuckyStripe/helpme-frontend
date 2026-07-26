@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi, tagsApi, usersApi, clearTokens } from '@/lib/api';
 import { toast } from '@/lib/toast';
-import type { User, TagStatus } from '@/types';
+import type { User, TagStatus, Tag } from '@/types';
 import { type PlanType, PLAN_LABELS, PLAN_COLORS } from '@/lib/plans';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -23,7 +23,7 @@ import {
 export default function TagsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [tags, setTags] = useState<any[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -93,7 +93,7 @@ export default function TagsPage() {
     setLoading(true);
     try {
       const params: any = { page, limit };
-      if (filters.status !== 'ALL') params.status = filters.status;
+      if (filters.status !== 'ALL' && filters.status !== 'SENT') params.status = filters.status;
       if (filters.sellerId) params.sellerId = filters.sellerId;
       if (filters.search) params.search = filters.search;
       if (filters.dateFrom) params.dateFrom = filters.dateFrom;
@@ -101,10 +101,14 @@ export default function TagsPage() {
       if (filters.plan) params.plan = filters.plan;
 
       const data = await tagsApi.list(params);
-      setTags(data.tags);
+      let filteredTags = data.tags;
+      if (filters.status === 'SENT') {
+        filteredTags = data.tags.filter((t: Tag) => t.status === 'VIRGIN' && t.instructionsSentAt);
+      }
+      setTags(filteredTags);
       setCounts(data.counts);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
+      setTotal(filters.status === 'SENT' ? filteredTags.length : data.total);
+      setTotalPages(filters.status === 'SENT' ? Math.ceil(filteredTags.length / limit) : data.totalPages);
       setSelected(new Set());
     } catch (err: any) {
       toast.error(err.message || 'Error al cargar tags');
@@ -361,18 +365,50 @@ export default function TagsPage() {
             <span className="font-medium">Todos</span>
             <span className="font-medium">{Object.values(counts).reduce((a, b) => a + b, 0)}</span>
           </button>
-          {Object.entries(counts).map(([status, count]) => (
-            <button
-              key={status}
-              onClick={() => handleFilterChange({ ...filters, status: filters.status === status ? 'ALL' : status })}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
-                filters.status === status ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              <StatusBadge status={status as TagStatus} />
-              <span className="font-medium">{count}</span>
-            </button>
-          ))}
+          {Object.entries(counts).map(([status, count]) => {
+            if (status === 'VIRGIN' && count > 0) {
+              const sentCount = tags.filter(t => t.status === 'VIRGIN' && t.instructionsSentAt).length;
+              const pendingCount = count - sentCount;
+              return (
+                <div key={status} className="flex gap-2 shrink-0">
+                  {pendingCount > 0 && (
+                    <button
+                      onClick={() => handleFilterChange({ ...filters, status: filters.status === status ? 'ALL' : status })}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
+                        filters.status === status ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+                      }`}
+                    >
+                      <StatusBadge status={status as TagStatus} />
+                      <span className="font-medium">{pendingCount}</span>
+                    </button>
+                  )}
+                  {sentCount > 0 && (
+                    <button
+                      onClick={() => handleFilterChange({ ...filters, status: filters.status === 'SENT' ? 'ALL' : 'SENT' })}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
+                        filters.status === 'SENT' ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+                      }`}
+                    >
+                      <StatusBadge status="VIRGIN" isSent />
+                      <span className="font-medium">{sentCount}</span>
+                    </button>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <button
+                key={status}
+                onClick={() => handleFilterChange({ ...filters, status: filters.status === status ? 'ALL' : status })}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
+                  filters.status === status ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                <StatusBadge status={status as TagStatus} />
+                <span className="font-medium">{count}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -427,6 +463,9 @@ export default function TagsPage() {
                     <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> UUID</span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> Teléfono</span>
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
                   {isAdmin && (
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -459,11 +498,11 @@ export default function TagsPage() {
                       </td>
                     )}
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs text-gray-300">{shortUuid(tag.uuid)}</span>
+                      <span className="font-mono text-xs text-gray-300 cursor-help" title={tag.uuid}>{shortUuid(tag.uuid)}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <StatusBadge status={tag.status} />
+                        <StatusBadge status={tag.status} isSent={!!tag.instructionsSentAt} />
                         {tag.status === 'ACTIVE' && tag.userDisabled && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -472,6 +511,7 @@ export default function TagsPage() {
                         )}
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-sm text-gray-400">{tag.ownerPhone || '—'}</td>
                     <td className="px-4 py-3">
                       {tag.plan ? (
                         <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
