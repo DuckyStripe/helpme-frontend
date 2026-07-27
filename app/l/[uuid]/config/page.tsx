@@ -12,6 +12,7 @@ import {
   Stethoscope, AlertCircle, Contact, Camera, X, MessageCircle, Car, Phone,
 } from 'lucide-react';
 import OwnerView from '@/components/OwnerView';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 type TagStatus = 'VIRGIN' | 'INCOMPLETE' | 'ACTIVE' | 'SUSPENDED';
 
@@ -1299,7 +1300,10 @@ export default function ConfigPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 flex items-center justify-center">
+      <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 dark:from-gray-950 dark:via-red-950/10 dark:to-gray-950 flex items-center justify-center">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
         <div className="text-center">
           <div className="relative">
             <div className="w-16 h-16 border-4 border-red-200 dark:border-red-500/30 rounded-full animate-spin border-t-red-600" />
@@ -1312,7 +1316,10 @@ export default function ConfigPage() {
 
   if (status === 'SUSPENDED') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 flex items-center justify-center p-4">
+      <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 dark:from-gray-950 dark:via-red-950/10 dark:to-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
         <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 text-center max-w-sm w-full border border-gray-100 dark:border-gray-800">
           <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-gray-500 dark:text-gray-400" />
@@ -1326,7 +1333,10 @@ export default function ConfigPage() {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-gray-50 p-4 sm:p-6">
+      <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-gray-50 dark:from-gray-950 dark:via-green-950/10 dark:to-gray-950 p-4 sm:p-6">
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <ThemeToggle />
+        </div>
         <div className="max-w-md mx-auto pt-8">
           <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800">
             <div className="bg-gradient-to-br from-green-500 to-green-700 p-8 text-center">
@@ -1426,10 +1436,13 @@ export default function ConfigPage() {
   if (pinToken && formTransition && editMode) {
     const limits = getPlanLimits(tagPlan);
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50 p-4 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50 dark:from-gray-950 dark:via-red-950/10 dark:to-gray-950 p-4 sm:p-6">
         <div className="max-w-lg mx-auto">
           <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800">
             <div className="bg-gradient-to-br from-red-600 to-red-800 p-6 text-center relative">
+              <div className="absolute top-3 right-3">
+                <ThemeToggle />
+              </div>
               <div className="bg-white/10 backdrop-blur-sm w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Shield className="w-6 h-6 text-white" />
               </div>
@@ -2518,7 +2531,7 @@ export default function ConfigPage() {
                                   setShowAllergySelect(false);
                                 }
                               }}
-                              className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                              className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                             >
                               <option value="">Seleccionar alergia</option>
                               <option value="Penicilina">Penicilina</option>
@@ -2549,7 +2562,7 @@ export default function ConfigPage() {
                                     }
                                   }}
                                   placeholder="Especifica la alergia"
-                                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                                 />
                                 <button
                                   type="button"
@@ -2583,7 +2596,7 @@ export default function ConfigPage() {
                           <button
                             type="button"
                             onClick={() => setShowAllergySelect(true)}
-                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 transition-all min-h-[44px]"
+                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-500/10 transition-all min-h-[44px]"
                           >
                             <Plus className="w-4 h-4" />
                             {selectedAllergies.length === 0 ? 'Agregar alergia' : 'Agregar otra alergia'}
@@ -2740,7 +2753,7 @@ export default function ConfigPage() {
                               onChange={(e) => {
                                 setHereditaryInput(e.target.value);
                               }}
-                              className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                              className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                             >
                               <option value="">Seleccionar enfermedad</option>
                               {hereditaryConditions.filter(c => c !== 'Otra' && !selectedHereditary.find(h => h.name === c)).map((c) => (
@@ -2755,7 +2768,7 @@ export default function ConfigPage() {
                                   value={customHereditary}
                                   onChange={(e) => setCustomHereditary(e.target.value)}
                                   placeholder="Especifica la enfermedad"
-                                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                                 />
                                 <button
                                   type="button"
@@ -2812,7 +2825,7 @@ export default function ConfigPage() {
                           <button
                             type="button"
                             onClick={() => setShowHereditarySelect(true)}
-                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 transition-all min-h-[44px]"
+                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-500/10 transition-all min-h-[44px]"
                           >
                             <Plus className="w-4 h-4" />
                             {selectedHereditary.length === 0 ? 'Agregar antecedente' : 'Agregar otro antecedente'}
@@ -2957,7 +2970,7 @@ export default function ConfigPage() {
                         <button
                           type="button"
                           onClick={addContact}
-                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 transition-all min-h-[44px]"
+                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-500/10 transition-all min-h-[44px]"
                         >
                           <Plus className="w-4 h-4" />
                           Agregar contacto
@@ -3145,7 +3158,7 @@ export default function ConfigPage() {
                                 autoComplete="off"
                                 value={vehicle.insurerId || ''}
                                 onChange={(e) => updateVehicle(index, 'insurerId', e.target.value)}
-                                className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-colors"
+                                className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-colors"
                               >
                                 <option value="">Sin aseguradora</option>
                                 {insurers.map((ins) => (
@@ -3181,7 +3194,7 @@ export default function ConfigPage() {
                         <button
                           type="button"
                           onClick={addVehicle}
-                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-blue-400 dark:hover:border-blue-500/40 hover:text-blue-500 hover:bg-blue-50/50 transition-all min-h-[44px]"
+                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-blue-400 dark:hover:border-blue-500/40 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 transition-all min-h-[44px]"
                         >
                           <Plus className="w-4 h-4" />
                           {vehicles.length === 0 ? 'Agregar mi primer vehículo' : 'Agregar otro vehículo'}
