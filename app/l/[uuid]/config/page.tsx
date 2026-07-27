@@ -271,10 +271,10 @@ function PinInput({ length, value, onChange, showPin }: { length: number; value:
           key={i}
           className={`w-12 h-14 sm:w-14 sm:h-16 rounded-xl border-2 flex items-center justify-center text-2xl font-bold transition-all duration-200 ${
             i < value.length
-              ? 'border-red-500 bg-red-50 text-red-700 scale-105 shadow-md shadow-red-500/20'
+              ? 'border-red-500 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 scale-105 shadow-md shadow-red-500/20'
               : i === value.length
-              ? 'border-red-400 bg-white animate-pulse'
-              : 'border-gray-200 bg-gray-50'
+              ? 'border-red-400 bg-white dark:bg-gray-900 animate-pulse'
+              : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'
           }`}
         >
           {i < value.length ? (showPin ? value[i] : '•') : ''}
@@ -327,8 +327,8 @@ function SectionCard({
 
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${
-        highlight ? 'border-red-400 ring-2 ring-red-400/40' : 'border-gray-100'
+      className={`bg-white dark:bg-gray-900 rounded-2xl shadow-sm border overflow-hidden ${
+        highlight ? 'border-red-400 ring-2 ring-red-400/40' : 'border-gray-100 dark:border-gray-800'
       }`}
     >
       <button
@@ -337,10 +337,10 @@ function SectionCard({
         className="w-full flex items-center justify-between p-4 sm:p-5 hover:bg-gray-50/50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0">
             <Icon className="w-5 h-5 text-red-600" />
           </div>
-          <h3 className="text-base font-bold text-gray-900">{title}</h3>
+          <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h3>
           {complete && (
             <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" aria-label="Seccion completa" />
           )}
@@ -356,7 +356,7 @@ function SectionCard({
           open ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         } overflow-hidden`}
       >
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 space-y-4 border-t border-gray-100">
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 space-y-4 border-t border-gray-100 dark:border-gray-800">
           <div className="pt-4">{children}</div>
         </div>
       </div>
@@ -374,7 +374,7 @@ const InputField = React.forwardRef<
 >(function InputField({ label, required, error, ...props }, ref) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-semibold text-gray-700">
+      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
@@ -382,10 +382,10 @@ const InputField = React.forwardRef<
         {...props}
         ref={ref}
         aria-invalid={!!error}
-        className={`w-full h-12 px-4 border rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors ${
+        className={`w-full h-12 px-4 border rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors ${
           error
             ? 'border-red-400 ring-1 ring-red-400'
-            : 'border-gray-200'
+            : 'border-gray-200 dark:border-gray-700'
         } ${props.className || ''}`}
       />
       {error && (
@@ -1302,9 +1302,9 @@ export default function ConfigPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            <div className="w-16 h-16 border-4 border-red-200 rounded-full animate-spin border-t-red-600" />
+            <div className="w-16 h-16 border-4 border-red-200 dark:border-red-500/30 rounded-full animate-spin border-t-red-600" />
           </div>
-          <p className="mt-4 text-sm font-medium text-gray-500">Cargando configuracion…</p>
+          <p className="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">Cargando configuracion…</p>
         </div>
       </div>
     );
@@ -1313,12 +1313,12 @@ export default function ConfigPage() {
   if (status === 'SUSPENDED') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 text-center max-w-sm w-full border border-gray-100">
-          <div className="bg-gray-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-gray-500" />
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 text-center max-w-sm w-full border border-gray-100 dark:border-gray-800">
+          <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-gray-500 dark:text-gray-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tag Inactivo</h1>
-          <p className="text-gray-500 text-sm">Este tag ha sido dado de baja del sistema.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tag Inactivo</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Este tag ha sido dado de baja del sistema.</p>
         </div>
       </div>
     );
@@ -1328,7 +1328,7 @@ export default function ConfigPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-gray-50 p-4 sm:p-6">
         <div className="max-w-md mx-auto pt-8">
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800">
             <div className="bg-gradient-to-br from-green-500 to-green-700 p-8 text-center">
               <AnimatedCheckmark />
               <h1 className="text-2xl font-bold text-white mt-6">Datos Guardados!</h1>
@@ -1336,19 +1336,19 @@ export default function ConfigPage() {
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
-                <h2 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/30 rounded-2xl p-4">
+                <h2 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
                   <Shield className="w-4 h-4" />
                   Como modificar tus datos despues?
                 </h2>
-                <ol className="space-y-3 text-sm text-blue-800">
+                <ol className="space-y-3 text-sm text-blue-800 dark:text-blue-400">
                   {[
                     'Escanea el QR o acerca el NFC de tu tag',
                     'Ingresa tu PIN de 4 digitos que acabas de crear',
                     'Edita tus datos medicos y guarda los cambios',
                   ].map((step, i) => (
                     <li key={i} className="flex gap-3 items-start">
-                      <span className="w-6 h-6 rounded-full bg-blue-200 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                      <span className="w-6 h-6 rounded-full bg-blue-200 text-blue-700 dark:text-blue-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                         {i + 1}
                       </span>
                       <span>{step}</span>
@@ -1357,12 +1357,12 @@ export default function ConfigPage() {
                 </ol>
               </div>
 
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
-                <h2 className="text-sm font-bold text-amber-900 mb-2 flex items-center gap-2">
+              <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/30 rounded-2xl p-4">
+                <h2 className="text-sm font-bold text-amber-900 dark:text-amber-300 mb-2 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
                   Importante
                 </h2>
-                <ul className="space-y-1.5 text-sm text-amber-800">
+                <ul className="space-y-1.5 text-sm text-amber-800 dark:text-amber-400">
                   <li>Manten tu tag NFC/QR en un lugar accesible de tu casco</li>
                   <li>No compartas tu PIN con nadie</li>
                   <li>Actualiza tus datos cuando haya cambios importantes</li>
@@ -1383,7 +1383,7 @@ export default function ConfigPage() {
 
                 <button
                   onClick={() => setShowSuccess(false)}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3.5 px-6 rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
+                  className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold py-3.5 px-6 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors min-h-[44px]"
                 >
                   <Save className="w-5 h-5" />
                   Seguir Editando
@@ -1428,7 +1428,7 @@ export default function ConfigPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50 p-4 sm:p-6">
         <div className="max-w-lg mx-auto">
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800">
             <div className="bg-gradient-to-br from-red-600 to-red-800 p-6 text-center relative">
               <div className="bg-white/10 backdrop-blur-sm w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Shield className="w-6 h-6 text-white" />
@@ -1475,10 +1475,10 @@ export default function ConfigPage() {
                           alt="Foto de perfil"
                           width={80}
                           height={80}
-                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                         />
                       ) : (
-                        <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                        <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center">
                           <Camera className="w-7 h-7 text-gray-400" />
                         </div>
                       )}
@@ -1504,7 +1504,7 @@ export default function ConfigPage() {
                         <button
                           type="button"
                           onClick={handleRemovePhoto}
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                         >
                           <X className="w-3.5 h-3.5" />
                           Quitar foto
@@ -1552,7 +1552,7 @@ export default function ConfigPage() {
                   />
 
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-semibold text-gray-700">Genero</label>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Genero</label>
                       <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label="Genero">
                         {genders.map((g) => (
                           <button
@@ -1564,7 +1564,7 @@ export default function ConfigPage() {
                             className={`flex-1 min-w-[80px] h-11 rounded-xl text-sm font-medium transition-colors border ${
                               medicalData.gender === g
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                                : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-500/40 hover:bg-red-50 dark:hover:bg-red-500/10'
                             }`}
                           >
                             {g}
@@ -1582,14 +1582,14 @@ export default function ConfigPage() {
                           updateMedicalField('gender', e.target.value);
                         }}
                         placeholder="Especifica tu genero"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
                       />
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5" ref={bloodTypeRef} tabIndex={-1}>
-                      <label className="block text-sm font-semibold text-gray-700">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                         Tipo de Sangre <span className="text-red-500">*</span>
                       </label>
                       <div className={`grid grid-cols-4 gap-2 rounded-xl ${errors.bloodType ? 'ring-2 ring-red-400 p-1.5 -m-1.5' : ''}`} role="radiogroup" aria-label="Tipo de sangre">
@@ -1603,7 +1603,7 @@ export default function ConfigPage() {
                             className={`h-11 rounded-xl text-sm font-bold transition-colors border ${
                               medicalData.bloodType === bt
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
-                                : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                                : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-500/40 hover:bg-red-50 dark:hover:bg-red-500/10'
                             }`}
                           >
                             {bt}
@@ -1619,7 +1619,7 @@ export default function ConfigPage() {
                     </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Religion</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Religion</label>
                     <div className="flex gap-2">
                       {(['Si', 'No'] as const).map((opt) => (
                         <button
@@ -1639,7 +1639,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -1659,7 +1659,7 @@ export default function ConfigPage() {
                           }}
                           name="religion"
                           autoComplete="off"
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors"
+                          className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors"
                         >
                           <option value="">Seleccionar religion</option>
                           {religions.map((r) => (
@@ -1677,13 +1677,13 @@ export default function ConfigPage() {
                               updateMedicalField('religion', e.target.value);
                             }}
                             placeholder="Especifica tu religion"
-                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors mt-2"
+                            className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors mt-2"
                           />
                         )}
                       </div>
                     )}
                     {hasReligion === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin religion</span>
                       </div>
@@ -1693,7 +1693,7 @@ export default function ConfigPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-semibold text-gray-700">Donador de Organos</label>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Donador de Organos</label>
                       <div className="flex gap-2">
                         {(['Si', 'No'] as const).map((opt) => (
                           <button
@@ -1707,8 +1707,8 @@ export default function ConfigPage() {
                               medicalData.organDonor === opt
                                 ? opt === 'Si'
                                   ? 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                                  : 'bg-gray-600 text-white border-gray-600 shadow-md shadow-gray-600/20'
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                                  : 'bg-gray-600 text-white border-gray-600 dark:border-gray-500 shadow-md shadow-gray-600/20'
+                                : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                             }`}
                           >
                             {opt}
@@ -1716,7 +1716,7 @@ export default function ConfigPage() {
                         ))}
                       </div>
                       {hasOrganDonor === false && medicalData.organDonor === 'No' && (
-                        <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                           <CheckCircle className="w-4 h-4 flex-shrink-0" />
                           <span className="text-sm font-medium">No es donador de organos</span>
                         </div>
@@ -1750,7 +1750,7 @@ export default function ConfigPage() {
               >
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Tipo de Seguro</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tipo de Seguro</label>
                     <select
                       name="insurance-type"
                       autoComplete="off"
@@ -1767,7 +1767,7 @@ export default function ConfigPage() {
                           updateMedicalField('insurancePhone', '');
                         }
                       }}
-                      className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                      className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                     >
                       <option value="">Seleccionar</option>
                       <option value="IMSS">IMSS</option>
@@ -1803,7 +1803,7 @@ export default function ConfigPage() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-sm font-semibold text-gray-700">UMF / Clinica</label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">UMF / Clinica</label>
                         <select
                           name="umf"
                           autoComplete="off"
@@ -1813,7 +1813,7 @@ export default function ConfigPage() {
                             updateMedicalField('umf', selected);
                             if (selected !== 'Otra') setCustomUmf('');
                           }}
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                          className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                         >
                           <option value="">Seleccionar</option>
                           {umfClinics.map((c) => (
@@ -1831,7 +1831,7 @@ export default function ConfigPage() {
                               updateMedicalField('umf', e.target.value);
                             }}
                             placeholder="Especifica tu UMF o clinica"
-                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
+                            className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
                           />
                         )}
                       </div>
@@ -1863,7 +1863,7 @@ export default function ConfigPage() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-sm font-semibold text-gray-700">Dependencia / Clinica</label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Dependencia / Clinica</label>
                         <input
                           type="text"
                           name="insurance-details"
@@ -1871,7 +1871,7 @@ export default function ConfigPage() {
                           value={medicalData.insuranceDetails}
                           onChange={(e) => updateMedicalField('insuranceDetails', e.target.value)}
                           placeholder="Ej: ISSSTE Clinica Central, SEP, etc."
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                          className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                         />
                       </div>
                     </div>
@@ -1879,8 +1879,8 @@ export default function ConfigPage() {
 
                   {medicalData.insuranceType === 'IMSS-BIENESTAR' && (
                     <div className="space-y-4">
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <p className="text-xs font-semibold text-blue-800 mb-1">Identificador: CURP</p>
+                      <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-blue-800 dark:text-blue-400 mb-1">Identificador: CURP</p>
                         <p className="text-[11px] text-blue-600">IMSS Bienestar utiliza tu CURP como identificador unico para la atencion medica.</p>
                       </div>
                       <InputField
@@ -1892,7 +1892,7 @@ export default function ConfigPage() {
                         maxLength={18}
                       />
                       <div className="space-y-1.5">
-                        <label className="block text-sm font-semibold text-gray-700">UMF / Centro de Salud</label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">UMF / Centro de Salud</label>
                         <select
                           name="umf-bienestar"
                           autoComplete="off"
@@ -1902,7 +1902,7 @@ export default function ConfigPage() {
                             updateMedicalField('umf', selected);
                             if (selected !== 'Otra') setCustomUmf('');
                           }}
-                          className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                          className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                         >
                           <option value="">Seleccionar</option>
                           {umfClinics.map((c) => (
@@ -1920,7 +1920,7 @@ export default function ConfigPage() {
                               updateMedicalField('umf', e.target.value);
                             }}
                             placeholder="Especifica tu centro de salud"
-                            className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
+                            className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors mt-2"
                           />
                         )}
                       </div>
@@ -1965,30 +1965,30 @@ export default function ConfigPage() {
 
                   {medicalData.insuranceType === 'SIN_SEGURO' && (
                     <div className="space-y-4">
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                        <p className="text-xs font-semibold text-green-800 mb-2">Atención de Urgencia Obligatoria</p>
-                        <p className="text-[11px] text-green-700 leading-relaxed">
+                      <div className="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/30 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-green-800 dark:text-green-400 mb-2">Atención de Urgencia Obligatoria</p>
+                        <p className="text-[11px] text-green-700 dark:text-green-400 leading-relaxed">
                           Por ley, los hospitales públicos (IMSS-Bienestar, Secretaría de Salud / SESA) y las áreas de
                           urgencias de hospitales privados están obligados a brindar atención médica inmediata si la vida
                           está en riesgo, sin condicionarla a pagos o afiliación previa.
                         </p>
-                        <p className="text-[11px] text-green-700 leading-relaxed mt-2">
+                        <p className="text-[11px] text-green-700 dark:text-green-400 leading-relaxed mt-2">
                           Una vez estabilizado, si no cuentas con seguridad social, serás canalizado al sistema
                           IMSS-Bienestar o a hospitales de la red pública local para continuar tu tratamiento de manera
                           gratuita o con cuotas de recuperación basadas en un estudio socioeconómico.
                         </p>
                       </div>
 
-                      <label className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4 cursor-pointer">
+                      <label className="flex items-start gap-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 cursor-pointer">
                         <input
                           type="checkbox"
                           id="wantsPublicCare"
                           name="wants-public-care"
                           checked={medicalData.wantsPublicCare}
                           onChange={(e) => updateMedicalField('wantsPublicCare', e.target.checked)}
-                          className="mt-0.5 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500/30 focus:ring-offset-0"
+                          className="mt-0.5 w-5 h-5 text-green-600 border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-green-500/30 focus:ring-offset-0"
                         />
-                        <span className="text-sm text-gray-700 leading-relaxed">
+                        <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                           Acepto ser canalizado a la red publica de salud (IMSS-Bienestar, SESA, etc.) para recibir
                           atencion medica gratuita tras una emergencia.
                         </span>
@@ -2005,12 +2005,12 @@ export default function ConfigPage() {
                 complete={hasHospitalizations !== null || hasSurgeries !== null || hasTrauma !== null}
               >
                 <div className="space-y-4">
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <p className="text-xs font-semibold text-amber-800 mb-1">Importancia en Emergencias</p>
+                  <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1">Importancia en Emergencias</p>
                     <p className="text-[11px] text-amber-600">Estos antecedentes ayudan al personal medico a tomar decisiones rapidas y precisas en situaciones criticas.</p>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Hospitalizaciones Previas</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Hospitalizaciones Previas</label>
                     <div className="flex gap-2">
                       {(['Si', 'No'] as const).map((opt) => (
                         <button
@@ -2029,7 +2029,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2044,18 +2044,18 @@ export default function ConfigPage() {
                         onChange={(e) => updateMedicalField('previousHospitalizations', e.target.value)}
                         placeholder="Ej: Hospitalizacion por neumonia en 2022, apendicitis en 2019..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
                       />
                     )}
                     {hasHospitalizations === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin hospitalizaciones previas</span>
                       </div>
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Cirugias Previas</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Cirugias Previas</label>
                     <div className="flex gap-2">
                       {(['Si', 'No'] as const).map((opt) => (
                         <button
@@ -2074,7 +2074,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2089,18 +2089,18 @@ export default function ConfigPage() {
                         onChange={(e) => updateMedicalField('previousSurgeries', e.target.value)}
                         placeholder="Ej: Apendicectomia 2019, cirugia de rodilla 2021..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
                       />
                     )}
                     {hasSurgeries === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin cirugias previas</span>
                       </div>
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Traumatismo Previo</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Traumatismo Previo</label>
                     <div className="flex gap-2">
                       {(['Si', 'No'] as const).map((opt) => (
                         <button
@@ -2119,7 +2119,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2134,11 +2134,11 @@ export default function ConfigPage() {
                         onChange={(e) => updateMedicalField('previousTrauma', e.target.value)}
                         placeholder="Ej: Fractura de femur 2020, traumatismo craneal 2018..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
                       />
                     )}
                     {hasTrauma === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin traumatismo previo</span>
                       </div>
@@ -2154,13 +2154,13 @@ export default function ConfigPage() {
                 complete={hasAllergies !== null && hasHereditary !== null && hasMedications !== null}
               >
                 <div className="space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-2">
-                    <p className="text-xs font-semibold text-blue-800 mb-1">Dispositivos Medicos Implantados</p>
+                  <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl p-4 mb-2">
+                    <p className="text-xs font-semibold text-blue-800 dark:text-blue-400 mb-1">Dispositivos Medicos Implantados</p>
                     <p className="text-[11px] text-blue-600">Estos dispositivos pueden interferir con procedimientos de emergencia como RCP, desfibrilacion o inmovilizacion.</p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Marcapasos o Cardiodesfibrilador Implantable</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Marcapasos o Cardiodesfibrilador Implantable</label>
                     <div className="flex gap-2">
                       {['Si', 'No'].map((opt) => (
                         <button
@@ -2180,7 +2180,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2196,11 +2196,11 @@ export default function ConfigPage() {
                         }}
                         rows={2}
                         placeholder="Tipo, modelo, fecha de implante, lado..."
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
                       />
                     )}
                     {hasPacemaker === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin marcapasos</span>
                       </div>
@@ -2210,7 +2210,7 @@ export default function ConfigPage() {
                   {medicalData.gender === 'Femenino' && (
                     <>
                       <div className="space-y-1.5">
-                        <label className="block text-sm font-semibold text-gray-700">Implante Anticonceptivo Subdermico</label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Implante Anticonceptivo Subdermico</label>
                         <div className="flex gap-2">
                           {['Si', 'No'].map((opt) => (
                             <button
@@ -2230,7 +2230,7 @@ export default function ConfigPage() {
                                   ? opt === 'Si'
                                     ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                     : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                                  : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                               }`}
                             >
                               {opt}
@@ -2246,11 +2246,11 @@ export default function ConfigPage() {
                             }}
                             rows={2}
                             placeholder="Lado del brazo, fecha de colocacion..."
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
                           />
                         )}
                         {hasImplantContraceptive === false && (
-                          <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                             <CheckCircle className="w-4 h-4 flex-shrink-0" />
                             <span className="text-sm font-medium">Sin implante anticonceptivo</span>
                           </div>
@@ -2258,7 +2258,7 @@ export default function ConfigPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-sm font-semibold text-gray-700">Implantes Mamarios</label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Implantes Mamarios</label>
                         <div className="flex gap-2">
                           {['Si', 'No'].map((opt) => (
                             <button
@@ -2278,7 +2278,7 @@ export default function ConfigPage() {
                                   ? opt === 'Si'
                                     ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                     : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                                  : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                               }`}
                             >
                               {opt}
@@ -2294,11 +2294,11 @@ export default function ConfigPage() {
                             }}
                             rows={2}
                             placeholder="Tipo, fecha de colocacion..."
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
                           />
                         )}
                         {hasImplantMammary === false && (
-                          <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                             <CheckCircle className="w-4 h-4 flex-shrink-0" />
                             <span className="text-sm font-medium">Sin implantes mamarios</span>
                           </div>
@@ -2308,7 +2308,7 @@ export default function ConfigPage() {
                   )}
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Implantes Ortopedicos Metalicos o Neuroestimuladores</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Implantes Ortopedicos Metalicos o Neuroestimuladores</label>
                     <div className="flex gap-2">
                       {['Si', 'No'].map((opt) => (
                         <button
@@ -2328,7 +2328,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2344,11 +2344,11 @@ export default function ConfigPage() {
                         }}
                         rows={2}
                         placeholder="Ubicacion, tipo de implante..."
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
                       />
                     )}
                     {hasOrthopedicImplants === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin implantes ortopedicos</span>
                       </div>
@@ -2356,7 +2356,7 @@ export default function ConfigPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Implante Coclear u Otro Dispositivo Auditivo</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Implante Coclear u Otro Dispositivo Auditivo</label>
                     <div className="flex gap-2">
                       {['Si', 'No'].map((opt) => (
                         <button
@@ -2376,7 +2376,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2392,11 +2392,11 @@ export default function ConfigPage() {
                         }}
                         rows={2}
                         placeholder="Lado (izquierdo/derecho/ambos), tipo..."
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
                       />
                     )}
                     {hasCochlearImplant === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin implante coclear</span>
                       </div>
@@ -2404,7 +2404,7 @@ export default function ConfigPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Protesis Ocular</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Protesis Ocular</label>
                     <div className="flex gap-2">
                       {['Si', 'No'].map((opt) => (
                         <button
@@ -2424,7 +2424,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2440,11 +2440,11 @@ export default function ConfigPage() {
                         }}
                         rows={2}
                         placeholder="Ojo afectado (izquierdo/derecho)..."
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all mt-2 resize-none"
                       />
                     )}
                     {hasOcularProsthesis === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin protesis ocular</span>
                       </div>
@@ -2452,7 +2452,7 @@ export default function ConfigPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Alergias</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Alergias</label>
                     <div className="flex gap-2">
                       {['Si', 'No'].map((opt) => (
                         <button
@@ -2472,7 +2472,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2486,7 +2486,7 @@ export default function ConfigPage() {
                             {selectedAllergies.map((allergy, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg text-sm font-medium"
+                                className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 px-3 py-1.5 rounded-lg text-sm font-medium"
                               >
                                 {allergy}
                                 <button
@@ -2496,7 +2496,7 @@ export default function ConfigPage() {
                                     setSelectedAllergies(updated);
                                     updateMedicalField('allergies', updated.length > 0 ? updated.join('|') : 'Ninguna conocida');
                                   }}
-                                  className="ml-0.5 text-amber-600 hover:text-amber-800 p-0.5 rounded"
+                                  className="ml-0.5 text-amber-600 hover:text-amber-800 dark:hover:text-amber-400 p-0.5 rounded"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -2518,7 +2518,7 @@ export default function ConfigPage() {
                                   setShowAllergySelect(false);
                                 }
                               }}
-                              className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                              className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                             >
                               <option value="">Seleccionar alergia</option>
                               <option value="Penicilina">Penicilina</option>
@@ -2549,7 +2549,7 @@ export default function ConfigPage() {
                                     }
                                   }}
                                   placeholder="Especifica la alergia"
-                                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                                 />
                                 <button
                                   type="button"
@@ -2574,7 +2574,7 @@ export default function ConfigPage() {
                                 setAllergyInput('');
                                 setCustomAllergy('');
                               }}
-                              className="text-sm text-gray-500 hover:text-gray-700"
+                              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             >
                               Cancelar
                             </button>
@@ -2583,7 +2583,7 @@ export default function ConfigPage() {
                           <button
                             type="button"
                             onClick={() => setShowAllergySelect(true)}
-                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
+                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 transition-all min-h-[44px]"
                           >
                             <Plus className="w-4 h-4" />
                             {selectedAllergies.length === 0 ? 'Agregar alergia' : 'Agregar otra alergia'}
@@ -2592,7 +2592,7 @@ export default function ConfigPage() {
                       </div>
                     )}
                     {hasAllergies === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Ninguna alergia conocida</span>
                       </div>
@@ -2600,7 +2600,7 @@ export default function ConfigPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Medicamentos Actuales</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Medicamentos Actuales</label>
                     <div className="flex gap-2">
                       {(['Si', 'No'] as const).map((opt) => (
                         <button
@@ -2619,7 +2619,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2634,11 +2634,11 @@ export default function ConfigPage() {
                         onChange={(e) => updateMedicalField('medications', e.target.value)}
                         placeholder="Nombre, dosis, frecuencia..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors resize-none mt-2"
                       />
                     )}
                     {hasMedications === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin medicamentos actuales</span>
                       </div>
@@ -2646,7 +2646,7 @@ export default function ConfigPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Antecedentes Heredofamiliares</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Antecedentes Heredofamiliares</label>
                     <div className="flex gap-2">
                       {['Si', 'No'].map((opt) => (
                         <button
@@ -2666,7 +2666,7 @@ export default function ConfigPage() {
                               ? opt === 'Si'
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
                                 : 'bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           {opt}
@@ -2682,17 +2682,17 @@ export default function ConfigPage() {
                                 key={idx}
                                 className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                                   item.isActive
-                                    ? 'bg-red-50 border-red-200'
-                                    : 'bg-gray-50 border-gray-200'
+                                    ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30'
+                                    : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700'
                                 }`}
                               >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.isActive ? 'bg-red-500' : 'bg-gray-400'}`} />
+                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.isActive ? 'bg-red-500' : 'bg-gray-400 dark:bg-gray-500'}`} />
                                   <div className="min-w-0">
-                                    <span className={`text-sm font-medium ${item.isActive ? 'text-red-800' : 'text-gray-700'}`}>
+                                    <span className={`text-sm font-medium ${item.isActive ? 'text-red-800 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
                                       {item.name}
                                     </span>
-                                    <span className="text-xs text-gray-500 ml-1.5">Linea {item.line}</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1.5">Linea {item.line}</span>
                                     {item.isActive && (
                                       <span className="ml-1.5 text-xs font-semibold text-red-600">Lo padezco</span>
                                     )}
@@ -2711,7 +2711,7 @@ export default function ConfigPage() {
                                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                                       item.isActive
                                         ? 'bg-red-600 text-white'
-                                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
                                     }`}
                                   >
                                     {item.isActive ? 'Lo padezco' : 'No lo padezco'}
@@ -2724,7 +2724,7 @@ export default function ConfigPage() {
                                       const serialized = updated.map(h => `${h.name} - ${h.line} - ${h.isActive ? 'si' : 'no'}`).join('|');
                                       updateMedicalField('hereditaryConditions', serialized || '');
                                     }}
-                                    className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                                    className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -2740,7 +2740,7 @@ export default function ConfigPage() {
                               onChange={(e) => {
                                 setHereditaryInput(e.target.value);
                               }}
-                              className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                              className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                             >
                               <option value="">Seleccionar enfermedad</option>
                               {hereditaryConditions.filter(c => c !== 'Otra' && !selectedHereditary.find(h => h.name === c)).map((c) => (
@@ -2755,7 +2755,7 @@ export default function ConfigPage() {
                                   value={customHereditary}
                                   onChange={(e) => setCustomHereditary(e.target.value)}
                                   placeholder="Especifica la enfermedad"
-                                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
+                                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors"
                                 />
                                 <button
                                   type="button"
@@ -2773,7 +2773,7 @@ export default function ConfigPage() {
                             )}
                             {hereditaryInput && hereditaryInput !== 'custom' && (
                               <div className="space-y-2">
-                                <label className="block text-xs font-semibold text-gray-600">Linea familiar</label>
+                                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">Linea familiar</label>
                                 <div className="flex gap-2">
                                   {(['materna', 'paterna', 'ambas'] as const).map((line) => (
                                     <button
@@ -2788,7 +2788,7 @@ export default function ConfigPage() {
                                         setHereditaryInput('');
                                         setShowHereditarySelect(false);
                                       }}
-                                      className="flex-1 h-10 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                      className="flex-1 h-10 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                                     >
                                       {line.charAt(0).toUpperCase() + line.slice(1)}
                                     </button>
@@ -2803,7 +2803,7 @@ export default function ConfigPage() {
                                 setHereditaryInput('');
                                 setCustomHereditary('');
                               }}
-                              className="text-sm text-gray-500 hover:text-gray-700"
+                              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             >
                               Cancelar
                             </button>
@@ -2812,7 +2812,7 @@ export default function ConfigPage() {
                           <button
                             type="button"
                             onClick={() => setShowHereditarySelect(true)}
-                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
+                            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 transition-all min-h-[44px]"
                           >
                             <Plus className="w-4 h-4" />
                             {selectedHereditary.length === 0 ? 'Agregar antecedente' : 'Agregar otro antecedente'}
@@ -2821,7 +2821,7 @@ export default function ConfigPage() {
                       </div>
                     )}
                     {hasHereditary === false && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 px-4 py-3 rounded-xl border border-green-100 mt-2">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-4 py-3 rounded-xl border border-green-100 dark:border-green-500/30 mt-2">
                         <CheckCircle className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">Sin antecedentes heredofamiliares</span>
                       </div>
@@ -2838,19 +2838,19 @@ export default function ConfigPage() {
               >
                 <div className="space-y-3">
                   {contacts.map((contact, index) => (
-                    <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+                    <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
                             <Contact className="w-4 h-4 text-red-600" />
                           </div>
-                          <span className="text-sm font-semibold text-gray-700">Contacto {index + 1}</span>
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Contacto {index + 1}</span>
                         </div>
                         {contacts.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeContact(index)}
-                            className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            className="text-red-400 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -2900,7 +2900,7 @@ export default function ConfigPage() {
                       <div className="flex items-center gap-2">
                         {contact.verified ? (
                           <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
                               <CheckCircle className="w-3.5 h-3.5" /> Verificado
                             </span>
                             <button
@@ -2910,7 +2910,7 @@ export default function ConfigPage() {
                                 contactVerified[index]?.status === 'verifying' ||
                                 Boolean(contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now())
                               }
-                              className="text-xs text-blue-600 hover:text-blue-800 underline disabled:opacity-50 disabled:hover:text-blue-600"
+                              className="text-xs text-blue-600 hover:text-blue-800 dark:hover:text-blue-300 underline disabled:opacity-50 disabled:hover:text-blue-600 dark:hover:text-blue-400"
                             >
                               {contactVerified[index]?.status === 'verifying'
                                 ? 'Enviando…'
@@ -2928,7 +2928,7 @@ export default function ConfigPage() {
                               contactVerified[index]?.status === 'verifying' ||
                               Boolean(contactVerified[index]?.cooldownUntil && contactVerified[index].cooldownUntil > Date.now())
                             }
-                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 disabled:opacity-50 disabled:hover:bg-green-50 px-3 py-2 rounded-lg transition-colors min-h-[36px]"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 hover:bg-green-100 dark:hover:bg-green-500/20 border border-green-200 dark:border-green-500/30 disabled:opacity-50 disabled:hover:bg-green-50 dark:hover:bg-green-500/10 px-3 py-2 rounded-lg transition-colors min-h-[36px]"
                           >
                             {contactVerified[index]?.status === 'verifying' ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -2957,7 +2957,7 @@ export default function ConfigPage() {
                         <button
                           type="button"
                           onClick={addContact}
-                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50/50 transition-all min-h-[44px]"
+                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 transition-all min-h-[44px]"
                         >
                           <Plus className="w-4 h-4" />
                           Agregar contacto
@@ -2977,15 +2977,15 @@ export default function ConfigPage() {
                 const limits = getPlanLimits(tagPlan);
                 if (!limits.hasVehicles) return null;
                 return (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
                 <label className="flex items-center justify-between p-4 sm:p-5 cursor-pointer hover:bg-gray-50/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                       <Car className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-gray-900">Mis Vehículos</h3>
-                      <p className="text-xs text-gray-500">Hasta 3 vehículos</p>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Mis Vehículos</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Hasta 3 vehículos</p>
                     </div>
                   </div>
                   <div className="relative">
@@ -2998,32 +2998,32 @@ export default function ConfigPage() {
                       }}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </div>
                 </label>
 
                 {vehicleSectionEnabled && (
-                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-4 border-t border-gray-100 pt-4">
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-4 border-t border-gray-100 dark:border-gray-800 pt-4">
                     {vehicles.map((vehicle, index) => (
-                      <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+                      <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                               <Car className="w-4 h-4 text-blue-600" />
                             </div>
-                            <span className="text-sm font-semibold text-gray-700">Vehículo {index + 1}</span>
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Vehículo {index + 1}</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => removeVehicle(index)}
-                            className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            className="text-red-400 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-sm font-semibold text-gray-700">Tipo de Vehiculo</label>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tipo de Vehiculo</label>
                           <div className="flex gap-2" role="radiogroup" aria-label="Tipo de vehiculo">
                             {(['AUTO', 'MOTO', 'BICICLETA'] as const).map((t) => (
                               <button
@@ -3035,7 +3035,7 @@ export default function ConfigPage() {
                                 className={`flex-1 h-10 rounded-xl text-sm font-medium transition-colors border ${
                                   vehicle.type === t
                                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500/40 hover:bg-blue-50 dark:hover:bg-blue-500/10'
                                 }`}
                               >
                                 {t === 'AUTO' ? 'Auto' : t === 'MOTO' ? 'Moto' : 'Bicicleta'}
@@ -3114,7 +3114,7 @@ export default function ConfigPage() {
 
                         {vehicle.type === 'BICICLETA' && (
                           <div className="space-y-1.5">
-                            <label className="block text-sm font-semibold text-gray-700">Tipo de Bicicleta</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tipo de Bicicleta</label>
                             <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label="Tipo de bicicleta">
                               {['Montaña', 'Ruta', 'Urbana', 'Electrica'].map((bt) => (
                                 <button
@@ -3126,7 +3126,7 @@ export default function ConfigPage() {
                                   className={`flex-1 min-w-[80px] h-10 rounded-xl text-sm font-medium transition-colors border ${
                                     vehicle.bikeType === bt
                                       ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                                      : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                      : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500/40 hover:bg-blue-50 dark:hover:bg-blue-500/10'
                                   }`}
                                 >
                                   {bt}
@@ -3139,13 +3139,13 @@ export default function ConfigPage() {
                         {vehicle.type !== 'BICICLETA' && (
                           <>
                             <div className="space-y-1.5">
-                              <label className="block text-sm font-semibold text-gray-700">Aseguradora</label>
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Aseguradora</label>
                               <select
                                 name={`vehicle-insurer-${index}`}
                                 autoComplete="off"
                                 value={vehicle.insurerId || ''}
                                 onChange={(e) => updateVehicle(index, 'insurerId', e.target.value)}
-                                className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-colors"
+                                className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-colors"
                               >
                                 <option value="">Sin aseguradora</option>
                                 {insurers.map((ins) => (
@@ -3153,7 +3153,7 @@ export default function ConfigPage() {
                                 ))}
                               </select>
                               {vehicle.insurerId && (
-                                <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
+                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg">
                                   <Phone className="w-3.5 h-3.5" />
                                   <span>
                                     Emergencias: {insurers.find(i => i.id === vehicle.insurerId)?.phone || '—'}
@@ -3181,7 +3181,7 @@ export default function ConfigPage() {
                         <button
                           type="button"
                           onClick={addVehicle}
-                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-semibold text-gray-500 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-all min-h-[44px]"
+                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-blue-400 dark:hover:border-blue-500/40 hover:text-blue-500 hover:bg-blue-50/50 transition-all min-h-[44px]"
                         >
                           <Plus className="w-4 h-4" />
                           {vehicles.length === 0 ? 'Agregar mi primer vehículo' : 'Agregar otro vehículo'}
@@ -3194,7 +3194,7 @@ export default function ConfigPage() {
                 );
               })()}
 
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+              <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -3206,7 +3206,7 @@ export default function ConfigPage() {
                     }}
                     className="mt-1 w-4 h-4 accent-red-600 focus:ring-2 focus:ring-red-500/30"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
                     {isMinor ? (
                       <>En mi calidad de madre, padre o tutor legal, he leído el{' '}</>
                     ) : (
@@ -3252,7 +3252,7 @@ export default function ConfigPage() {
                   <button
                     type="button"
                     onClick={() => setShowChangePinModal(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors min-h-[44px]"
                   >
                     <Lock className="w-4 h-4" />
                     Cambiar PIN
@@ -3263,7 +3263,7 @@ export default function ConfigPage() {
                     type="button"
                     onClick={() => setEditMode(false)}
                     disabled={saving}
-                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 min-h-[44px]"
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 min-h-[44px]"
                   >
                     Cancelar
                   </button>
@@ -3272,13 +3272,13 @@ export default function ConfigPage() {
 
               {showChangePinModal && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowChangePinModal(false)}>
-                  <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+                  <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
                     <div className="text-center mb-6">
-                      <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-2xl mb-4">
-                        <Lock className="w-7 h-7 text-gray-600" />
+                      <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 dark:bg-gray-800 rounded-2xl mb-4">
+                        <Lock className="w-7 h-7 text-gray-600 dark:text-gray-400" />
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900">Cambiar PIN</h3>
-                      <p className="text-sm text-gray-500 mt-2">Ingresa tu PIN actual y el nuevo PIN</p>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Cambiar PIN</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Ingresa tu PIN actual y el nuevo PIN</p>
                     </div>
 
                     <div className="space-y-3">
@@ -3292,7 +3292,7 @@ export default function ConfigPage() {
                         onChange={(e) => { setChangePinCurrent(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="PIN actual"
                         aria-label="PIN actual"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                       <label htmlFor="change-pin-new" className="sr-only">Nuevo PIN</label>
                       <input
@@ -3304,7 +3304,7 @@ export default function ConfigPage() {
                         onChange={(e) => { setChangePinNew(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="Nuevo PIN"
                         aria-label="Nuevo PIN"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                       <label htmlFor="change-pin-confirm" className="sr-only">Confirmar nuevo PIN</label>
                       <input
@@ -3316,7 +3316,7 @@ export default function ConfigPage() {
                         onChange={(e) => { setChangePinConfirm(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="Confirmar nuevo PIN"
                         aria-label="Confirmar nuevo PIN"
-                        className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                     </div>
 
@@ -3331,7 +3331,7 @@ export default function ConfigPage() {
                       <button
                         type="button"
                         onClick={() => { setShowChangePinModal(false); setChangePinCurrent(''); setChangePinNew(''); setChangePinConfirm(''); setChangePinError(''); }}
-                        className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
+                        className="flex-1 py-3 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors min-h-[44px]"
                       >
                         Cancelar
                       </button>
@@ -3364,7 +3364,7 @@ export default function ConfigPage() {
       }} />
 
       <div className="relative z-10 w-full max-w-sm">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 border border-gray-100 dark:border-gray-800">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="relative mx-auto w-16 h-16 mb-4">
@@ -3373,10 +3373,10 @@ export default function ConfigPage() {
                 <Lock className="w-7 h-7 text-white" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {pinMode === 'create' ? (pinStep === 'enter' ? 'Crear PIN' : 'Confirmar PIN') : 'Ingresar PIN'}
             </h1>
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
                {pinMode === 'create'
                 ? pinStep === 'enter'
                   ? 'Crea un PIN de 6 digitos para proteger tus datos'
@@ -3397,7 +3397,7 @@ export default function ConfigPage() {
                 <button
                   type="button"
                   onClick={() => setShowPin(!showPin)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30"
                 >
                 {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -3411,7 +3411,7 @@ export default function ConfigPage() {
                   className={`h-1 rounded-full transition-all duration-200 ${
                     (pinMode === 'create' && pinStep === 'confirm' ? confirmPin : pin).length >= i + 1
                       ? 'w-6 bg-red-500'
-                      : 'w-6 bg-gray-200'
+                      : 'w-6 bg-gray-200 dark:bg-gray-700'
                   }`}
                 />
               ))}
@@ -3419,7 +3419,7 @@ export default function ConfigPage() {
 
             {/* Error message */}
             {pinError && (
-              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-xl border border-red-100">
+              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-100 dark:border-red-500/30">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{pinError}</span>
               </div>
@@ -3447,7 +3447,7 @@ export default function ConfigPage() {
                   setConfirmPin('');
                   setPinError('');
                 }}
-                className="w-full text-center text-sm text-gray-500 hover:text-gray-700 py-2 transition-colors min-h-[44px] flex items-center justify-center"
+                className="w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 py-2 transition-colors min-h-[44px] flex items-center justify-center"
               >
                 Volver a ingresar PIN
               </button>
