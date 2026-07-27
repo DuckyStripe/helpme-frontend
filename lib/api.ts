@@ -471,25 +471,19 @@ export const pinApi = {
   },
 };
 
+export type WhatsappStatus = 'starting' | 'qr' | 'authenticated' | 'ready' | 'disconnected';
+
 export const settingsApi = {
-  async getOpenwa() {
-    return api.get<{ baseUrl: string; sessionId: string; hasApiKey: boolean; updatedAt: string | null }>('/settings/openwa');
+  async getWhatsappStatus() {
+    return api.get<{ status: WhatsappStatus; hasQr: boolean }>('/settings/whatsapp/status');
   },
 
-  async updateOpenwa(data: { baseUrl?: string; sessionId?: string; apiKey?: string }) {
-    return api.put<{ baseUrl: string; sessionId: string; hasApiKey: boolean; updatedAt: string | null }>('/settings/openwa', data);
+  async getWhatsappQr() {
+    return api.get<{ qr: string }>('/settings/whatsapp/qr');
   },
 
-  async testOpenwa() {
-    return api.post<{ ok: boolean; message: string; status?: string }>('/settings/openwa/test', {});
-  },
-
-  async generateOpenwaKey() {
-    return api.post<{ ok: boolean; message: string; apiKey?: string }>('/settings/openwa/generate-key', {});
-  },
-
-  async revealOpenwaKey() {
-    return api.get<{ ok: boolean; message: string; apiKey?: string }>('/settings/openwa/reveal-key');
+  async logoutWhatsapp() {
+    return api.post<{ ok: boolean; message: string }>('/settings/whatsapp/logout', {});
   },
 };
 
