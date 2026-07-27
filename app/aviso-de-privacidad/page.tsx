@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { Cross, ArrowLeft } from 'lucide-react';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function AvisoPrivacidadPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-100">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <header className="border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg px-2 py-1"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg px-2 py-1"
             aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -20,25 +21,26 @@ export default function AvisoPrivacidadPage() {
             <div className="flex items-center justify-center w-9 h-9 bg-red-600 rounded-lg">
               <Cross className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">HelpMe</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">HelpMe</span>
+            <ThemeToggle className="ml-2" />
           </div>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-4">
           Aviso de Privacidad
         </h1>
-        <p className="text-sm text-gray-500 mb-12">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-12">
           Última actualización: [DÍA] de [MES] de 2025
         </p>
 
         <div className="space-y-10">
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               1. Identidad y Domicilio del Responsable
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               <strong>[NOMBRE COMPLETO O RAZÓN SOCIAL]</strong>, con domicilio en <strong>[DIRECCIÓN COMPLETA, CDMX]</strong>,
               en adelante &quot;HelpMe&quot;, es el responsable del tratamiento de sus datos personales,
               de conformidad con la Ley Federal de Protección de Datos Personales en Posesión
@@ -47,20 +49,20 @@ export default function AvisoPrivacidadPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               2. Datos Personales que Recabamos
             </h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               HelpMe recaba las siguientes categorías de datos personales:
             </p>
-            <h3 className="font-semibold text-gray-900 mb-2">Datos de identificación:</h3>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Datos de identificación:</h3>
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-4">
               <li>Nombre completo</li>
               <li>Ciudad de residencia</li>
               <li>Número de teléfono (para contacto vía WhatsApp)</li>
             </ul>
-            <h3 className="font-semibold text-gray-900 mb-2">Datos médicos y de salud (datos sensibles):</h3>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Datos médicos y de salud (datos sensibles):</h3>
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-4">
               <li>Tipo de sangre</li>
               <li>Alergias</li>
               <li>Medicamentos de uso regular</li>
@@ -68,22 +70,22 @@ export default function AvisoPrivacidadPage() {
               <li>Condición de donador de órganos</li>
               <li>Contactos de emergencia</li>
             </ul>
-            <h3 className="font-semibold text-gray-900 mb-2">Otros datos sensibles y de identificación:</h3>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Otros datos sensibles y de identificación:</h3>
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-4">
               <li>Fecha y lugar de nacimiento, género</li>
               <li>Religión (dato sensible conforme al art. 3, fracción VI de la LFPDPPP)</li>
               <li>CURP y número de seguridad social (NSS) / Unidad de Medicina Familiar (UMF)</li>
               <li>Fotografía del titular, si decide agregarla (dato opcional, usado únicamente para
                 que quien lo asista en una emergencia pueda identificarlo visualmente)</li>
             </ul>
-            <h3 className="font-semibold text-gray-900 mb-2">Datos de ubicación (de quien escanea el tag, no del titular):</h3>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Datos de ubicación (de quien escanea el tag, no del titular):</h3>
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-4">
               <li>Coordenadas de geolocalización, capturadas únicamente si la persona que asiste
                 en la emergencia otorga el permiso de ubicación de su navegador, con el fin de
                 ubicar el sitio del incidente al alertar a un contacto de emergencia</li>
             </ul>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <p className="text-sm text-amber-800 leading-relaxed">
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4">
+              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
                 Los datos de salud, religión, los identificadores gubernamentales (CURP, NSS) y la
                 fotografía del titular son considerados <strong>datos sensibles</strong> conforme al
                 artículo 3, fracción VI de la LFPDPPP y reciben protección reforzada (cifrado
@@ -93,42 +95,42 @@ export default function AvisoPrivacidadPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               3. Finalidades del Tratamiento
             </h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               Sus datos personales serán utilizados para las siguientes finalidades <strong>primarias</strong>
               (necesarias para la prestación del servicio):
             </p>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-6">
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-6">
               <li>Registrar y activar su etiqueta de identificación de emergencia HelpMe</li>
               <li>Mostrar su información médica a personal de emergencias (paramédicos, policías,
                 personal de rescate) ante un accidente</li>
               <li>Permitirle actualizar su información médica mediante su PIN de acceso</li>
               <li>Brindarle soporte técnico relacionado con su producto</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               <strong>Finalidades secundarias</strong> (no necesarias para el servicio, puede negarse):
             </p>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-4">
               <li>Envío de comunicados sobre nuevos productos o actualizaciones de HelpMe</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Para negarse al tratamiento de finalidades secundarias, escríbanos a:
               📱 WhatsApp: <strong>5530541062</strong>
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               4. Transferencia de Datos
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               HelpMe <strong>no vende ni cede</strong> sus datos personales a terceros con fines
               comerciales. Sí existen las siguientes transferencias, necesarias para el
               funcionamiento del servicio:
             </p>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mt-4">
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mt-4">
               <li>Cuando sea requerido por autoridad competente mediante orden judicial</li>
               <li>Cuando sea necesario para proteger la vida o integridad física del titular</li>
               <li>
@@ -155,14 +157,14 @@ export default function AvisoPrivacidadPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               5. Seguridad de los Datos
             </h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               HelpMe implementa las siguientes medidas de seguridad para proteger
               sus datos personales:
             </p>
-            <ul className="list-disc list-inside text-gray-700 space-y-1">
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
               <li>Cifrado AES-256-GCM para datos médicos almacenados</li>
               <li>PIN de acceso personal protegido con hash bcrypt</li>
               <li>Transmisión de datos bajo protocolo HTTPS/TLS</li>
@@ -171,41 +173,41 @@ export default function AvisoPrivacidadPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               6. Derechos ARCO
             </h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               Usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse (ARCO)</strong>
               al tratamiento de sus datos personales. Para ejercer estos derechos:
             </p>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               📱 Escríbanos por WhatsApp al <strong>5530541062</strong> indicando:
             </p>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 mb-4">
               <li>Nombre completo</li>
               <li>Derecho que desea ejercer</li>
               <li>Descripción clara de lo que solicita</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Responderemos en un plazo máximo de <strong>20 días hábiles.</strong>
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               7. Uso de Cookies y Tecnologías de Rastreo
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Nuestro sitio web puede utilizar cookies de sesión estrictamente necesarias
               para su funcionamiento. No utilizamos cookies de rastreo publicitario.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               8. Cambios al Aviso de Privacidad
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Nos reservamos el derecho de modificar este Aviso de Privacidad en cualquier
               momento. Cualquier cambio será publicado en nuestro sitio web con la fecha
               de actualización correspondiente.
@@ -213,13 +215,13 @@ export default function AvisoPrivacidadPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               9. Contacto
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Para cualquier duda relacionada con el tratamiento de sus datos personales:
             </p>
-            <p className="text-gray-700 mt-2">
+            <p className="text-gray-700 dark:text-gray-300 mt-2">
               📱 WhatsApp: <strong>5530541062</strong>
               <br />
               🌐 <strong>[URL DEL SITIO WEB]</strong>
@@ -228,8 +230,8 @@ export default function AvisoPrivacidadPage() {
         </div>
       </main>
 
-      <footer className="border-t border-gray-100 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-sm text-gray-500">
+      <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>© {new Date().getFullYear()} HelpMe · Todos los derechos reservados · CDMX</p>
         </div>
       </footer>

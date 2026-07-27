@@ -339,7 +339,7 @@ function SectionCard({
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0">
-            <Icon className="w-5 h-5 text-red-600" />
+            <Icon className="w-5 h-5 text-red-600 dark:text-red-400" />
           </div>
           <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h3>
           {complete && (
@@ -390,7 +390,7 @@ const InputField = React.forwardRef<
         } ${props.className || ''}`}
       />
       {error && (
-        <div role="alert" className="flex items-center gap-1.5 text-red-600 text-xs font-medium pt-0.5">
+        <div role="alert" className="flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-medium pt-0.5">
           <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -1496,13 +1496,13 @@ export default function ConfigPage() {
                         </div>
                       )}
                       {photoProcessing && (
-                        <div className="absolute inset-0 bg-white/70 rounded-full flex items-center justify-center">
-                          <Loader2 className="w-6 h-6 animate-spin text-red-600" />
+                        <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 rounded-full flex items-center justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-red-600 dark:text-red-400" />
                         </div>
                       )}
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="cursor-pointer inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700">
+                      <label className="cursor-pointer inline-flex items-center gap-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700">
                         <Camera className="w-4 h-4" />
                         {medicalData.photo ? 'Cambiar foto' : 'Agregar foto'}
                         <input
@@ -1624,7 +1624,7 @@ export default function ConfigPage() {
                         ))}
                       </div>
                       {errors.bloodType && (
-                        <div role="alert" className="flex items-center gap-1.5 text-red-600 text-xs font-medium pt-0.5">
+                        <div role="alert" className="flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-medium pt-0.5">
                           <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                           <span>{errors.bloodType}</span>
                         </div>
@@ -2707,7 +2707,7 @@ export default function ConfigPage() {
                                     </span>
                                     <span className="text-xs text-gray-500 dark:text-gray-400 ml-1.5">Linea {item.line}</span>
                                     {item.isActive && (
-                                      <span className="ml-1.5 text-xs font-semibold text-red-600">Lo padezco</span>
+                                      <span className="ml-1.5 text-xs font-semibold text-red-600 dark:text-red-400">Lo padezco</span>
                                     )}
                                   </div>
                                 </div>
@@ -2854,8 +2854,8 @@ export default function ConfigPage() {
                     <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                            <Contact className="w-4 h-4 text-red-600" />
+                          <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+                            <Contact className="w-4 h-4 text-red-600 dark:text-red-400" />
                           </div>
                           <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Contacto {index + 1}</span>
                         </div>
@@ -2956,7 +2956,7 @@ export default function ConfigPage() {
                           </button>
                         )}
                         {contactVerified[index]?.phone === contact.phone && contactVerified[index]?.status === 'error' && (!contactVerified[index]?.cooldownUntil || contactVerified[index].cooldownUntil <= Date.now()) && (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
                             <AlertCircle className="w-3.5 h-3.5" /> {contactVerified[index]?.error || 'No se pudo verificar'}
                           </span>
                         )}
@@ -3229,7 +3229,7 @@ export default function ConfigPage() {
                       href="/aviso-de-privacidad"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-red-600 underline font-semibold"
+                      className="text-red-600 dark:text-red-400 underline font-semibold"
                     >
                       Aviso de Privacidad
                     </a>{' '}
@@ -3239,7 +3239,7 @@ export default function ConfigPage() {
                   </span>
                 </label>
                 {consentError && (
-                  <p className="text-sm text-red-600 font-medium">{consentError}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400 font-medium">{consentError}</p>
                 )}
               </div>
 
@@ -3305,7 +3305,7 @@ export default function ConfigPage() {
                         onChange={(e) => { setChangePinCurrent(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="PIN actual"
                         aria-label="PIN actual"
-                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                       <label htmlFor="change-pin-new" className="sr-only">Nuevo PIN</label>
                       <input
@@ -3317,7 +3317,7 @@ export default function ConfigPage() {
                         onChange={(e) => { setChangePinNew(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="Nuevo PIN"
                         aria-label="Nuevo PIN"
-                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                       <label htmlFor="change-pin-confirm" className="sr-only">Confirmar nuevo PIN</label>
                       <input
@@ -3329,12 +3329,12 @@ export default function ConfigPage() {
                         onChange={(e) => { setChangePinConfirm(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="Confirmar nuevo PIN"
                         aria-label="Confirmar nuevo PIN"
-                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
+                        className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                     </div>
 
                     {changePinError && (
-                      <div className="flex items-center gap-1.5 text-red-600 text-xs font-medium mt-3">
+                      <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-medium mt-3">
                         <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                         {changePinError}
                       </div>
@@ -3369,19 +3369,23 @@ export default function ConfigPage() {
 
   // PIN Screen
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-gray-50 dark:from-gray-950 dark:via-red-950/10 dark:to-gray-950 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: 'radial-gradient(circle, #dc2626 1px, transparent 1px)',
         backgroundSize: '24px 24px',
       }} />
 
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
       <div className="relative z-10 w-full max-w-sm">
         <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 border border-gray-100 dark:border-gray-800">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="relative mx-auto w-16 h-16 mb-4">
-              <div className="absolute inset-0 bg-red-100 rounded-2xl rotate-6" />
+              <div className="absolute inset-0 bg-red-100 dark:bg-red-500/10 rounded-2xl rotate-6" />
               <div className="relative bg-gradient-to-br from-red-500 to-red-700 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/30">
                 <Lock className="w-7 h-7 text-white" />
               </div>
@@ -3432,7 +3436,7 @@ export default function ConfigPage() {
 
             {/* Error message */}
             {pinError && (
-              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-100 dark:border-red-500/30">
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-100 dark:border-red-500/30">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{pinError}</span>
               </div>

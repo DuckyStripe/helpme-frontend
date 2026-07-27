@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { tagsApi, scanApi } from '@/lib/api';
 import LocationPickerModal from '@/components/LocationPickerModal';
 import LongPressButton from '@/components/ui/LongPressButton';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import {
   Shield, AlertTriangle, Loader2, AlertCircle, CheckCircle,
   MapPin, RefreshCw,
@@ -179,21 +180,24 @@ export default function QrViewerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-red-600 dark:text-red-500" />
       </div>
     );
   }
 
   if (error === 'suspended') {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-gray-500" />
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-gray-500 dark:text-gray-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tag Inactivo</h1>
-          <p className="text-gray-600">Este tag ha sido dado de baja del sistema.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tag Inactivo</h1>
+          <p className="text-gray-600 dark:text-gray-400">Este tag ha sido dado de baja del sistema.</p>
         </div>
       </div>
     );
@@ -201,13 +205,16 @@ export default function QrViewerPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-red-100 dark:bg-red-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tag No Encontrado</h1>
-          <p className="text-gray-600 mb-4">No se encontró información para este código.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tag No Encontrado</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">No se encontró información para este código.</p>
           <button
             onClick={() => window.location.reload()}
             className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -223,10 +230,13 @@ export default function QrViewerPage() {
   if (!data) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <main className="max-w-md mx-auto bg-white min-h-screen shadow-xl">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950">
+      <main className="max-w-md mx-auto bg-white dark:bg-gray-900 min-h-screen shadow-xl">
         {/* HEADER */}
-        <header className="bg-gradient-to-br from-red-600 to-red-700 text-white px-5 pt-8 pb-6 text-center">
+        <header className="bg-gradient-to-br from-red-600 to-red-700 text-white px-5 pt-8 pb-6 text-center relative">
+          <div className="absolute top-4 right-4">
+            <ThemeToggle />
+          </div>
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl backdrop-blur-sm mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
@@ -236,12 +246,12 @@ export default function QrViewerPage() {
 
         {/* INFO */}
         <section className="px-5 pt-6 pb-4">
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4">
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-5 mb-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-amber-800 mb-1">¿Encontraste este tag?</p>
-                <p className="text-xs text-amber-700 leading-relaxed">
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">¿Encontraste este tag?</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
                   Al presionar el botón de abajo, se enviará un mensaje a los contactos de emergencia
                   para que verifiquen el estado de salud del propietario. Esto ayuda a evitar falsas alarmas.
                 </p>
@@ -250,25 +260,25 @@ export default function QrViewerPage() {
           </div>
 
           {data.ownerName && (
-            <div className="bg-gray-50 rounded-2xl p-4 mb-4">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="bg-gray-200 w-10 h-10 rounded-xl flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-gray-500" />
+                <div className="bg-gray-200 dark:bg-gray-700 w-10 h-10 rounded-xl flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">Propietario</p>
-                  <p className="text-sm font-bold text-gray-900">{data.ownerName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wide">Propietario</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{data.ownerName}</p>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4">
+          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-2xl p-4 mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <MapPin className="w-4 h-4 text-blue-600" />
-              <p className="text-xs font-bold text-blue-800">Se solicitará tu ubicación</p>
+              <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <p className="text-xs font-bold text-blue-800 dark:text-blue-300">Se solicitará tu ubicación</p>
             </div>
-            <p className="text-[11px] text-blue-600 leading-relaxed">
+            <p className="text-[11px] text-blue-600 dark:text-blue-400 leading-relaxed">
               Para enviar la alerta, necesitaremos acceso a tu ubicación. Esto ayuda a los contactos
               a saber dónde se escaneó el tag.
             </p>
@@ -278,7 +288,7 @@ export default function QrViewerPage() {
         {/* BOTÓN DE ALERTA */}
         {data.hasContacts && (
           <section className="px-5 pb-6 space-y-3">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Verificar Estado del Propietario
             </p>
             <LongPressButton
@@ -289,7 +299,7 @@ export default function QrViewerPage() {
               label="Mantener presionado para verificar"
               countdownLabel="Verificando..."
             />
-            <p className="text-xs text-center text-gray-400">
+            <p className="text-xs text-center text-gray-400 dark:text-gray-500">
               Se enviará a los {data.contactCount} contacto{data.contactCount > 1 ? 's' : ''} de emergencia
             </p>
           </section>
@@ -297,10 +307,10 @@ export default function QrViewerPage() {
 
         {!data.hasContacts && (
           <section className="px-5 pb-6">
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
-              <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm font-bold text-gray-600">Sin contactos de emergencia</p>
-              <p className="text-xs text-gray-500 mt-1">
+            <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 text-center">
+              <AlertCircle className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+              <p className="text-sm font-bold text-gray-600 dark:text-gray-400">Sin contactos de emergencia</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Este tag aún no tiene contactos configurados.
               </p>
             </div>
@@ -312,16 +322,16 @@ export default function QrViewerPage() {
           <div className="px-5 pb-4" role="status" aria-live="polite">
             <div className={`rounded-2xl p-4 flex items-start gap-3 ${
               alertFeedback.type === 'success'
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200'
+                ? 'bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/30'
+                : 'bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30'
             }`}>
               {alertFeedback.type === 'success' ? (
-                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
               )}
               <p className={`text-sm font-medium ${
-                alertFeedback.type === 'success' ? 'text-green-800' : 'text-red-800'
+                alertFeedback.type === 'success' ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'
               }`}>
                 {alertFeedback.message}
               </p>
@@ -330,67 +340,67 @@ export default function QrViewerPage() {
         )}
 
         {/* FOOTER */}
-        <footer className="bg-gray-50 border-t border-gray-200 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500">
-          <p className="text-[10px] text-gray-400 text-center">
+        <footer className="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center">
             Esta verificación ayuda a confirmar el estado de salud del propietario.
           </p>
-          <p className="text-[10px] text-gray-300">HelpMe - Sistema de Emergencia</p>
+          <p className="text-[10px] text-gray-300 dark:text-gray-600">HelpMe - Sistema de Emergencia</p>
         </footer>
       </main>
 
       {/* MODAL INFO RESCATISTA */}
       {showRescuerInfo && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowRescuerInfo(false)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-amber-100 rounded-2xl mb-4">
-                <AlertTriangle className="w-7 h-7 text-amber-600" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-amber-100 dark:bg-amber-500/10 rounded-2xl mb-4">
+                <AlertTriangle className="w-7 h-7 text-amber-600 dark:text-amber-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Verificar Estado del Propietario</h3>
-              <p className="text-sm text-gray-500 mt-2">Se enviará un mensaje a los contactos para que verifiquen el estado de salud. Los datos opcionales ayudan a la familia a contactarte.</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Verificar Estado del Propietario</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Se enviará un mensaje a los contactos para que verifiquen el estado de salud. Los datos opcionales ayudan a la familia a contactarte.</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="qr-rescuer-name" className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
+                <label htmlFor="qr-rescuer-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tu nombre (opcional)</label>
                 <input
                   id="qr-rescuer-name"
                   type="text"
                   value={rescuerName}
                   onChange={(e) => setRescuerName(e.target.value)}
                   placeholder="Ej: Paramédico Juan"
-                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                  className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                 />
               </div>
 
               <div>
-                <label htmlFor="qr-rescuer-phone" className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
+                <label htmlFor="qr-rescuer-phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tu teléfono (opcional)</label>
                 <input
                   id="qr-rescuer-phone"
                   type="tel"
                   value={rescuerPhone}
                   onChange={(e) => setRescuerPhone(e.target.value)}
                   placeholder="Ej: +52 55 1234 5678"
-                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                  className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                 />
               </div>
 
               <div>
-                <label htmlFor="qr-rescuer-comment" className="block text-sm font-medium text-gray-700 mb-1">Comentario (opcional)</label>
+                <label htmlFor="qr-rescuer-comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comentario (opcional)</label>
                 <textarea
                   id="qr-rescuer-comment"
                   value={rescuerComment}
                   onChange={(e) => setRescuerComment(e.target.value)}
                   placeholder="Ej: Persona consciente, accidente vehicular..."
                   rows={2}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all resize-none"
                 />
               </div>
 
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowRescuerInfo(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   Cancelar
                 </button>

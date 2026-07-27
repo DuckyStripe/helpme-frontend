@@ -7,7 +7,7 @@ import { MapPin, Loader2, Send, X, AlertTriangle, RefreshCw } from 'lucide-react
 const LocationMap = dynamic(() => import('./LocationMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full flex items-center justify-center bg-gray-100">
+    <div className="h-full w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
       <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
     </div>
   ),
@@ -160,18 +160,18 @@ export default function LocationPickerModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div role="dialog" aria-modal="true" aria-labelledby="location-picker-title" className="bg-white w-full sm:max-w-md sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] overscroll-contain">
-        <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-gray-100">
+      <div role="dialog" aria-modal="true" aria-labelledby="location-picker-title" className="bg-white dark:bg-gray-900 w-full sm:max-w-md sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] overscroll-contain">
+        <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 id="location-picker-title" className="font-bold text-gray-900">Confirmar ubicación</h2>
-            <p className="text-xs text-gray-500">Ajusta el pin si no está en el lugar exacto</p>
+            <h2 id="location-picker-title" className="font-bold text-gray-900 dark:text-gray-100">Confirmar ubicación</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Ajusta el pin si no está en el lugar exacto</p>
           </div>
           <button
             onClick={onCancel}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
             aria-label="Cancelar"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
@@ -181,10 +181,10 @@ export default function LocationPickerModal({
 
         <div className="px-5 py-4 space-y-3">
           {showWarning && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800 leading-snug">
-                {isDefault 
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 dark:text-amber-300 leading-snug">
+                {isDefault
                   ? 'La ubicación actual es un punto de referencia. '
                   : 'No pudimos detectar tu ubicación exacta. '
                 }
@@ -192,20 +192,20 @@ export default function LocationPickerModal({
               </p>
             </div>
           )}
-          <div className="bg-gray-50 rounded-xl p-3 flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 flex items-start gap-2">
+            <MapPin className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-900 leading-snug">
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-snug">
                 GPS confirmado: {lat.toFixed(5)}, {lng.toFixed(5)}
               </p>
               {loadingAddress ? (
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   <span>Buscando calle de referencia…</span>
                 </div>
               ) : (
                 <div className="flex items-start justify-between gap-2 mt-1">
-                  <p className="text-xs text-gray-500 leading-snug break-words">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-snug break-words">
                     {geocodeError
                       ? '⚠️ Sin calle de referencia disponible (el pin sigue siendo exacto)'
                       : address
@@ -215,30 +215,30 @@ export default function LocationPickerModal({
                   {geocodeError && (
                     <button
                       onClick={handleRetryGeocode}
-                      className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors"
+                      className="flex-shrink-0 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
                       title="Reintentar"
                     >
-                      <RefreshCw className="w-3.5 h-3.5 text-gray-500" />
+                      <RefreshCw className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
                     </button>
                   )}
                 </div>
               )}
             </div>
           </div>
-          <p className="text-[11px] text-gray-400 leading-snug">
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-snug">
             El pin del mapa (coordenadas GPS) es lo que abre el rescatista en Google Maps y siempre
             es exacto. La calle es solo una referencia y puede faltar en zonas sin datos de OpenStreetMap.
           </p>
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700 leading-snug">{error}</p>
+            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 dark:text-red-400 leading-snug">{error}</p>
             </div>
           )}
           {needsConfirm && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800 leading-snug">
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 dark:text-amber-300 leading-snug">
                 La ubicación es aproximada. Te recomendamos ajustar el pin al lugar exacto. Presiona de nuevo para enviarla así.
               </p>
             </div>
