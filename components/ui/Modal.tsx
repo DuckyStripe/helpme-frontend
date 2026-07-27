@@ -21,6 +21,14 @@ const sizes = {
 export default function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
+  // onClose casi siempre se pasa como una arrow function inline en el caller
+  // (onClose={() => setShow(false)}), asi que su identidad cambia en cada
+  // render del padre. Guardarlo en un ref evita que el effect de abajo lo
+  // tenga como dependencia — si no, el effect se re-dispara en cada
+  // keystroke de cualquier input dentro del modal y panelRef.current.focus()
+  // le roba el foco al input justo despues de escribir un caracter.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -30,7 +38,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== 'Tab') return;
@@ -59,7 +67,8 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
         triggerRef.current.focus();
       }
     };
-  }, [isOpen, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
