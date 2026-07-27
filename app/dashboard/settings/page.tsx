@@ -151,19 +151,19 @@ export default function SettingsPage() {
   return (
     <DashboardLayout user={user}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-100">Configuración</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Configuración</h1>
         <p className="text-sm text-gray-500 mt-1">
           Ajustes de infraestructura que no requieren un redeploy
         </p>
       </div>
 
-      <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 max-w-2xl">
+      <div className="bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6 max-w-2xl">
         <div className="flex items-start gap-3 mb-6">
           <div className="w-10 h-10 bg-green-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <MessageCircle className="w-5 h-5 text-green-400" />
+            <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-gray-100">Sesión de WhatsApp (OpenWA)</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Sesión de WhatsApp (OpenWA)</h2>
             <p className="text-sm text-gray-500 mt-0.5">
               El backend envía las alertas de emergencia usando esta sesión. Si la sesión se cae o
               se reemplaza el número, cambia el ID aquí — se aplica de inmediato, sin necesidad de
@@ -179,34 +179,34 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">URL base de OpenWA</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">URL base de OpenWA</label>
               <input
                 type="text"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
                 placeholder="https://openwa.codelabs.com.mx"
                 autoComplete="off"
-                className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">ID de sesión</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">ID de sesión</label>
               <input
                 type="text"
                 value={sessionId}
                 onChange={(e) => setSessionId(e.target.value)}
                 placeholder="73fc17b3-1aa1-426a-89a1-fe7655cd9a7f"
                 autoComplete="off"
-                className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                API Key <span className="text-red-400">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                API Key <span className="text-red-600 dark:text-red-400">*</span>
                 {hasApiKey && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-400 font-normal">
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-normal">
                     <CheckCircle2 className="w-3.5 h-3.5" /> configurada
                   </span>
                 )}
@@ -218,12 +218,12 @@ export default function SettingsPage() {
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder={hasApiKey ? 'Dejar vacío para no cambiarla' : 'Requerida por OpenWA para enviar mensajes'}
                   autoComplete="off"
-                  className="w-full px-4 py-2.5 pr-11 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
+                  className="w-full px-4 py-2.5 pr-11 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                   aria-label={showApiKey ? 'Ocultar clave' : 'Mostrar clave'}
                 >
                   {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -238,7 +238,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={handleRevealKey}
                     disabled={revealingKey}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Revelar la API Key guardada en la base de datos"
                   >
                     {revealingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={handleGenerateKey}
                   disabled={generatingKey || !hasApiKey}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Generar nueva API Key desde el portal de OpenWA"
                 >
                   {generatingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
@@ -267,8 +267,8 @@ export default function SettingsPage() {
               <div
                 className={`rounded-lg p-3 flex items-start gap-2 text-sm ${
                   testResult.ok
-                    ? 'bg-green-600/10 border border-green-600/30 text-green-400'
-                    : 'bg-red-600/10 border border-red-600/30 text-red-400'
+                    ? 'bg-green-600/10 border border-green-600/30 text-green-700 dark:text-green-400'
+                    : 'bg-red-600/10 border border-red-600/30 text-red-700 dark:text-red-400'
                 }`}
               >
                 {testResult.ok ? (
@@ -286,7 +286,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleTest}
                   disabled={testing}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-700/50 text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                 >
                   {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
                   Probar conexión

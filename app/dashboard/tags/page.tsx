@@ -330,7 +330,7 @@ export default function TagsPage() {
     <DashboardLayout user={user}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Tags</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Tags</h1>
           <p className="text-sm text-gray-500 mt-1">Gestiona los tags NFC/QR del sistema</p>
         </div>
         {isAdmin && (
@@ -346,17 +346,17 @@ export default function TagsPage() {
 
       {!isAdmin && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5">
             <p className="text-sm text-gray-500 mb-1">Total asignados</p>
-            <p className="text-3xl font-bold text-gray-200">{vendorStats.total}</p>
+            <p className="text-3xl font-bold text-gray-800 dark:text-gray-200">{vendorStats.total}</p>
           </div>
-          <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5">
             <p className="text-sm text-gray-500 mb-1">Disponibles</p>
-            <p className="text-3xl font-bold text-emerald-400">{vendorStats.virgin}</p>
+            <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{vendorStats.virgin}</p>
           </div>
-          <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5">
             <p className="text-sm text-gray-500 mb-1">Activados</p>
-            <p className="text-3xl font-bold text-amber-400">{vendorStats.activated}</p>
+            <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">{vendorStats.activated}</p>
           </div>
         </div>
       )}
@@ -366,7 +366,7 @@ export default function TagsPage() {
           <button
             onClick={() => handleFilterChange({ ...filters, status: 'ALL' })}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
-              filters.status === 'ALL' ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+              filters.status === 'ALL' ? 'bg-gray-200 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             <span className="font-medium">Todos</span>
@@ -382,7 +382,7 @@ export default function TagsPage() {
                     <button
                       onClick={() => handleFilterChange({ ...filters, status: filters.status === status ? 'ALL' : status })}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
-                        filters.status === status ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+                        filters.status === status ? 'bg-gray-200 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
                       <StatusBadge status={status as TagStatus} />
@@ -393,7 +393,7 @@ export default function TagsPage() {
                     <button
                       onClick={() => handleFilterChange({ ...filters, status: filters.status === 'SENT' ? 'ALL' : 'SENT' })}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
-                        filters.status === 'SENT' ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+                        filters.status === 'SENT' ? 'bg-gray-200 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
                       <StatusBadge status="VIRGIN" isSent />
@@ -408,7 +408,7 @@ export default function TagsPage() {
                 key={status}
                 onClick={() => handleFilterChange({ ...filters, status: filters.status === status ? 'ALL' : status })}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors shrink-0 ${
-                  filters.status === status ? 'bg-gray-700/50 text-gray-200' : 'text-gray-500 hover:text-gray-300'
+                  filters.status === status ? 'bg-gray-200 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 <StatusBadge status={status as TagStatus} />
@@ -451,18 +451,18 @@ export default function TagsPage() {
           action={isAdmin ? { label: 'Crear Tags', onClick: () => setShowCreate(true) } : undefined}
         />
       ) : (
-        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[800px]">
               <thead>
-                <tr className="border-b border-gray-700/50">
+                <tr className="border-b border-gray-200 dark:border-gray-700/50">
                   {isAdmin && (
                     <th className="px-4 py-3 text-left w-10">
                       <input
                         type="checkbox"
                         checked={selected.size === tags.length && tags.length > 0}
                         onChange={toggleSelectAll}
-                        className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
                       />
                     </th>
                   )}
@@ -494,35 +494,35 @@ export default function TagsPage() {
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700/30">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700/30">
                 {tags.map(tag => (
-                  <tr key={tag.id} className="hover:bg-gray-700/20 transition-colors">
+                  <tr key={tag.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors">
                     {isAdmin && (
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={selected.has(tag.id)}
                           onChange={() => toggleSelect(tag.id)}
-                          className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
+                          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 text-red-600 focus:ring-red-500/50 focus:ring-offset-0 cursor-pointer"
                         />
                       </td>
                     )}
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs text-gray-300 cursor-help" title={tag.uuid}>{shortUuid(tag.uuid)}</span>
+                      <span className="font-mono text-xs text-gray-700 dark:text-gray-300 cursor-help" title={tag.uuid}>{shortUuid(tag.uuid)}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <StatusBadge status={tag.status} isSent={!!tag.instructionsSentAt} />
                         {tag.status === 'ACTIVE' && tag.userDisabled && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-full" title="Modo privado activado por el dueño">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                             Privado
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">{tag.ownerPhone || '—'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-400">{tag.ownerName || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{tag.ownerPhone || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{tag.ownerName || '—'}</td>
                     <td className="px-4 py-3">
                       {tag.plan ? (
                         <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
@@ -533,16 +533,16 @@ export default function TagsPage() {
                       )}
                     </td>
                     {isAdmin && (
-                      <td className="px-4 py-3 text-sm text-gray-400">{tag.seller?.name || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{tag.seller?.name || '—'}</td>
                     )}
-                    <td className="px-4 py-3 text-sm text-gray-400 text-center">{tag.viewCount}</td>
-                    <td className="px-4 py-3 text-sm text-gray-400 text-center">{tag.scanCount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">{tag.viewCount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">{tag.scanCount}</td>
                     <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{new Date(tag.createdAt).toLocaleDateString('es-MX')}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => copyLink(tag.uuid)}
-                          className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
+                          className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
                           title="Copiar URL para NFC"
                           aria-label="Copiar URL para NFC"
                         >
@@ -552,7 +552,7 @@ export default function TagsPage() {
                         {tag.status === 'VIRGIN' && (
                           <button
                             onClick={() => openSendInstructions(tag)}
-                            className="p-1.5 text-gray-500 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors"
                             title="Enviar instrucciones por WhatsApp"
                             aria-label="Enviar instrucciones por WhatsApp"
                           >
@@ -562,7 +562,7 @@ export default function TagsPage() {
                         <a
                           href={`/L/${tag.uuid}`}
                           target="_blank"
-                          className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                          className="p-1.5 text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
                           title="Ver tag"
                           aria-label="Ver tag"
                         >
@@ -571,7 +571,7 @@ export default function TagsPage() {
                         {isAdmin && (
                           <button
                             onClick={() => openChangePlan(tag)}
-                            className="p-1.5 text-gray-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
                             title="Cambiar plan"
                             aria-label="Cambiar plan"
                           >
@@ -581,7 +581,7 @@ export default function TagsPage() {
                         {isAdmin && tag.status !== 'VIRGIN' && tag.status !== 'SUSPENDED' && (
                           <button
                             onClick={() => handleUnlockPin(tag.id)}
-                            className="p-1.5 text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                             title="Desbloquear PIN"
                             aria-label="Desbloquear PIN"
                           >
@@ -591,7 +591,7 @@ export default function TagsPage() {
                         {isAdmin && tag.status !== 'SUSPENDED' && (
                           <button
                             onClick={() => setConfirmSuspendId(tag.id)}
-                            className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Suspender"
                             aria-label="Suspender"
                           >
@@ -601,7 +601,7 @@ export default function TagsPage() {
                         {isAdmin && tag.status === 'SUSPENDED' && (
                           <button
                             onClick={() => handleResume(tag.id)}
-                            className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
                             title="Reanudar"
                             aria-label="Reanudar"
                           >
@@ -623,11 +623,11 @@ export default function TagsPage() {
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Crear Tags" size="sm">
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Plan</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plan</label>
             <select
               value={createPlan}
               onChange={(e) => setCreatePlan(e.target.value as PlanType)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="PRINCIPAL">Principal ($149)</option>
               <option value="PRO">Pro ($449)</option>
@@ -635,20 +635,20 @@ export default function TagsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Cantidad de tags</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cantidad de tags</label>
             <input
               type="number"
               min={1}
               max={500}
               value={createQty}
               onChange={(e) => setCreateQty(parseInt(e.target.value) || 1)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             />
             <p className="text-xs text-gray-500 mt-1">Máximo 500 tags por lote</p>
           </div>
           {createQty === 1 && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Teléfono del destinatario <span className="text-gray-500">(opcional)</span>
               </label>
               <input
@@ -658,17 +658,17 @@ export default function TagsPage() {
                 placeholder="10 dígitos, ej: 5512345678"
                 value={createOwnerPhone}
                 onChange={(e) => setCreateOwnerPhone(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               />
               <p className="text-xs text-gray-500 mt-1">Se enviarán instrucciones de configuración por WhatsApp. Este número NO se guarda en el sistema.</p>
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Asignar a</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Asignar a</label>
             <select
               value={createSellerId}
               onChange={(e) => setCreateSellerId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="">Admin (yo)</option>
               {sellers.map(s => (
@@ -682,7 +682,7 @@ export default function TagsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowCreate(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -700,11 +700,11 @@ export default function TagsPage() {
 
       <Modal isOpen={showAssign} onClose={() => setShowAssign(false)} title="Asignar Vendedor" size="sm">
         <div className="space-y-5">
-          <p className="text-sm text-gray-400">Asignar {selected.size} tag{selected.size > 1 ? 's' : ''} a:</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Asignar {selected.size} tag{selected.size > 1 ? 's' : ''} a:</p>
           <select
             value={assignSellerId}
             onChange={(e) => setAssignSellerId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           >
             <option value="">Seleccionar vendedor...</option>
             {sellers.map(s => (
@@ -714,7 +714,7 @@ export default function TagsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowAssign(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -732,22 +732,22 @@ export default function TagsPage() {
 
       <Modal isOpen={showChangePlan} onClose={() => setShowChangePlan(false)} title="Cambiar Plan del Tag" size="sm">
         <div className="space-y-5">
-          <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-3">
+          <div className="bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-3">
             <p className="text-xs text-gray-500 mb-1">Tag</p>
-            <p className="font-mono text-sm text-gray-200">{changePlanTag?.uuid ? shortUuid(changePlanTag.uuid) : ''}</p>
+            <p className="font-mono text-sm text-gray-800 dark:text-gray-200">{changePlanTag?.uuid ? shortUuid(changePlanTag.uuid) : ''}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Plan actual</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plan actual</label>
             <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full ${PLAN_COLORS[changePlanTag?.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[changePlanTag?.plan as PlanType]?.text || 'text-gray-700'}`}>
               {PLAN_LABELS[changePlanTag?.plan as PlanType] || changePlanTag?.plan || 'Sin plan'}
             </span>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Nuevo plan</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nuevo plan</label>
             <select
               value={newPlan}
               onChange={(e) => setNewPlan(e.target.value as PlanType)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="PRINCIPAL">Principal ($149)</option>
               <option value="PRO">Pro ($449)</option>
@@ -757,7 +757,7 @@ export default function TagsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowChangePlan(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -775,13 +775,13 @@ export default function TagsPage() {
 
       <Modal isOpen={showSendInstructions} onClose={() => setShowSendInstructions(false)} title="Enviar Instrucciones por WhatsApp" size="sm">
         <div className="space-y-5">
-          <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-3">
+          <div className="bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-3">
             <p className="text-xs text-gray-500 mb-1">Tag</p>
-            <p className="font-mono text-sm text-gray-200">{sendInstructionsTag?.uuid ? shortUuid(sendInstructionsTag.uuid) : ''}</p>
-            <p className="text-xs text-gray-400 mt-1">Plan: {PLAN_LABELS[sendInstructionsTag?.plan as PlanType] || sendInstructionsTag?.plan || 'Sin plan'}</p>
+            <p className="font-mono text-sm text-gray-800 dark:text-gray-200">{sendInstructionsTag?.uuid ? shortUuid(sendInstructionsTag.uuid) : ''}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Plan: {PLAN_LABELS[sendInstructionsTag?.plan as PlanType] || sendInstructionsTag?.plan || 'Sin plan'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono del destinatario</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono del destinatario</label>
             <input
               type="tel"
               inputMode="numeric"
@@ -789,14 +789,14 @@ export default function TagsPage() {
               placeholder="10 dígitos, ej: 5512345678"
               value={sendInstructionsPhone}
               onChange={(e) => setSendInstructionsPhone(e.target.value.replace(/\D/g, ''))}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
             />
             <p className="text-xs text-gray-500 mt-1">Se enviarán instrucciones de configuración. Este número NO se guarda en el sistema.</p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => setShowSendInstructions(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -815,13 +815,13 @@ export default function TagsPage() {
       <Modal isOpen={!!confirmSuspendId} onClose={() => setConfirmSuspendId(null)} title="Suspender Tag" size="sm">
         <div className="text-center">
           <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-            <Ban className="w-6 h-6 text-red-400" />
+            <Ban className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-          <p className="text-gray-300 mb-6">¿Suspender este tag?</p>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">¿Suspender este tag?</p>
           <div className="flex gap-3">
             <button
               onClick={() => setConfirmSuspendId(null)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -838,13 +838,13 @@ export default function TagsPage() {
       <Modal isOpen={confirmBulkSuspend} onClose={() => setConfirmBulkSuspend(false)} title="Suspender Tags" size="sm">
         <div className="text-center">
           <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-            <Ban className="w-6 h-6 text-red-400" />
+            <Ban className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-          <p className="text-gray-300 mb-6">¿Suspender {selected.size} tag{selected.size > 1 ? 's' : ''}?</p>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">¿Suspender {selected.size} tag{selected.size > 1 ? 's' : ''}?</p>
           <div className="flex gap-3">
             <button
               onClick={() => setConfirmBulkSuspend(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>

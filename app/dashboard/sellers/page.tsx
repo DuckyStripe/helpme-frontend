@@ -236,13 +236,13 @@ export default function SellersPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Vendedores</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendedores</h1>
           <p className="text-sm text-gray-500 mt-1">Gestiona los vendedores y sus tags asignados</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <button
             onClick={() => setShowAssign(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-700/50 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600/50"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600/50"
           >
             <Tag className="w-4 h-4" />
             Asignar Tags
@@ -266,7 +266,7 @@ export default function SellersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar vendedor…"
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           />
         </div>
       </div>
@@ -290,16 +290,16 @@ export default function SellersPage() {
             return (
               <div
                 key={seller.id}
-                className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5 hover:border-gray-600/50 transition-colors group"
+                className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5 hover:border-gray-300 dark:hover:border-gray-600/50 transition-colors group"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-red-600/10 rounded-lg flex items-center justify-center">
-                      <span className="text-sm font-bold text-red-400">{seller.name.charAt(0).toUpperCase()}</span>
+                      <span className="text-sm font-bold text-red-600 dark:text-red-400">{seller.name.charAt(0).toUpperCase()}</span>
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-200">{seller.name}</h3>
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{seller.name}</h3>
                       <p className="text-xs text-gray-500 flex items-center gap-1">
                         <Mail className="w-3 h-3" />
                         {seller.email}
@@ -308,7 +308,7 @@ export default function SellersPage() {
                   </div>
                   <button
                     onClick={() => loadSellerDetail(seller)}
-                    className="p-1.5 text-gray-600 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1.5 text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                     aria-label="Ver detalle"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -318,19 +318,19 @@ export default function SellersPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-4 gap-3 mb-4">
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-200">{seller.tagCount}</p>
+                    <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{seller.tagCount}</p>
                     <p className="text-[10px] text-gray-500 uppercase">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-bold text-emerald-400">{seller.active}</p>
+                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{seller.active}</p>
                     <p className="text-[10px] text-gray-500 uppercase">Activos</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-400">{seller.virgin}</p>
+                    <p className="text-lg font-bold text-gray-500 dark:text-gray-400">{seller.virgin}</p>
                     <p className="text-[10px] text-gray-500 uppercase">Vírgenes</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-bold text-red-400">{seller.suspended}</p>
+                    <p className="text-lg font-bold text-red-600 dark:text-red-400">{seller.suspended}</p>
                     <p className="text-[10px] text-gray-500 uppercase">Baja</p>
                   </div>
                 </div>
@@ -339,9 +339,9 @@ export default function SellersPage() {
                 <div className="mb-4">
                   <div className="flex items-center justify-between text-xs mb-1.5">
                     <span className="text-gray-500">Tasa de activación</span>
-                    <span className="text-gray-300 font-medium">{rate}%</span>
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">{rate}%</span>
                   </div>
-                  <div className="h-2 bg-gray-700/50 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700/50 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-red-600 to-emerald-500 rounded-full transition-[width]"
                       style={{ width: `${rate}%` }}
@@ -350,13 +350,13 @@ export default function SellersPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-3 border-t border-gray-700/30">
+                <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700/30">
                   <button
                     onClick={() => {
                       setAssignSellerId(seller.id);
                       setShowAssign(true);
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Asignar tags
@@ -368,7 +368,7 @@ export default function SellersPage() {
                       setConfirmNewPassword('');
                       setShowResetPassword(true);
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                   >
                     <Key className="w-3.5 h-3.5" />
                     Contraseña
@@ -378,7 +378,7 @@ export default function SellersPage() {
                       setDeleteSeller(seller);
                       setShowDelete(true);
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                   >
                     Eliminar
                   </button>
@@ -393,52 +393,52 @@ export default function SellersPage() {
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Nuevo Vendedor" size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Nombre</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nombre</label>
             <input
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               autoComplete="name"
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Nombre completo"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
             <input
               type="email"
               value={formEmail}
               onChange={(e) => setFormEmail(e.target.value)}
               autoComplete="email"
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="email@ejemplo.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Contraseña</label>
             <input
               type="password"
               value={formPassword}
               onChange={(e) => setFormPassword(e.target.value)}
               autoComplete="new-password"
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Mínimo 6 caracteres"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Confirmar Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirmar Contraseña</label>
             <input
               type="password"
               value={formConfirmPassword}
               onChange={(e) => setFormConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Repite la contraseña"
             />
           </div>
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowCreate(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -458,9 +458,9 @@ export default function SellersPage() {
       <Modal isOpen={showDelete} onClose={() => setShowDelete(false)} title="Eliminar Vendedor" size="sm">
         <div className="text-center">
           <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-            <Ban className="w-6 h-6 text-red-400" />
+            <Ban className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-          <p className="text-gray-300 mb-2">
+          <p className="text-gray-700 dark:text-gray-300 mb-2">
             ¿Eliminar a <strong>{deleteSeller?.name}</strong>?
           </p>
           <p className="text-sm text-gray-500 mb-6">
@@ -469,7 +469,7 @@ export default function SellersPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowDelete(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -489,11 +489,11 @@ export default function SellersPage() {
       <Modal isOpen={showAssign} onClose={() => setShowAssign(false)} title="Asignar Tags" size="sm">
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Vendedor</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Vendedor</label>
             <select
               value={assignSellerId}
               onChange={(e) => setAssignSellerId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="">Seleccionar vendedor...</option>
               {sellers.map(s => (
@@ -502,20 +502,20 @@ export default function SellersPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Cantidad de tags</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cantidad de tags</label>
             <input
               type="number"
               min={1}
               max={500}
               value={assignQty}
               onChange={(e) => setAssignQty(parseInt(e.target.value) || 1)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             />
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => setShowAssign(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -534,33 +534,33 @@ export default function SellersPage() {
       {/* Reset Password Modal */}
       <Modal isOpen={showResetPassword} onClose={() => setShowResetPassword(false)} title="Cambiar Contraseña" size="sm">
         <div className="space-y-4">
-          <p className="text-sm text-gray-400">
-            Nueva contraseña para <strong className="text-gray-200">{resetSeller?.name}</strong>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Nueva contraseña para <strong className="text-gray-800 dark:text-gray-200">{resetSeller?.name}</strong>
           </p>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Nueva Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nueva Contraseña</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Mínimo 6 caracteres"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Confirmar Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirmar Contraseña</label>
             <input
               type="password"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Repite la contraseña"
             />
           </div>
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowResetPassword(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -588,21 +588,21 @@ export default function SellersPage() {
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {/* Summary */}
             {selectedSeller && (
-              <div className="grid grid-cols-4 gap-3 mb-4 p-4 bg-gray-800/50 rounded-lg">
+              <div className="grid grid-cols-4 gap-3 mb-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                 <div className="text-center">
-                  <p className="text-xl font-bold text-gray-200">{selectedSeller.tagCount}</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{selectedSeller.tagCount}</p>
                   <p className="text-xs text-gray-500">Total</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-bold text-emerald-400">{selectedSeller.active}</p>
+                  <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{selectedSeller.active}</p>
                   <p className="text-xs text-gray-500">Activos</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-bold text-gray-400">{selectedSeller.virgin}</p>
+                  <p className="text-xl font-bold text-gray-500 dark:text-gray-400">{selectedSeller.virgin}</p>
                   <p className="text-xs text-gray-500">Vírgenes</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-bold text-amber-400">{selectedSeller.incomplete}</p>
+                  <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{selectedSeller.incomplete}</p>
                   <p className="text-xs text-gray-500">Incompletos</p>
                 </div>
               </div>
@@ -610,13 +610,13 @@ export default function SellersPage() {
             {/* Tags list */}
             <div className="grid grid-cols-2 gap-2">
               {sellerTags.map(tag => (
-                <div key={tag.id} className="flex items-center justify-between px-3 py-2 bg-gray-800/30 rounded-lg">
-                  <span className="font-mono text-xs text-gray-400 truncate flex-1">{tag.uuid.substring(0, 16)}…</span>
+                <div key={tag.id} className="flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800/30 rounded-lg">
+                  <span className="font-mono text-xs text-gray-500 dark:text-gray-400 truncate flex-1">{tag.uuid.substring(0, 16)}…</span>
                   <span className={`ml-2 px-2 py-0.5 text-[10px] font-medium rounded-full ${
-                    tag.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' :
-                    tag.status === 'VIRGIN' ? 'bg-gray-500/10 text-gray-400' :
-                    tag.status === 'INCOMPLETE' ? 'bg-amber-500/10 text-amber-400' :
-                    'bg-red-500/10 text-red-400'
+                    tag.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                    tag.status === 'VIRGIN' ? 'bg-gray-500/10 text-gray-600 dark:text-gray-400' :
+                    tag.status === 'INCOMPLETE' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                    'bg-red-500/10 text-red-600 dark:text-red-400'
                   }`}>
                     {tag.status}
                   </span>

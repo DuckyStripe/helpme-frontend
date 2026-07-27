@@ -11,24 +11,24 @@ interface StatCardProps {
 }
 
 const colors = {
-  red: { bg: 'bg-red-500/10', text: 'text-red-400', icon: 'text-red-400' },
-  emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', icon: 'text-emerald-400' },
-  amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', icon: 'text-amber-400' },
-  blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', icon: 'text-blue-400' },
-  gray: { bg: 'bg-gray-500/10', text: 'text-gray-400', icon: 'text-gray-400' },
+  red: { bg: 'bg-red-500/10', text: 'text-red-600 dark:text-red-400', icon: 'text-red-600 dark:text-red-400' },
+  emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', icon: 'text-emerald-600 dark:text-emerald-400' },
+  amber: { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', icon: 'text-amber-600 dark:text-amber-400' },
+  blue: { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', icon: 'text-blue-600 dark:text-blue-400' },
+  gray: { bg: 'bg-gray-500/10', text: 'text-gray-600 dark:text-gray-400', icon: 'text-gray-600 dark:text-gray-400' },
 };
 
 export default function StatCard({ label, value, icon: Icon, color = 'gray', trend }: StatCardProps) {
   const c = colors[color];
   return (
-    <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5 hover:border-gray-600/50 transition-colors">
+    <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5 hover:border-gray-300 dark:hover:border-gray-600/50 transition-colors">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-400 mb-1">{label}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
           <p className={`text-3xl font-bold ${c.text}`}>{value}</p>
           {trend && (
             <p className="text-xs text-gray-500 mt-2">
-              <span className={trend.value >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+              <span className={trend.value >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
                 {trend.value >= 0 ? '+' : ''}{trend.value}%
               </span>
               {' '}{trend.label}

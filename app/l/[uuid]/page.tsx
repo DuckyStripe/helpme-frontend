@@ -7,6 +7,7 @@ import { calculateAge } from '@/lib/utils';
 import { getPlanLimits, type PlanType } from '@/lib/plans';
 import LocationPickerModal from '@/components/LocationPickerModal';
 import LongPressButton from '@/components/ui/LongPressButton';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import {
   Activity, Droplet, AlertTriangle, ShieldPlus, Contact,
   Phone, Stethoscope, Pill, ShieldCheck, Loader2, AlertCircle,
@@ -302,21 +303,24 @@ export default function ViewerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-red-600 dark:text-red-500" />
       </div>
     );
   }
 
   if (error === 'suspended') {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-gray-500" />
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-gray-500 dark:text-gray-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tag Inactivo</h1>
-          <p className="text-gray-600">Este tag ha sido dado de baja del sistema.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tag Inactivo</h1>
+          <p className="text-gray-600 dark:text-gray-400">Este tag ha sido dado de baja del sistema.</p>
         </div>
       </div>
     );
@@ -324,13 +328,16 @@ export default function ViewerPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-red-100 dark:bg-red-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tag No Encontrado</h1>
-          <p className="text-gray-600">{error}</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tag No Encontrado</h1>
+          <p className="text-gray-600 dark:text-gray-400">{error}</p>
         </div>
       </div>
     );
@@ -338,13 +345,16 @@ export default function ViewerPage() {
 
   if (expired) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Clock className="w-8 h-8 text-gray-500" />
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Sesión Expirada</h1>
-          <p className="text-gray-600 mb-4">Por seguridad, la ficha médica se oculta después de un tiempo. Vuelve a escanear el tag o recarga para verla de nuevo.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Sesión Expirada</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Por seguridad, la ficha médica se oculta después de un tiempo. Vuelve a escanear el tag o recarga para verla de nuevo.</p>
           <button
             onClick={handleReload}
             className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors active:scale-95"
@@ -361,13 +371,16 @@ export default function ViewerPage() {
 
   if (data.status === 'VIRGIN' || data.status === 'INCOMPLETE') {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShieldPlus className="w-8 h-8 text-yellow-600" />
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <div className="bg-yellow-100 dark:bg-yellow-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldPlus className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tag Sin Configurar</h1>
-          <p className="text-gray-600 mb-4">Este tag aún no ha sido activado por su dueño.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tag Sin Configurar</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Este tag aún no ha sido activado por su dueño.</p>
           <a
             href={`/l/${uuid}/config`}
             className="inline-block px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors"
@@ -382,17 +395,20 @@ export default function ViewerPage() {
   if (data.userDisabled) {
     const realContacts = data.contacts.filter((c) => c.name.trim() || c.phone.trim());
     return (
-      <div className="min-h-screen bg-gray-100 flex items-start justify-center p-0 sm:p-4 sm:items-center">
-        <main className="w-full max-w-md bg-white sm:rounded-3xl shadow-2xl overflow-hidden relative z-10 min-h-screen sm:min-h-0">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-start justify-center p-0 sm:p-4 sm:items-center">
+        <main className="w-full max-w-md bg-white dark:bg-gray-900 sm:rounded-3xl shadow-2xl overflow-hidden relative z-10 min-h-screen sm:min-h-0">
           <header className="bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 text-white px-5 pt-6 pb-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl">
-                <ShieldOff className="w-6 h-6 text-white" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl">
+                  <ShieldOff className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold">Ficha Bloqueada</h1>
+                  <p className="text-amber-100 text-sm">Modo privado activado por el dueño</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold">Ficha Bloqueada</h1>
-                <p className="text-amber-100 text-sm">Modo privado activado por el dueño</p>
-              </div>
+              <ThemeToggle />
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-sm text-amber-50 leading-relaxed">
@@ -403,20 +419,20 @@ export default function ViewerPage() {
 
           {realContacts.length > 0 && (
             <section className="px-5 pt-5">
-              <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <PhoneCall className="w-4 h-4" />
                 Contactos de Emergencia
               </h2>
               <div className="space-y-2.5">
                 {realContacts.map((contact, index) => (
-                  <div key={index} className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                  <div key={index} className="bg-emerald-50 dark:bg-emerald-500/10 border-2 border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="bg-emerald-600 p-2.5 rounded-xl text-white flex-shrink-0">
                         <Contact className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-emerald-900 truncate">{contact.name}</p>
-                        <p className="text-[11px] text-emerald-600 font-medium">{contact.relationship}</p>
+                        <p className="text-sm font-bold text-emerald-900 dark:text-emerald-300 truncate">{contact.name}</p>
+                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{contact.relationship}</p>
                       </div>
                     </div>
                     <a
@@ -432,14 +448,14 @@ export default function ViewerPage() {
           )}
 
           <section className="px-5 pt-5 pb-5">
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-5">
+            <div className="bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-4">
-                <div className="bg-amber-100 p-2.5 rounded-xl">
-                  <Key className="w-5 h-5 text-amber-600" />
+                <div className="bg-amber-100 dark:bg-amber-500/10 p-2.5 rounded-xl">
+                  <Key className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <h2 id="unlock-code-heading" className="text-sm font-bold text-gray-900">Desbloquear Ficha</h2>
-                  <p className="text-xs text-gray-500">Ingresa el código de emergencia</p>
+                  <h2 id="unlock-code-heading" className="text-sm font-bold text-gray-900 dark:text-gray-100">Desbloquear Ficha</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Ingresa el código de emergencia</p>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -456,7 +472,7 @@ export default function ViewerPage() {
                   placeholder="Código de 6 dígitos"
                   aria-labelledby="unlock-code-heading"
                   aria-label="Código de desbloqueo"
-                  className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all font-mono text-center text-lg tracking-widest"
+                  className="flex-1 h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all font-mono text-center text-lg tracking-widest"
                 />
                 <button
                   onClick={handleUnlock}
@@ -467,19 +483,19 @@ export default function ViewerPage() {
                 </button>
               </div>
               {unlockError && (
-                <div className="flex items-center gap-1.5 text-red-600 text-xs font-medium mt-2">
+                <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-medium mt-2">
                   <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                   {unlockError}
                 </div>
               )}
-              <p className="text-xs text-gray-400 mt-3">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
                 ¿No tienes el código? Comunícate con los contactos de emergencia listados arriba.
               </p>
             </div>
           </section>
 
-          <footer className="bg-gray-50 border-t border-gray-200 p-5 flex flex-col items-center gap-2 text-gray-500">
-            <p className="text-[10px] text-gray-400 text-center">
+          <footer className="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 p-5 flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center">
               HelpMe - Sistema de Emergencia
             </p>
           </footer>
@@ -491,9 +507,12 @@ export default function ViewerPage() {
   const md = data.medicalData;
   if (!md) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm">
-          <p className="text-gray-600">Sin datos médicos disponibles.</p>
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center max-w-sm">
+          <p className="text-gray-600 dark:text-gray-400">Sin datos médicos disponibles.</p>
         </div>
       </div>
     );
@@ -513,7 +532,7 @@ export default function ViewerPage() {
   const hasAnyDevice = hasPacemaker || hasImplantContraceptive || hasImplantMammary || hasOrthopedicImplants || hasCochlearImplant || hasOcularProsthesis;
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex items-start justify-center p-0 sm:p-4 sm:items-center">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex items-start justify-center p-0 sm:p-4 sm:items-center">
       <style>{`
         @media print {
           body { background: white !important; }
@@ -521,8 +540,8 @@ export default function ViewerPage() {
           main { box-shadow: none !important; border: none !important; }
         }
       `}</style>
-      <main className="w-full max-w-md bg-white sm:rounded-3xl shadow-2xl overflow-hidden relative z-10 min-h-screen sm:min-h-0">
-        
+      <main className="w-full max-w-md bg-white dark:bg-gray-900 sm:rounded-3xl shadow-2xl overflow-hidden relative z-10 min-h-screen sm:min-h-0">
+
         {/* HERO - Información crítica inmediata */}
         <header className="bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white px-5 pt-6 pb-5">
           <div className="flex items-center justify-between mb-4">
@@ -535,15 +554,16 @@ export default function ViewerPage() {
                 <p className="text-[9px] text-red-200 uppercase tracking-widest">Emergencia</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="no-print flex items-center gap-2">
               {remainingSec !== null && (
-                <div className="no-print flex items-center gap-1 bg-white/10 px-2.5 py-1.5 rounded-xl" title="Esta ficha se oculta automáticamente por seguridad">
+                <div className="flex items-center gap-1 bg-white/10 px-2.5 py-1.5 rounded-xl" title="Esta ficha se oculta automáticamente por seguridad">
                   <Clock className="w-3.5 h-3.5 text-red-100" />
                   <span className="text-xs font-mono font-bold text-red-100">
                     {String(Math.floor(remainingSec / 60)).padStart(2, '0')}:{String(remainingSec % 60).padStart(2, '0')}
                   </span>
                 </div>
               )}
+              <ThemeToggle />
             </div>
           </div>
 
@@ -604,33 +624,33 @@ export default function ViewerPage() {
           <div className="grid grid-cols-2 gap-3">
             {/* Alergias */}
             <div className={`rounded-2xl p-4 border-2 shadow-lg ${
-              hasAllergies 
-                ? 'bg-amber-50 border-amber-300' 
-                : 'bg-green-50 border-green-200'
+              hasAllergies
+                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30'
+                : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30'
             }`}>
               <div className="flex items-center gap-1.5 mb-2">
-                <AlertTriangle className={`w-4 h-4 ${hasAllergies ? 'text-amber-600' : 'text-green-600'}`} />
-                <span className={`text-[10px] font-bold uppercase tracking-wide ${hasAllergies ? 'text-amber-700' : 'text-green-700'}`}>
+                <AlertTriangle className={`w-4 h-4 ${hasAllergies ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-wide ${hasAllergies ? 'text-amber-700 dark:text-amber-400' : 'text-green-700 dark:text-green-400'}`}>
                   Alergias
                 </span>
               </div>
-              <p className={`text-sm font-bold leading-tight ${hasAllergies ? 'text-amber-900' : 'text-green-800'}`}>
+              <p className={`text-sm font-bold leading-tight ${hasAllergies ? 'text-amber-900 dark:text-amber-300' : 'text-green-800 dark:text-green-300'}`}>
                 {hasAllergies ? md.allergies : 'Ninguna'}
               </p>
             </div>
 
             {/* Teléfono de emergencia personal */}
             {md.emergencyPhone && (
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
+              <div className="bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-200 dark:border-blue-500/30 rounded-2xl p-4 shadow-lg">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Phone className="w-4 h-4 text-blue-600" />
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                  <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
                     Tel. Personal
                   </span>
                 </div>
-                <a 
+                <a
                   href={`tel:+52${md.emergencyPhone}`}
-                  className="text-sm font-bold text-blue-900 font-mono tracking-wide hover:underline block"
+                  className="text-sm font-bold text-blue-900 dark:text-blue-300 font-mono tracking-wide hover:underline block"
                 >
                   {md.emergencyPhone}
                 </a>
@@ -642,68 +662,68 @@ export default function ViewerPage() {
         {/* ALERTAS CRITICAS - Dispositivos Implantados */}
         {hasAnyDevice && (
           <section className="px-5 pt-5">
-            <h2 className="text-xs font-black text-red-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h2 className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               Alertas Criticas - Dispositivos Implantados
             </h2>
             <div className="space-y-2">
               {hasPacemaker && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border-2 border-red-300 shadow-sm">
-                  <Activity className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border-2 border-red-300 dark:border-red-500/30 shadow-sm">
+                  <Activity className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-red-900">Marcapasos / Cardiodesfibrilador Implantable</p>
-                    {md.pacemakerICD && md.pacemakerICD !== 'Si' && <p className="text-xs text-red-700 mt-1">{md.pacemakerICD}</p>}
-                    <p className="text-[11px] text-red-600 mt-1.5 font-semibold">Interfiere con colocacion directa de paletas o parches de desfibrilacion</p>
+                    <p className="text-sm font-bold text-red-900 dark:text-red-300">Marcapasos / Cardiodesfibrilador Implantable</p>
+                    {md.pacemakerICD && md.pacemakerICD !== 'Si' && <p className="text-xs text-red-700 dark:text-red-400 mt-1">{md.pacemakerICD}</p>}
+                    <p className="text-[11px] text-red-600 dark:text-red-400 mt-1.5 font-semibold">Interfiere con colocacion directa de paletas o parches de desfibrilacion</p>
                   </div>
                 </div>
               )}
               {hasImplantContraceptive && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border-2 border-amber-300 shadow-sm">
-                  <ShieldPlus className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border-2 border-amber-300 dark:border-amber-500/30 shadow-sm">
+                  <ShieldPlus className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-amber-900">Implante Anticonceptivo Subdermico</p>
-                    {md.implantContraceptive && md.implantContraceptive !== 'Si' && <p className="text-xs text-amber-700 mt-1">{md.implantContraceptive}</p>}
-                    <p className="text-[11px] text-amber-600 mt-1.5 font-semibold">Interfiere con vias intravenosas y manguito de presion arterial en el brazo afectado</p>
+                    <p className="text-sm font-bold text-amber-900 dark:text-amber-300">Implante Anticonceptivo Subdermico</p>
+                    {md.implantContraceptive && md.implantContraceptive !== 'Si' && <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">{md.implantContraceptive}</p>}
+                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 font-semibold">Interfiere con vias intravenosas y manguito de presion arterial en el brazo afectado</p>
                   </div>
                 </div>
               )}
               {hasImplantMammary && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border-2 border-amber-300 shadow-sm">
-                  <ShieldPlus className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border-2 border-amber-300 dark:border-amber-500/30 shadow-sm">
+                  <ShieldPlus className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-amber-900">Implantes Mamarios</p>
-                    {md.implantMammary && md.implantMammary !== 'Si' && <p className="text-xs text-amber-700 mt-1">{md.implantMammary}</p>}
-                    <p className="text-[11px] text-amber-600 mt-1.5 font-semibold">Interfiere con compresiones toracicas (RCP) y parches de desfibrilacion por cambio en impedancia</p>
+                    <p className="text-sm font-bold text-amber-900 dark:text-amber-300">Implantes Mamarios</p>
+                    {md.implantMammary && md.implantMammary !== 'Si' && <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">{md.implantMammary}</p>}
+                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 font-semibold">Interfiere con compresiones toracicas (RCP) y parches de desfibrilacion por cambio en impedancia</p>
                   </div>
                 </div>
               )}
               {hasOrthopedicImplants && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-50 border-2 border-orange-300 shadow-sm">
-                  <ShieldPlus className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-50 dark:bg-orange-500/10 border-2 border-orange-300 dark:border-orange-500/30 shadow-sm">
+                  <ShieldPlus className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-orange-900">Implantes Ortopedicos Metalicos / Neuroestimuladores</p>
-                    {md.orthopedicImplants && md.orthopedicImplants !== 'Si' && <p className="text-xs text-orange-700 mt-1">{md.orthopedicImplants}</p>}
-                    <p className="text-[11px] text-orange-600 mt-1.5 font-semibold">Interfiere con manipulacion de extremidades traumatizadas y equipos electromagneticos de rescate</p>
+                    <p className="text-sm font-bold text-orange-900 dark:text-orange-300">Implantes Ortopedicos Metalicos / Neuroestimuladores</p>
+                    {md.orthopedicImplants && md.orthopedicImplants !== 'Si' && <p className="text-xs text-orange-700 dark:text-orange-400 mt-1">{md.orthopedicImplants}</p>}
+                    <p className="text-[11px] text-orange-600 dark:text-orange-400 mt-1.5 font-semibold">Interfiere con manipulacion de extremidades traumatizadas y equipos electromagneticos de rescate</p>
                   </div>
                 </div>
               )}
               {hasCochlearImplant && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border-2 border-blue-300 shadow-sm">
-                  <Cpu className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-300 dark:border-blue-500/30 shadow-sm">
+                  <Cpu className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-blue-900">Implante Coclear / Dispositivo Auditivo</p>
-                    {md.cochlearImplant && md.cochlearImplant !== 'Si' && <p className="text-xs text-blue-700 mt-1">{md.cochlearImplant}</p>}
-                    <p className="text-[11px] text-blue-600 mt-1.5 font-semibold">Interfiere con collares cervicales, inmovilizadores de cabeza y cascos</p>
+                    <p className="text-sm font-bold text-blue-900 dark:text-blue-300">Implante Coclear / Dispositivo Auditivo</p>
+                    {md.cochlearImplant && md.cochlearImplant !== 'Si' && <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">{md.cochlearImplant}</p>}
+                    <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-1.5 font-semibold">Interfiere con collares cervicales, inmovilizadores de cabeza y cascos</p>
                   </div>
                 </div>
               )}
               {hasOcularProsthesis && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50 border-2 border-indigo-300 shadow-sm">
-                  <Eye className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border-2 border-indigo-300 dark:border-indigo-500/30 shadow-sm">
+                  <Eye className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-indigo-900">Protesis Ocular</p>
-                    {md.ocularProsthesis && md.ocularProsthesis !== 'Si' && <p className="text-xs text-indigo-700 mt-1">{md.ocularProsthesis}</p>}
-                    <p className="text-[11px] text-indigo-600 mt-1.5 font-semibold">Interfiere con evaluacion neurologica de urgencia (reflejos pupilares)</p>
+                    <p className="text-sm font-bold text-indigo-900 dark:text-indigo-300">Protesis Ocular</p>
+                    {md.ocularProsthesis && md.ocularProsthesis !== 'Si' && <p className="text-xs text-indigo-700 dark:text-indigo-400 mt-1">{md.ocularProsthesis}</p>}
+                    <p className="text-[11px] text-indigo-600 dark:text-indigo-400 mt-1.5 font-semibold">Interfiere con evaluacion neurologica de urgencia (reflejos pupilares)</p>
                   </div>
                 </div>
               )}
@@ -713,35 +733,35 @@ export default function ViewerPage() {
 
         {/* INFORMACIÓN PERSONAL - Debajo de tipo de sangre */}
         <section className="px-5 pt-5">
-          <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
             <User className="w-4 h-4" />
             Información Personal
           </h2>
-          
-          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-2 gap-3">
               {md.dob && (
                 <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Fecha Nacimiento</p>
-                  <p className="text-sm font-bold text-gray-900">{md.dob}</p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wide mb-0.5">Fecha Nacimiento</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{md.dob}</p>
                 </div>
               )}
               {md.pob && (
                 <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Lugar Nacimiento</p>
-                  <p className="text-sm font-bold text-gray-900">{md.pob}</p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wide mb-0.5">Lugar Nacimiento</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{md.pob}</p>
                 </div>
               )}
               {md.religion && (
                 <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Religión</p>
-                  <p className="text-sm font-bold text-gray-900">{md.religion}</p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wide mb-0.5">Religión</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{md.religion}</p>
                 </div>
               )}
               {md.organDonor && (
                 <div>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-0.5">Donador de Órganos</p>
-                  <p className={`text-sm font-bold ${md.organDonor === 'Si' ? 'text-green-600' : 'text-gray-600'}`}>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wide mb-0.5">Donador de Órganos</p>
+                  <p className={`text-sm font-bold ${md.organDonor === 'Si' ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
                     {md.organDonor}
                   </p>
                 </div>
@@ -753,12 +773,12 @@ export default function ViewerPage() {
         {/* SEGURIDAD SOCIAL */}
         {(md.insuranceType || md.nss || md.curp) && (
           <section className="px-5 pt-5">
-            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <ShieldPlus className="w-4 h-4" />
               Seguridad Social
             </h2>
-            
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-xl shadow-blue-600/20">
+
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-900 rounded-2xl p-5 shadow-xl shadow-blue-600/20">
               {md.insuranceType === 'IMSS' && (
                 <>
                   <div className="flex items-center gap-3 mb-3">
@@ -935,28 +955,28 @@ export default function ViewerPage() {
         {/* ANTECEDENTES MÉDICOS */}
         {(md.previousHospitalizations || md.previousSurgeries || md.previousTrauma) && (
           <section className="px-5 pt-5">
-            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Activity className="w-4 h-4" />
               Antecedentes Médicos
             </h2>
-            
+
             <div className="space-y-2.5">
               {md.previousHospitalizations && (
-                <div className="rounded-xl p-4 border-2 bg-amber-50 border-amber-200">
-                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-amber-700">Hospitalizaciones Previas</p>
-                  <p className="text-sm font-semibold text-amber-900">{md.previousHospitalizations}</p>
+                <div className="rounded-xl p-4 border-2 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30">
+                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-amber-700 dark:text-amber-400">Hospitalizaciones Previas</p>
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">{md.previousHospitalizations}</p>
                 </div>
               )}
               {md.previousSurgeries && (
-                <div className="rounded-xl p-4 border-2 bg-orange-50 border-orange-200">
-                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-orange-700">Cirugías Previas</p>
-                  <p className="text-sm font-semibold text-orange-900">{md.previousSurgeries}</p>
+                <div className="rounded-xl p-4 border-2 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30">
+                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-orange-700 dark:text-orange-400">Cirugías Previas</p>
+                  <p className="text-sm font-semibold text-orange-900 dark:text-orange-300">{md.previousSurgeries}</p>
                 </div>
               )}
               {md.previousTrauma && (
-                <div className="rounded-xl p-4 border-2 bg-red-50 border-red-200">
-                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-red-700">Traumatismo Previo</p>
-                  <p className="text-sm font-semibold text-red-900">{md.previousTrauma}</p>
+                <div className="rounded-xl p-4 border-2 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30">
+                  <p className="text-[10px] font-bold uppercase tracking-wide mb-1 text-red-700 dark:text-red-400">Traumatismo Previo</p>
+                  <p className="text-sm font-semibold text-red-900 dark:text-red-300">{md.previousTrauma}</p>
                 </div>
               )}
             </div>
@@ -965,24 +985,24 @@ export default function ViewerPage() {
 
         {/* PERFIL MÉDICO */}
         <section className="px-5 pt-5">
-          <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
             <Stethoscope className="w-4 h-4" />
             Perfil Médico
           </h2>
-          
+
           <div className="space-y-2.5">
             {/* Condiciones crónicas */}
             <div className={`rounded-xl p-4 border-2 flex items-start gap-3 ${
-              hasConditions 
-                ? 'bg-red-50 border-red-200' 
-                : 'bg-gray-50 border-gray-100'
+              hasConditions
+                ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30'
+                : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700'
             }`}>
-              <Stethoscope className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasConditions ? 'text-red-500' : 'text-gray-400'}`} />
+              <Stethoscope className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasConditions ? 'text-red-500 dark:text-red-400' : 'text-gray-400'}`} />
               <div className="flex-1 min-w-0">
-                <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${hasConditions ? 'text-red-700' : 'text-gray-500'}`}>
+                <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${hasConditions ? 'text-red-700 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
                   Condiciones Crónicas
                 </p>
-                <p className={`text-sm font-semibold ${hasConditions ? 'text-red-900' : 'text-gray-500'}`}>
+                <p className={`text-sm font-semibold ${hasConditions ? 'text-red-900 dark:text-red-300' : 'text-gray-500 dark:text-gray-400'}`}>
                   {hasConditions ? md.conditions : 'Ninguna'}
                 </p>
               </div>
@@ -990,16 +1010,16 @@ export default function ViewerPage() {
 
             {/* Medicamentos */}
             <div className={`rounded-xl p-4 border-2 flex items-start gap-3 ${
-              hasMedications 
-                ? 'bg-purple-50 border-purple-200' 
-                : 'bg-gray-50 border-gray-100'
+              hasMedications
+                ? 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30'
+                : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700'
             }`}>
-              <Pill className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasMedications ? 'text-purple-500' : 'text-gray-400'}`} />
+              <Pill className={`w-5 h-5 flex-shrink-0 mt-0.5 ${hasMedications ? 'text-purple-500 dark:text-purple-400' : 'text-gray-400'}`} />
               <div className="flex-1 min-w-0">
-                <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${hasMedications ? 'text-purple-700' : 'text-gray-500'}`}>
+                <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${hasMedications ? 'text-purple-700 dark:text-purple-400' : 'text-gray-500 dark:text-gray-400'}`}>
                   Medicamentos Actuales
                 </p>
-                <p className={`text-sm font-semibold ${hasMedications ? 'text-purple-900' : 'text-gray-500'}`}>
+                <p className={`text-sm font-semibold ${hasMedications ? 'text-purple-900 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
                   {hasMedications ? md.medications : 'Ninguno'}
                 </p>
               </div>
@@ -1007,10 +1027,10 @@ export default function ViewerPage() {
 
             {/* Antecedentes heredofamiliares - Con indicador de si padece o no */}
             {hasHereditary && (
-              <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4">
+              <div className="bg-orange-50 dark:bg-orange-500/10 border-2 border-orange-200 dark:border-orange-500/30 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Heart className="w-5 h-5 text-orange-500" />
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700">
+                  <Heart className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700 dark:text-orange-400">
                     Antecedentes Heredofamiliares
                   </p>
                 </div>
@@ -1021,31 +1041,31 @@ export default function ViewerPage() {
                     const line = parts[1] || '';
                     const isActive = parts[2] === 'si';
                     return (
-                      <div 
-                        key={idx} 
+                      <div
+                        key={idx}
                         className={`flex items-center justify-between p-3 rounded-lg border-2 ${
-                          isActive 
-                            ? 'bg-red-100 border-red-300' 
-                            : 'bg-gray-100 border-gray-200'
+                          isActive
+                            ? 'bg-red-100 dark:bg-red-500/10 border-red-300 dark:border-red-500/30'
+                            : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           {isActive ? (
-                            <AlertTriangle className="w-4 h-4 text-red-600" />
+                            <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
                           ) : (
-                            <CheckCircle className="w-4 h-4 text-gray-500" />
+                            <CheckCircle className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           )}
                           <div>
-                            <p className={`text-sm font-bold ${isActive ? 'text-red-900' : 'text-gray-700'}`}>
+                            <p className={`text-sm font-bold ${isActive ? 'text-red-900 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'}`}>
                               {name}
                             </p>
-                            <p className="text-[10px] text-gray-500 uppercase">Línea {line}</p>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase">Línea {line}</p>
                           </div>
                         </div>
                         <div className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${
-                          isActive 
-                            ? 'bg-red-600 text-white' 
-                            : 'bg-gray-300 text-gray-600'
+                          isActive
+                            ? 'bg-red-600 text-white'
+                            : 'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                         }`}>
                           {isActive ? 'Lo padece' : 'No lo padece'}
                         </div>
@@ -1061,31 +1081,31 @@ export default function ViewerPage() {
         {/* CONTACTOS DE EMERGENCIA - Al final */}
         {data.contacts.length > 0 && (
           <section className="px-5 pt-5">
-            <h2 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <PhoneCall className="w-4 h-4" />
               Contactos de Emergencia
             </h2>
             <div className="space-y-2.5">
               {data.contacts.map((contact, index) => (
-                <div 
-                  key={index} 
-                  className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-center justify-between shadow-sm"
+                <div
+                  key={index}
+                  className="bg-emerald-50 dark:bg-emerald-500/10 border-2 border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="bg-emerald-600 p-2.5 rounded-xl text-white flex-shrink-0">
                       <Contact className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-emerald-900 truncate">
+                      <p className="text-sm font-bold text-emerald-900 dark:text-emerald-300 truncate">
                         {contact.name}
                       </p>
-                      <p className="text-[11px] text-emerald-600 font-medium">
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                         {contact.relationship}
                       </p>
                     </div>
                   </div>
-                  <a 
-                    href={`tel:+52${contact.phone.replace('+', '')}`} 
+                  <a
+                    href={`tel:+52${contact.phone.replace('+', '')}`}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex-shrink-0 ml-3"
                     aria-label={`Llamar a ${contact.name}`}
                   >
@@ -1103,7 +1123,7 @@ export default function ViewerPage() {
           return limits.hasRescuerAlert && data.contacts.length > 0 && (
             <section className="px-5 pt-5 space-y-3 no-print">
               <div className="space-y-2">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                   Enviar Alerta por WhatsApp
                 </p>
                 <LongPressButton
@@ -1114,7 +1134,7 @@ export default function ViewerPage() {
                   label="Mantener presionado para alertar"
                   countdownLabel="Preparando alerta..."
                 />
-                <p className="text-xs text-center text-gray-400">
+                <p className="text-xs text-center text-gray-400 dark:text-gray-500">
                   Se enviará a los {data.contacts.length} contacto{data.contacts.length > 1 ? 's' : ''} de emergencia
                 </p>
               </div>
@@ -1123,12 +1143,12 @@ export default function ViewerPage() {
         })()}
 
         {/* FOOTER */}
-        <footer className="bg-gray-50 border-t border-gray-200 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500">
+        <footer className="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 p-5 mt-5 flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-green-500" />
+            <ShieldCheck className="w-4 h-4 text-green-500 dark:text-green-400" />
             <p className="text-xs font-medium">Datos verificados por el paciente</p>
           </div>
-          <p className="text-[10px] text-gray-400 text-center">
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center">
             Esta información es proporcionada por el paciente para fines de primeros auxilios.
           </p>
         </footer>
@@ -1136,49 +1156,49 @@ export default function ViewerPage() {
 
       {showRescuerInfo && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={() => setShowRescuerInfo(false)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 rounded-2xl mb-4">
-                <AlertTriangle className="w-7 h-7 text-red-600" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-red-100 dark:bg-red-500/10 rounded-2xl mb-4">
+                <AlertTriangle className="w-7 h-7 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Enviar Alerta de Emergencia</h3>
-              <p className="text-sm text-gray-500 mt-2">Tu información se enviará a los contactos de emergencia. Los datos opcionales ayudan a la familia a contactarte.</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Enviar Alerta de Emergencia</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Tu información se enviará a los contactos de emergencia. Los datos opcionales ayudan a la familia a contactarte.</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="rescuer-name" className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
+                <label htmlFor="rescuer-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tu nombre (opcional)</label>
                 <input
                   id="rescuer-name"
                   type="text"
                   value={rescuerName}
                   onChange={(e) => setRescuerName(e.target.value)}
                   placeholder="Ej: Paramédico Juan"
-                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                  className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
                 />
               </div>
 
               <div>
-                <label htmlFor="rescuer-phone" className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
+                <label htmlFor="rescuer-phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tu teléfono (opcional)</label>
                 <input
                   id="rescuer-phone"
                   type="tel"
                   value={rescuerPhone}
                   onChange={(e) => setRescuerPhone(e.target.value)}
                   placeholder="Ej: +52 55 1234 5678"
-                  className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
+                  className="w-full h-12 px-4 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all"
                 />
               </div>
 
               <div>
-                <label htmlFor="rescuer-comment" className="block text-sm font-medium text-gray-700 mb-1">Describe la situación (opcional)</label>
+                <label htmlFor="rescuer-comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Describe la situación (opcional)</label>
                 <textarea
                   id="rescuer-comment"
                   value={rescuerComment}
                   onChange={(e) => setRescuerComment(e.target.value)}
                   rows={3}
                   placeholder="Ej: Choque contra auto, paciente consciente, sangrado leve..."
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
                 />
               </div>
             </div>
@@ -1186,7 +1206,7 @@ export default function ViewerPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowRescuerInfo(false)}
-                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+                className="flex-1 py-3 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancelar
               </button>

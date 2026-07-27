@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAuthenticated } from '@/lib/api';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import {
   Shield,
   Activity,
@@ -83,6 +84,10 @@ function Header() {
             </a>
           ))}
         </nav>
+
+        <div className="hidden lg:flex items-center gap-2">
+          <ThemeToggle />
+        </div>
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}

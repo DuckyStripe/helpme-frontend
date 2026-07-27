@@ -76,7 +76,7 @@ export const PLAN_LABELS: Record<PlanType, string> = {
 };
 
 export const PLAN_COLORS: Record<PlanType, { bg: string; text: string; border: string }> = {
-  PRINCIPAL: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' },
-  PRO: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300' },
-  ULTRA: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300' },
+  PRINCIPAL: { bg: 'bg-gray-100 dark:bg-gray-500/10', text: 'text-gray-700 dark:text-gray-400', border: 'border-gray-300 dark:border-gray-500/30' },
+  PRO: { bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-800 dark:text-amber-400', border: 'border-amber-300 dark:border-amber-500/30' },
+  ULTRA: { bg: 'bg-red-100 dark:bg-red-500/10', text: 'text-red-800 dark:text-red-400', border: 'border-red-300 dark:border-red-500/30' },
 };

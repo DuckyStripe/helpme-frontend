@@ -32,10 +32,10 @@ export default function ToastContainer() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`flex items-center gap-3 bg-white rounded-xl shadow-lg border border-gray-100 border-l-4 ${borders[t.type]} px-4 py-3 animate-slide-in`}
+          className={`flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 border-l-4 ${borders[t.type]} px-4 py-3 animate-slide-in`}
         >
           {icons[t.type]}
-          <p className="text-sm font-medium text-gray-800 flex-1">{t.message}</p>
+          <p className="text-sm font-medium text-gray-800 dark:text-gray-100 flex-1">{t.message}</p>
         </div>
       ))}
     </div>

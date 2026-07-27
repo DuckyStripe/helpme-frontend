@@ -12,8 +12,8 @@ export default function ActivationChart({ data, period }: ActivationChartProps) 
   const displayData = period === '7d' ? data : period === '30d' ? data.filter((_, i) => i % 2 === 0 || i === data.length - 1) : data.filter((_, i) => i % 5 === 0 || i === data.length - 1);
 
   return (
-    <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
-      <h3 className="text-sm font-medium text-gray-400 mb-6">Activaciones por día</h3>
+    <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6">
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">Activaciones por día</h3>
       <div className="flex items-end gap-1 h-40">
         {displayData.map((d, i) => {
           const height = (d.count / maxCount) * 100;
@@ -31,12 +31,12 @@ export default function ActivationChart({ data, period }: ActivationChartProps) 
                   style={{ height: `${Math.max(height, 4)}%` }}
                 />
                 {d.count > 0 && (
-                  <div className="absolute -top-6 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-xs text-gray-300 whitespace-nowrap bg-gray-700 px-2 py-0.5 rounded">
+                  <div className="absolute -top-6 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-xs text-white dark:text-gray-300 whitespace-nowrap bg-gray-700 dark:bg-gray-700 px-2 py-0.5 rounded">
                     {d.count}
                   </div>
                 )}
               </div>
-              <span className="text-[10px] text-gray-600 truncate w-full text-center">{label}</span>
+              <span className="text-[10px] text-gray-500 dark:text-gray-600 truncate w-full text-center">{label}</span>
             </div>
           );
         })}

@@ -65,15 +65,15 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
             placeholder="Buscar por UUID…"
             aria-label="Buscar por UUID"
             autoComplete="off"
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50"
           />
         </div>
         <button
           onClick={() => setOpen(!open)}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
             open || hasFilters
-              ? 'bg-red-600/10 text-red-400 border border-red-500/20'
-              : 'bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-gray-200'
+              ? 'bg-red-600/10 text-red-600 dark:text-red-400 border border-red-500/20'
+              : 'bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
           }`}
         >
           <Filter className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1 px-3 py-2.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex items-center gap-1 px-3 py-2.5 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 transition-colors"
           >
             <X className="w-3.5 h-3.5" />
             Limpiar
@@ -92,14 +92,14 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
       </div>
 
       {open && (
-        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label htmlFor="filter-status" className="block text-xs text-gray-500 mb-1">Estado</label>
             <select
               id="filter-status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="ALL">Todos</option>
               <option value="VIRGIN">Sin activar</option>
@@ -114,7 +114,7 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
               id="filter-seller"
               value={sellerId}
               onChange={(e) => setSellerId(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="">Todos</option>
               {adminId && (
@@ -131,7 +131,7 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
               id="filter-plan"
               value={plan}
               onChange={(e) => setPlan(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <option value="">Todos</option>
               {plans.map(p => (
@@ -146,7 +146,7 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             />
           </div>
           <div>
@@ -156,7 +156,7 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             />
           </div>
         </div>

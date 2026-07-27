@@ -197,7 +197,7 @@ export default function AdminsPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Administradores</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Administradores</h1>
           <p className="text-sm text-gray-500 mt-1">Gestiona los administradores del sistema</p>
         </div>
         <button
@@ -218,7 +218,7 @@ export default function AdminsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar administrador…"
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-sm text-gray-900 dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           />
         </div>
       </div>
@@ -236,9 +236,9 @@ export default function AdminsPage() {
           action={{ label: 'Nuevo Admin', onClick: () => setShowCreate(true) }}
         />
       ) : (
-        <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl overflow-hidden">
+        <div className="bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
           {/* Table header */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-700/50 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-200 dark:border-gray-700/50 text-xs font-medium text-gray-500 uppercase tracking-wider">
             <div className="col-span-4">Nombre</div>
             <div className="col-span-4">Email</div>
             <div className="col-span-2">Creado</div>
@@ -246,26 +246,26 @@ export default function AdminsPage() {
           </div>
 
           {/* Table rows */}
-          <div className="divide-y divide-gray-700/30">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700/30">
             {filteredAdmins.map(admin => (
               <div
                 key={admin.id}
-                className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-5 py-4 hover:bg-gray-700/20 transition-colors"
+                className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-5 py-4 hover:bg-gray-100 dark:hover:bg-gray-700/20 transition-colors"
               >
                 {/* Name */}
                 <div className="md:col-span-4 flex items-center gap-3">
                   <div className="w-9 h-9 bg-red-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-bold text-red-400">{admin.name.charAt(0).toUpperCase()}</span>
+                    <span className="text-sm font-bold text-red-600 dark:text-red-400">{admin.name.charAt(0).toUpperCase()}</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-200 truncate">{admin.name}</p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{admin.name}</p>
                     <p className="text-xs text-gray-500 md:hidden truncate">{admin.email}</p>
                   </div>
                 </div>
 
                 {/* Email */}
                 <div className="hidden md:flex md:col-span-4 items-center">
-                  <p className="text-sm text-gray-400 truncate">{admin.email}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{admin.email}</p>
                 </div>
 
                 {/* Created */}
@@ -282,7 +282,7 @@ export default function AdminsPage() {
                       setEditEmail(admin.email);
                       setShowEdit(true);
                     }}
-                    className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                    className="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                     title="Editar"
                     aria-label="Editar"
                   >
@@ -295,7 +295,7 @@ export default function AdminsPage() {
                       setConfirmNewPassword('');
                       setShowResetPassword(true);
                     }}
-                    className="p-2 text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
+                    className="p-2 text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                     title="Resetear contraseña"
                     aria-label="Restablecer contraseña"
                   >
@@ -307,7 +307,7 @@ export default function AdminsPage() {
                       setShowDelete(true);
                     }}
                     disabled={admins.length <= 1}
-                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+                    className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
                     title={admins.length <= 1 ? 'No se puede eliminar el último administrador' : 'Eliminar'}
                     aria-label={admins.length <= 1 ? 'No se puede eliminar el último administrador' : 'Eliminar'}
                   >
@@ -324,52 +324,52 @@ export default function AdminsPage() {
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Nuevo Administrador" size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Nombre</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nombre</label>
             <input
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               autoComplete="name"
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Nombre completo"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
             <input
               type="email"
               value={formEmail}
               onChange={(e) => setFormEmail(e.target.value)}
               autoComplete="email"
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="email@ejemplo.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Contraseña</label>
             <input
               type="password"
               value={formPassword}
               onChange={(e) => setFormPassword(e.target.value)}
               autoComplete="new-password"
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Mínimo 6 caracteres"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Confirmar Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirmar Contraseña</label>
             <input
               type="password"
               value={formConfirmPassword}
               onChange={(e) => setFormConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Repite la contraseña"
             />
           </div>
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowCreate(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -389,29 +389,29 @@ export default function AdminsPage() {
       <Modal isOpen={showEdit} onClose={() => setShowEdit(false)} title="Editar Administrador" size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Nombre</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nombre</label>
             <input
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Nombre completo"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
             <input
               type="email"
               value={editEmail}
               onChange={(e) => setEditEmail(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="email@ejemplo.com"
             />
           </div>
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowEdit(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -430,33 +430,33 @@ export default function AdminsPage() {
       {/* Reset Password Modal */}
       <Modal isOpen={showResetPassword} onClose={() => setShowResetPassword(false)} title="Cambiar Contraseña" size="sm">
         <div className="space-y-4">
-          <p className="text-sm text-gray-400">
-            Nueva contraseña para <strong className="text-gray-200">{resetAdmin?.name}</strong>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Nueva contraseña para <strong className="text-gray-800 dark:text-gray-200">{resetAdmin?.name}</strong>
           </p>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Nueva Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nueva Contraseña</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Mínimo 6 caracteres"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Confirmar Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirmar Contraseña</label>
             <input
               type="password"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Repite la contraseña"
             />
           </div>
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowResetPassword(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -476,9 +476,9 @@ export default function AdminsPage() {
       <Modal isOpen={showDelete} onClose={() => setShowDelete(false)} title="Eliminar Administrador" size="sm">
         <div className="text-center">
           <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-            <Ban className="w-6 h-6 text-red-400" />
+            <Ban className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-          <p className="text-gray-300 mb-2">
+          <p className="text-gray-700 dark:text-gray-300 mb-2">
             ¿Eliminar a <strong>{deleteAdmin?.name}</strong>?
           </p>
           <p className="text-sm text-gray-500 mb-6">
@@ -487,7 +487,7 @@ export default function AdminsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowDelete(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>

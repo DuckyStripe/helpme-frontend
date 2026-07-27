@@ -31,24 +31,24 @@ export default function Pagination({ page, totalPages, total, onPageChange }: Pa
   const endItem = Math.min(page * 20, total);
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-700/50">
+    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700/50">
       <p className="text-sm text-gray-500">
-        Mostrando <span className="text-gray-300">{startItem}</span> a{' '}
-        <span className="text-gray-300">{endItem}</span> de{' '}
-        <span className="text-gray-300">{total}</span>
+        Mostrando <span className="text-gray-700 dark:text-gray-300">{startItem}</span> a{' '}
+        <span className="text-gray-700 dark:text-gray-300">{endItem}</span> de{' '}
+        <span className="text-gray-700 dark:text-gray-300">{total}</span>
       </p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1}
           aria-label="Página anterior"
-          className="p-2 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         {pages.map((p, i) =>
           typeof p === 'string' ? (
-            <span key={`e-${i}`} className="px-2 text-gray-600">…</span>
+            <span key={`e-${i}`} className="px-2 text-gray-400 dark:text-gray-600">…</span>
           ) : (
             <button
               key={p}
@@ -56,7 +56,7 @@ export default function Pagination({ page, totalPages, total, onPageChange }: Pa
               className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
                 p === page
                   ? 'bg-red-600 text-white'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50'
               }`}
             >
               {p}
@@ -67,7 +67,7 @@ export default function Pagination({ page, totalPages, total, onPageChange }: Pa
           onClick={() => onPageChange(page + 1)}
           disabled={page === totalPages}
           aria-label="Página siguiente"
-          className="p-2 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

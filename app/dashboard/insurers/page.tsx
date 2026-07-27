@@ -141,7 +141,7 @@ export default function InsurersPage() {
     <DashboardLayout user={user}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Aseguradoras</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Aseguradoras</h1>
           <p className="text-sm text-gray-500 mt-1">Gestiona las aseguradoras disponibles para los usuarios</p>
         </div>
         <button
@@ -154,13 +154,13 @@ export default function InsurersPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5">
           <p className="text-sm text-gray-500 mb-1">Activas</p>
-          <p className="text-3xl font-bold text-emerald-400">{activeCount}</p>
+          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{activeCount}</p>
         </div>
-        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5">
           <p className="text-sm text-gray-500 mb-1">Inactivas</p>
-          <p className="text-3xl font-bold text-gray-400">{inactiveCount}</p>
+          <p className="text-3xl font-bold text-gray-500 dark:text-gray-400">{inactiveCount}</p>
         </div>
       </div>
 
@@ -174,11 +174,11 @@ export default function InsurersPage() {
           action={{ label: 'Nueva Aseguradora', onClick: openCreate }}
         />
       ) : (
-        <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
-                <tr className="border-b border-gray-700/50">
+                <tr className="border-b border-gray-200 dark:border-gray-700/50">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Nombre</span>
                   </th>
@@ -189,17 +189,17 @@ export default function InsurersPage() {
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700/30">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700/30">
                 {insurers.map(insurer => (
-                  <tr key={insurer.id} className="hover:bg-gray-700/20 transition-colors">
+                  <tr key={insurer.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <Shield className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                        <span className="font-medium text-gray-200">{insurer.name}</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{insurer.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-gray-400">
+                      <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
                         <Phone className="w-3.5 h-3.5" />
                         <span className="font-mono text-sm">{insurer.phone}</span>
                       </div>
@@ -209,8 +209,8 @@ export default function InsurersPage() {
                         onClick={() => handleToggle(insurer.id)}
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                           insurer.active
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
-                            : 'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                            : 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${insurer.active ? 'bg-emerald-400' : 'bg-gray-500'}`} />
@@ -221,7 +221,7 @@ export default function InsurersPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEdit(insurer)}
-                          className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                          className="p-1.5 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                           title="Editar"
                           aria-label="Editar"
                         >
@@ -230,7 +230,7 @@ export default function InsurersPage() {
                         {insurer.active && (
                           <button
                             onClick={() => setConfirmDeleteId(insurer.id)}
-                            className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Deshabilitar"
                             aria-label="Deshabilitar"
                           >
@@ -250,36 +250,36 @@ export default function InsurersPage() {
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Aseguradora' : 'Nueva Aseguradora'} size="sm">
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
             <input
               type="text"
               value={formName}
               onChange={(e) => { setFormName(e.target.value); setErrors(prev => ({ ...prev, name: undefined })); }}
               placeholder="Ej: GNP Seguros"
-              className={`w-full px-4 py-2.5 bg-gray-800/50 border rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 transition-colors ${
-                errors.name ? 'border-red-400 focus:ring-red-500/30' : 'border-gray-700/50 focus:ring-red-500/50 focus:border-red-500'
+              className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border rounded-lg text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 transition-colors ${
+                errors.name ? 'border-red-400 focus:ring-red-500/30' : 'border-gray-300 dark:border-gray-700/50 focus:ring-red-500/50 focus:border-red-500'
               }`}
             />
             {errors.name && (
-              <div className="flex items-center gap-1.5 text-red-400 text-xs mt-1">
+              <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs mt-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {errors.name}
               </div>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono de Emergencia</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono de Emergencia</label>
             <input
               type="tel"
               value={formPhone}
               onChange={(e) => { setFormPhone(e.target.value); setErrors(prev => ({ ...prev, phone: undefined })); }}
               placeholder="Ej: 55-5169-0000"
-              className={`w-full px-4 py-2.5 bg-gray-800/50 border rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 transition-colors ${
-                errors.phone ? 'border-red-400 focus:ring-red-500/30' : 'border-gray-700/50 focus:ring-red-500/50 focus:border-red-500'
+              className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border rounded-lg text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 transition-colors ${
+                errors.phone ? 'border-red-400 focus:ring-red-500/30' : 'border-gray-300 dark:border-gray-700/50 focus:ring-red-500/50 focus:border-red-500'
               }`}
             />
             {errors.phone && (
-              <div className="flex items-center gap-1.5 text-red-400 text-xs mt-1">
+              <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs mt-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {errors.phone}
               </div>
@@ -288,7 +288,7 @@ export default function InsurersPage() {
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setModalOpen(false)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
@@ -307,13 +307,13 @@ export default function InsurersPage() {
       <Modal isOpen={!!confirmDeleteId} onClose={() => setConfirmDeleteId(null)} title="Deshabilitar aseguradora" size="sm">
         <div className="text-center">
           <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-            <AlertCircle className="w-6 h-6 text-red-400" />
+            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-          <p className="text-gray-300 mb-6">¿Deshabilitar esta aseguradora?</p>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">¿Deshabilitar esta aseguradora?</p>
           <div className="flex gap-3">
             <button
               onClick={() => setConfirmDeleteId(null)}
-              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
             >
               Cancelar
             </button>
