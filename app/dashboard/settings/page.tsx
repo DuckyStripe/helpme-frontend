@@ -7,6 +7,7 @@ import { authApi, settingsApi, type WhatsappStatus } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { User } from '@/types';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import MessageTemplatesSection from '@/components/dashboard/MessageTemplatesSection';
 import { PageLoader } from '@/components/ui/Skeleton';
 import { MessageCircle, Loader2, CheckCircle2, LogOut, QrCode } from 'lucide-react';
 
@@ -170,6 +171,10 @@ export default function SettingsPage() {
             </p>
           </div>
         )}
+      </div>
+
+      <div className="mt-6">
+        <MessageTemplatesSection />
       </div>
     </DashboardLayout>
   );

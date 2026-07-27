@@ -487,6 +487,31 @@ export const settingsApi = {
   },
 };
 
+export interface MessageTemplate {
+  key: string;
+  description: string;
+  content: string;
+  updatedAt: string | null;
+}
+
+export const templatesApi = {
+  async list() {
+    return api.get<MessageTemplate[]>('/settings/templates');
+  },
+
+  async update(key: string, content: string) {
+    return api.put<MessageTemplate>(`/settings/templates/${key}`, { content });
+  },
+
+  async reset(key: string) {
+    return api.post<MessageTemplate>(`/settings/templates/${key}/reset`, {});
+  },
+
+  async preview(key: string, content: string) {
+    return api.post<{ preview: string }>(`/settings/templates/${key}/preview`, { content });
+  },
+};
+
 export const usersApi = {
   async create(name: string, email: string, password: string) {
     return api.post<any>('/users', { name, email, password });
