@@ -8,13 +8,16 @@ interface SkeletonProps {
 
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
-    <div className={`animate-pulse bg-gray-700/50 rounded-lg ${className}`} />
+    <div role="status" aria-live="polite" className={`animate-pulse bg-gray-700/50 rounded-lg ${className}`}>
+      <span className="sr-only">Cargando…</span>
+    </div>
   );
 }
 
 export function CardSkeleton() {
   return (
-    <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+    <div role="status" aria-live="polite" className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-5">
+      <span className="sr-only">Cargando…</span>
       <Skeleton className="h-4 w-24 mb-3" />
       <Skeleton className="h-8 w-16" />
     </div>
@@ -23,7 +26,8 @@ export function CardSkeleton() {
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+    <div role="status" aria-live="polite" className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+      <span className="sr-only">Cargando…</span>
       <div className="px-6 py-4 border-b border-gray-700/50">
         <div className="flex gap-4">
           {[...Array(5)].map((_, i) => (
@@ -46,7 +50,8 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
 
 export function PageLoader() {
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+    <div role="status" aria-live="polite" className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <span className="sr-only">Cargando…</span>
       <Loader2 className="w-8 h-8 animate-spin text-red-500" />
     </div>
   );

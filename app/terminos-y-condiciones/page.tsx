@@ -1,23 +1,21 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Cross, ArrowLeft } from 'lucide-react';
 
 export default function TerminosCondicionesPage() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.push('/')}
+          <Link
+            href="/"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg px-2 py-1"
             aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-sm font-medium">Inicio</span>
-          </button>
+          </Link>
           <div className="flex items-center gap-2 ml-auto">
             <div className="flex items-center justify-center w-9 h-9 bg-red-600 rounded-lg">
               <Cross className="w-5 h-5 text-white" />

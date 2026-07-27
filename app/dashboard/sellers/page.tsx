@@ -265,7 +265,7 @@ export default function SellersPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar vendedor..."
+            placeholder="Buscar vendedor…"
             className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           />
         </div>
@@ -309,6 +309,7 @@ export default function SellersPage() {
                   <button
                     onClick={() => loadSellerDetail(seller)}
                     className="p-1.5 text-gray-600 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    aria-label="Ver detalle"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -342,7 +343,7 @@ export default function SellersPage() {
                   </div>
                   <div className="h-2 bg-gray-700/50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-red-600 to-emerald-500 rounded-full transition-all"
+                      className="h-full bg-gradient-to-r from-red-600 to-emerald-500 rounded-full transition-[width]"
                       style={{ width: `${rate}%` }}
                     />
                   </div>
@@ -397,6 +398,7 @@ export default function SellersPage() {
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
+              autoComplete="name"
               className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Nombre completo"
             />
@@ -407,6 +409,7 @@ export default function SellersPage() {
               type="email"
               value={formEmail}
               onChange={(e) => setFormEmail(e.target.value)}
+              autoComplete="email"
               className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="email@ejemplo.com"
             />
@@ -417,6 +420,7 @@ export default function SellersPage() {
               type="password"
               value={formPassword}
               onChange={(e) => setFormPassword(e.target.value)}
+              autoComplete="new-password"
               className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Mínimo 6 caracteres"
             />
@@ -607,7 +611,7 @@ export default function SellersPage() {
             <div className="grid grid-cols-2 gap-2">
               {sellerTags.map(tag => (
                 <div key={tag.id} className="flex items-center justify-between px-3 py-2 bg-gray-800/30 rounded-lg">
-                  <span className="font-mono text-xs text-gray-400 truncate flex-1">{tag.uuid.substring(0, 16)}...</span>
+                  <span className="font-mono text-xs text-gray-400 truncate flex-1">{tag.uuid.substring(0, 16)}…</span>
                   <span className={`ml-2 px-2 py-0.5 text-[10px] font-medium rounded-full ${
                     tag.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' :
                     tag.status === 'VIRGIN' ? 'bg-gray-500/10 text-gray-400' :

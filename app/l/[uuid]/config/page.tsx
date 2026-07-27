@@ -289,7 +289,6 @@ function PinInput({ length, value, onChange, showPin }: { length: number; value:
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         className="absolute opacity-0 w-0 h-0"
-        autoFocus
         maxLength={length}
         aria-label="PIN input"
       />
@@ -413,6 +412,7 @@ export default function ConfigPage() {
   const [pinToken, setPinToken] = useState<string | null>(null);
   const [medicalData, setMedicalData] = useState<MedicalData>(emptyMedicalData);
   const [contacts, setContacts] = useState<Contact[]>([{ name: '', relationship: '', phone: '' }]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -509,6 +509,16 @@ export default function ConfigPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pinToken, formTransition]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   async function handleInstallApp() {
     if (deferredPrompt) {
@@ -904,6 +914,7 @@ export default function ConfigPage() {
 
   function updateMedicalField<K extends keyof MedicalData>(field: K, value: MedicalData[K]) {
     setMedicalData((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
     if (field === 'userName' || field === 'dob' || field === 'bloodType' || field === 'emergencyPhone') {
       const errorField = field as 'userName' | 'dob' | 'bloodType' | 'emergencyPhone';
       setErrors((prev) => {
@@ -1268,6 +1279,7 @@ export default function ConfigPage() {
       setIsActive(true);
       setStatus('ACTIVE');
       setShowSuccess(true);
+      setHasUnsavedChanges(false);
     } catch (err: any) {
       toast.error(err.message || 'Error al guardar los datos');
     } finally {
@@ -1437,7 +1449,7 @@ export default function ConfigPage() {
                 </div>
                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
                   <div
-                    className="h-full bg-white rounded-full transition-width duration-500"
+                    className="h-full bg-white rounded-full transition-[width] duration-500"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -3270,31 +3282,40 @@ export default function ConfigPage() {
                     </div>
 
                     <div className="space-y-3">
+                      <label htmlFor="change-pin-current" className="sr-only">PIN actual</label>
                       <input
+                        id="change-pin-current"
                         type="password"
                         inputMode="numeric"
                         maxLength={6}
                         value={changePinCurrent}
                         onChange={(e) => { setChangePinCurrent(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="PIN actual"
+                        aria-label="PIN actual"
                         className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
+                      <label htmlFor="change-pin-new" className="sr-only">Nuevo PIN</label>
                       <input
+                        id="change-pin-new"
                         type="password"
                         inputMode="numeric"
                         maxLength={6}
                         value={changePinNew}
                         onChange={(e) => { setChangePinNew(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="Nuevo PIN"
+                        aria-label="Nuevo PIN"
                         className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
+                      <label htmlFor="change-pin-confirm" className="sr-only">Confirmar nuevo PIN</label>
                       <input
+                        id="change-pin-confirm"
                         type="password"
                         inputMode="numeric"
                         maxLength={6}
                         value={changePinConfirm}
                         onChange={(e) => { setChangePinConfirm(e.target.value.replace(/\D/g, '')); setChangePinError(''); }}
                         placeholder="Confirmar nuevo PIN"
+                        aria-label="Confirmar nuevo PIN"
                         className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:border-red-500 transition-colors font-mono text-center text-lg tracking-widest"
                       />
                     </div>

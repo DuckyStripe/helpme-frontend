@@ -119,6 +119,15 @@ export default function ViewerPage() {
   }, [alertFeedback]);
 
   useEffect(() => {
+    if (!showRescuerInfo) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setShowRescuerInfo(false);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showRescuerInfo]);
+
+  useEffect(() => {
     loadViewer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
@@ -360,7 +369,7 @@ export default function ViewerPage() {
           <h1 className="text-xl font-bold text-gray-900 mb-2">Tag Sin Configurar</h1>
           <p className="text-gray-600 mb-4">Este tag aún no ha sido activado por su dueño.</p>
           <a
-            href={`/L/${uuid}/config`}
+            href={`/l/${uuid}/config`}
             className="inline-block px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors"
           >
             Activar mi Tag
@@ -429,7 +438,7 @@ export default function ViewerPage() {
                   <Key className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-gray-900">Desbloquear Ficha</h2>
+                  <h2 id="unlock-code-heading" className="text-sm font-bold text-gray-900">Desbloquear Ficha</h2>
                   <p className="text-xs text-gray-500">Ingresa el código de emergencia</p>
                 </div>
               </div>
@@ -445,6 +454,8 @@ export default function ViewerPage() {
                   }}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleUnlock(); }}
                   placeholder="Código de 6 dígitos"
+                  aria-labelledby="unlock-code-heading"
+                  aria-label="Código de desbloqueo"
                   className="flex-1 h-12 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all font-mono text-center text-lg tracking-widest"
                 />
                 <button
@@ -543,6 +554,8 @@ export default function ViewerPage() {
               <img
                 src={md.photo}
                 alt={md.userName || 'Foto del paciente'}
+                width={96}
+                height={96}
                 className="w-24 h-24 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
               />
             )}
@@ -1134,8 +1147,9 @@ export default function ViewerPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
+                <label htmlFor="rescuer-name" className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
                 <input
+                  id="rescuer-name"
                   type="text"
                   value={rescuerName}
                   onChange={(e) => setRescuerName(e.target.value)}
@@ -1145,8 +1159,9 @@ export default function ViewerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
+                <label htmlFor="rescuer-phone" className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
                 <input
+                  id="rescuer-phone"
                   type="tel"
                   value={rescuerPhone}
                   onChange={(e) => setRescuerPhone(e.target.value)}
@@ -1156,8 +1171,9 @@ export default function ViewerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Describe la situación (opcional)</label>
+                <label htmlFor="rescuer-comment" className="block text-sm font-medium text-gray-700 mb-1">Describe la situación (opcional)</label>
                 <textarea
+                  id="rescuer-comment"
                   value={rescuerComment}
                   onChange={(e) => setRescuerComment(e.target.value)}
                   rows={3}
@@ -1202,6 +1218,8 @@ export default function ViewerPage() {
 
       {alertFeedback && (
         <div
+          role="status"
+          aria-live="polite"
           className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] max-w-[90vw] px-5 py-3 rounded-2xl shadow-xl font-bold text-sm flex items-center gap-2 ${
             alertFeedback.type === 'success'
               ? 'bg-green-600 text-white'

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { authApi, metricsApi, clearTokens } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { User } from '@/types';
@@ -122,8 +123,8 @@ export default function DashboardPage() {
         <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-4">Accesos rápidos</h3>
           <div className="space-y-2">
-            <button
-              onClick={() => router.push('/dashboard/tags')}
+            <Link
+              href="/dashboard/tags"
               className="w-full flex items-center justify-between px-4 py-3 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors group"
             >
               <div className="flex items-center gap-3">
@@ -131,9 +132,9 @@ export default function DashboardPage() {
                 <span className="text-sm text-gray-300">Gestionar tags</span>
               </div>
               <ArrowUpRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
-            </button>
-            <button
-              onClick={() => router.push('/dashboard/sellers')}
+            </Link>
+            <Link
+              href="/dashboard/sellers"
               className="w-full flex items-center justify-between px-4 py-3 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors group"
             >
               <div className="flex items-center gap-3">
@@ -141,9 +142,9 @@ export default function DashboardPage() {
                 <span className="text-sm text-gray-300">Vendedores</span>
               </div>
               <ArrowUpRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
-            </button>
-            <button
-              onClick={() => router.push('/dashboard/tags?action=create')}
+            </Link>
+            <Link
+              href="/dashboard/tags?action=create"
               className="w-full flex items-center justify-between px-4 py-3 bg-red-600/10 hover:bg-red-600/20 rounded-lg transition-colors group"
             >
               <div className="flex items-center gap-3">
@@ -151,7 +152,7 @@ export default function DashboardPage() {
                 <span className="text-sm text-red-300">Crear tags</span>
               </div>
               <ArrowUpRight className="w-4 h-4 text-red-400/60 group-hover:text-red-400 transition-colors" />
-            </button>
+            </Link>
           </div>
 
           {/* Mini stats */}
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                 <div key={i} className="px-6 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
                     <StatusBadge status={act.status} />
-                    <span className="font-mono text-xs text-gray-400 truncate">{act.uuid.substring(0, 12)}...</span>
+                    <span className="font-mono text-xs text-gray-400 truncate">{act.uuid.substring(0, 12)}…</span>
                   </div>
                   <div className="text-right ml-4">
                     <p className="text-xs text-gray-300">{act.sellerName}</p>
@@ -218,7 +219,7 @@ export default function DashboardPage() {
                 <div key={i} className="px-6 py-3 flex items-center justify-between">
                   <div className="min-w-0">
                     <p className="text-xs text-gray-300">{scan.sellerName}</p>
-                    <p className="font-mono text-[10px] text-gray-600 truncate">{scan.tagUuid.substring(0, 16)}...</p>
+                    <p className="font-mono text-[10px] text-gray-600 truncate">{scan.tagUuid.substring(0, 16)}…</p>
                   </div>
                   <div className="text-right ml-4">
                     <p className="text-xs text-gray-400 flex items-center gap-1 justify-end">

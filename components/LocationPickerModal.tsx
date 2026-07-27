@@ -92,9 +92,18 @@ export default function LocationPickerModal({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [geocodeError, setGeocodeError] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
 
   const isDefault = isDefaultLocation(lat, lng);
   const showWarning = approximate || isDefault;
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onCancel();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +125,7 @@ export default function LocationPickerModal({
   function handleMove(newLat: number, newLng: number) {
     setLat(newLat);
     setLng(newLng);
+    setNeedsConfirm(false);
   }
 
   function handleRetryGeocode() {
@@ -129,11 +139,9 @@ export default function LocationPickerModal({
   }
 
   async function handleConfirm() {
-    if (showWarning && isDefault) {
-      const confirmed = window.confirm(
-        'La ubicación actual es aproximada (punto de referencia). ¿Estás seguro de que quieres enviar esta ubicación? Te recomendamos ajustar el pin al lugar exacto.'
-      );
-      if (!confirmed) return;
+    if (showWarning && isDefault && !needsConfirm) {
+      setNeedsConfirm(true);
+      return;
     }
 
     setSending(true);
@@ -152,10 +160,10 @@ export default function LocationPickerModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white w-full sm:max-w-md sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <div role="dialog" aria-modal="true" aria-labelledby="location-picker-title" className="bg-white w-full sm:max-w-md sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] overscroll-contain">
         <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-gray-100">
           <div>
-            <h2 className="font-bold text-gray-900">Confirmar ubicación</h2>
+            <h2 id="location-picker-title" className="font-bold text-gray-900">Confirmar ubicación</h2>
             <p className="text-xs text-gray-500">Ajusta el pin si no está en el lugar exacto</p>
           </div>
           <button
@@ -193,7 +201,7 @@ export default function LocationPickerModal({
               {loadingAddress ? (
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  <span>Buscando calle de referencia...</span>
+                  <span>Buscando calle de referencia…</span>
                 </div>
               ) : (
                 <div className="flex items-start justify-between gap-2 mt-1">
@@ -227,13 +235,23 @@ export default function LocationPickerModal({
               <p className="text-sm text-red-700 leading-snug">{error}</p>
             </div>
           )}
+          {needsConfirm && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 leading-snug">
+                La ubicación es aproximada. Te recomendamos ajustar el pin al lugar exacto. Presiona de nuevo para enviarla así.
+              </p>
+            </div>
+          )}
           <button
             onClick={handleConfirm}
             disabled={sending || loadingAddress}
-            className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-green-600/30 active:scale-95 transition-all"
+            className={`w-full flex items-center justify-center gap-2 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-transform ${
+              needsConfirm ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/30' : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'
+            }`}
           >
             {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            {sending ? 'Enviando...' : `Enviar a ${recipientLabel}`}
+            {sending ? 'Enviando…' : needsConfirm ? 'Confirmar y enviar de todas formas' : `Enviar a ${recipientLabel}`}
           </button>
         </div>
       </div>

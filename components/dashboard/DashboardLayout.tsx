@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import {
@@ -33,12 +34,16 @@ export default function DashboardLayout({ user, children }: DashboardLayoutProps
     router.push('/login');
   }
 
-  function navigate(href: string) {
-    router.push(href);
-    setMobileNavOpen(false);
-  }
-
   const visibleNavItems = navItems.filter(item => item.roles.includes(user.role));
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileNavOpen(false);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileNavOpen]);
 
   return (
     <div className="min-h-screen bg-gray-950 md:flex">
@@ -102,9 +107,10 @@ export default function DashboardLayout({ user, children }: DashboardLayoutProps
           {visibleNavItems.map(item => {
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
             return (
-              <button
+              <Link
                 key={item.href}
-                onClick={() => navigate(item.href)}
+                href={item.href}
+                onClick={() => setMobileNavOpen(false)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-red-600/10 text-red-400'
@@ -113,7 +119,7 @@ export default function DashboardLayout({ user, children }: DashboardLayoutProps
               >
                 <item.icon className="w-5 h-5 shrink-0" />
                 {item.label}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -129,6 +135,7 @@ export default function DashboardLayout({ user, children }: DashboardLayoutProps
               onClick={handleLogout}
               className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
               title="Cerrar sesión"
+              aria-label="Cerrar sesión"
             >
               <LogOut className="w-4 h-4" />
             </button>

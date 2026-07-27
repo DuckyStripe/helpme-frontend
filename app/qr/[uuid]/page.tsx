@@ -55,6 +55,15 @@ export default function QrViewerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
 
+  useEffect(() => {
+    if (!showRescuerInfo) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setShowRescuerInfo(false);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showRescuerInfo]);
+
   async function loadQrViewer() {
     try {
       const response = await tagsApi.getQrViewer(uuid);
@@ -300,7 +309,7 @@ export default function QrViewerPage() {
 
         {/* FEEDBACK */}
         {alertFeedback && (
-          <div className="px-5 pb-4">
+          <div className="px-5 pb-4" role="status" aria-live="polite">
             <div className={`rounded-2xl p-4 flex items-start gap-3 ${
               alertFeedback.type === 'success'
                 ? 'bg-green-50 border border-green-200'
@@ -343,8 +352,9 @@ export default function QrViewerPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
+                <label htmlFor="qr-rescuer-name" className="block text-sm font-medium text-gray-700 mb-1">Tu nombre (opcional)</label>
                 <input
+                  id="qr-rescuer-name"
                   type="text"
                   value={rescuerName}
                   onChange={(e) => setRescuerName(e.target.value)}
@@ -354,8 +364,9 @@ export default function QrViewerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
+                <label htmlFor="qr-rescuer-phone" className="block text-sm font-medium text-gray-700 mb-1">Tu teléfono (opcional)</label>
                 <input
+                  id="qr-rescuer-phone"
                   type="tel"
                   value={rescuerPhone}
                   onChange={(e) => setRescuerPhone(e.target.value)}
@@ -365,8 +376,9 @@ export default function QrViewerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comentario (opcional)</label>
+                <label htmlFor="qr-rescuer-comment" className="block text-sm font-medium text-gray-700 mb-1">Comentario (opcional)</label>
                 <textarea
+                  id="qr-rescuer-comment"
                   value={rescuerComment}
                   onChange={(e) => setRescuerComment(e.target.value)}
                   placeholder="Ej: Persona consciente, accidente vehicular..."

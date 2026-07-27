@@ -34,6 +34,7 @@ export default function InsurersPage() {
   const [formPhone, setFormPhone] = useState('');
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -125,6 +126,8 @@ export default function InsurersPage() {
       toast.success('Aseguradora deshabilitada');
     } catch (err: any) {
       toast.error(err.message || 'Error al eliminar');
+    } finally {
+      setConfirmDeleteId(null);
     }
   }
 
@@ -220,14 +223,16 @@ export default function InsurersPage() {
                           onClick={() => openEdit(insurer)}
                           className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                           title="Editar"
+                          aria-label="Editar"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         {insurer.active && (
                           <button
-                            onClick={() => handleDelete(insurer.id)}
+                            onClick={() => setConfirmDeleteId(insurer.id)}
                             className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Deshabilitar"
+                            aria-label="Deshabilitar"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -251,7 +256,7 @@ export default function InsurersPage() {
               value={formName}
               onChange={(e) => { setFormName(e.target.value); setErrors(prev => ({ ...prev, name: undefined })); }}
               placeholder="Ej: GNP Seguros"
-              className={`w-full px-4 py-2.5 bg-gray-800/50 border rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 transition-all ${
+              className={`w-full px-4 py-2.5 bg-gray-800/50 border rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 transition-colors ${
                 errors.name ? 'border-red-400 focus:ring-red-500/30' : 'border-gray-700/50 focus:ring-red-500/50 focus:border-red-500'
               }`}
             />
@@ -269,7 +274,7 @@ export default function InsurersPage() {
               value={formPhone}
               onChange={(e) => { setFormPhone(e.target.value); setErrors(prev => ({ ...prev, phone: undefined })); }}
               placeholder="Ej: 55-5169-0000"
-              className={`w-full px-4 py-2.5 bg-gray-800/50 border rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 transition-all ${
+              className={`w-full px-4 py-2.5 bg-gray-800/50 border rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 transition-colors ${
                 errors.phone ? 'border-red-400 focus:ring-red-500/30' : 'border-gray-700/50 focus:ring-red-500/50 focus:border-red-500'
               }`}
             />
@@ -293,7 +298,30 @@ export default function InsurersPage() {
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {saving ? 'Guardando...' : editing ? 'Actualizar' : 'Crear'}
+              {saving ? 'Guardando…' : editing ? 'Actualizar' : 'Crear'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!confirmDeleteId} onClose={() => setConfirmDeleteId(null)} title="Deshabilitar aseguradora" size="sm">
+        <div className="text-center">
+          <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+            <AlertCircle className="w-6 h-6 text-red-400" />
+          </div>
+          <p className="text-gray-300 mb-6">¿Deshabilitar esta aseguradora?</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setConfirmDeleteId(null)}
+              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+              className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Deshabilitar
             </button>
           </div>
         </div>

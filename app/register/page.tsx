@@ -46,7 +46,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+            <div role="alert" aria-live="polite" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
               {error}
             </div>
           )}
@@ -60,6 +60,7 @@ export default function RegisterPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-0 outline-none transition-colors"
               placeholder="Tu nombre"
               required
@@ -75,6 +76,7 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-0 outline-none transition-colors"
               placeholder="tu@email.com"
               required
@@ -91,6 +93,7 @@ export default function RegisterPage() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-0 outline-none transition-colors pr-12"
                 placeholder="Mínimo 6 caracteres"
                 minLength={6}
@@ -99,6 +102,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -112,7 +116,7 @@ export default function RegisterPage() {
             className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
           >
             {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-            {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
+            {loading ? 'Creando cuenta…' : 'Crear Cuenta'}
           </button>
 
           <div className="text-center">

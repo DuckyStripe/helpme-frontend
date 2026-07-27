@@ -403,6 +403,8 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
               <img
                 src={md.photo}
                 alt={md.userName || 'Foto del paciente'}
+                width={96}
+                height={96}
                 className="w-24 h-24 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
               />
             )}
@@ -422,81 +424,81 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
                     <User className="w-3.5 h-3.5" />
                     {md.gender}
                   </span>
-            )}
-
-            {hasAnyDevice && (
-              <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Cpu className="w-5 h-5 text-slate-600" />
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-700">Dispositivos Medicos Implantados</p>
-                </div>
-                <div className="space-y-2">
-                  {hasPacemaker && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
-                      <Activity className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold text-red-900">Marcapasos / Cardiodesfibrilador</p>
-                        {md.pacemakerICD && md.pacemakerICD !== 'Si' && <p className="text-xs text-red-700 mt-0.5">{md.pacemakerICD}</p>}
-                        <p className="text-[10px] text-red-600 mt-1 font-medium">Interfiere con colocacion de paletas o parches de desfibrilacion</p>
-                      </div>
-                    </div>
-                  )}
-                  {hasImplantContraceptive && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                      <ShieldPlus className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold text-amber-900">Implante Anticonceptivo Subdermico</p>
-                        {md.implantContraceptive && md.implantContraceptive !== 'Si' && <p className="text-xs text-amber-700 mt-0.5">{md.implantContraceptive}</p>}
-                        <p className="text-[10px] text-amber-600 mt-1 font-medium">Interfiere con vias IV y manguito de presion arterial</p>
-                      </div>
-                    </div>
-                  )}
-                  {hasImplantMammary && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                      <ShieldPlus className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold text-amber-900">Implantes Mamarios</p>
-                        {md.implantMammary && md.implantMammary !== 'Si' && <p className="text-xs text-amber-700 mt-0.5">{md.implantMammary}</p>}
-                        <p className="text-[10px] text-amber-600 mt-1 font-medium">Interfiere con RCP y parches de desfibrilacion por impedancia</p>
-                      </div>
-                    </div>
-                  )}
-                  {hasOrthopedicImplants && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-50 border border-orange-200">
-                      <ShieldPlus className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold text-orange-900">Implantes Ortopedicos / Neuroestimuladores</p>
-                        {md.orthopedicImplants && md.orthopedicImplants !== 'Si' && <p className="text-xs text-orange-700 mt-0.5">{md.orthopedicImplants}</p>}
-                        <p className="text-[10px] text-orange-600 mt-1 font-medium">Interfiere con manipulacion de extremidades y equipos electromagneticos</p>
-                      </div>
-                    </div>
-                  )}
-                  {hasCochlearImplant && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                      <Cpu className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold text-blue-900">Implante Coclear / Dispositivo Auditivo</p>
-                        {md.cochlearImplant && md.cochlearImplant !== 'Si' && <p className="text-xs text-blue-700 mt-0.5">{md.cochlearImplant}</p>}
-                        <p className="text-[10px] text-blue-600 mt-1 font-medium">Interfiere con collares cervicales e inmovilizadores de cabeza</p>
-                      </div>
-                    </div>
-                  )}
-                  {hasOcularProsthesis && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
-                      <Eye className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold text-indigo-900">Protesis Ocular</p>
-                        {md.ocularProsthesis && md.ocularProsthesis !== 'Si' && <p className="text-xs text-indigo-700 mt-0.5">{md.ocularProsthesis}</p>}
-                        <p className="text-[10px] text-indigo-600 mt-1 font-medium">Interfiere con evaluacion neurologica (reflejos pupilares)</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
-            )}
-          </div>
             </div>
           </div>
+
+          {hasAnyDevice && (
+            <div className="mb-4 bg-slate-50 border-2 border-slate-200 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Cpu className="w-5 h-5 text-slate-600" />
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-700">Dispositivos Medicos Implantados</p>
+              </div>
+              <div className="space-y-2">
+                {hasPacemaker && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                    <Activity className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-red-900">Marcapasos / Cardiodesfibrilador</p>
+                      {md.pacemakerICD && md.pacemakerICD !== 'Si' && <p className="text-xs text-red-700 mt-0.5">{md.pacemakerICD}</p>}
+                      <p className="text-[10px] text-red-600 mt-1 font-medium">Interfiere con colocacion de paletas o parches de desfibrilacion</p>
+                    </div>
+                  </div>
+                )}
+                {hasImplantContraceptive && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <ShieldPlus className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">Implante Anticonceptivo Subdermico</p>
+                      {md.implantContraceptive && md.implantContraceptive !== 'Si' && <p className="text-xs text-amber-700 mt-0.5">{md.implantContraceptive}</p>}
+                      <p className="text-[10px] text-amber-600 mt-1 font-medium">Interfiere con vias IV y manguito de presion arterial</p>
+                    </div>
+                  </div>
+                )}
+                {hasImplantMammary && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <ShieldPlus className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">Implantes Mamarios</p>
+                      {md.implantMammary && md.implantMammary !== 'Si' && <p className="text-xs text-amber-700 mt-0.5">{md.implantMammary}</p>}
+                      <p className="text-[10px] text-amber-600 mt-1 font-medium">Interfiere con RCP y parches de desfibrilacion por impedancia</p>
+                    </div>
+                  </div>
+                )}
+                {hasOrthopedicImplants && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-50 border border-orange-200">
+                    <ShieldPlus className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-orange-900">Implantes Ortopedicos / Neuroestimuladores</p>
+                      {md.orthopedicImplants && md.orthopedicImplants !== 'Si' && <p className="text-xs text-orange-700 mt-0.5">{md.orthopedicImplants}</p>}
+                      <p className="text-[10px] text-orange-600 mt-1 font-medium">Interfiere con manipulacion de extremidades y equipos electromagneticos</p>
+                    </div>
+                  </div>
+                )}
+                {hasCochlearImplant && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <Cpu className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-blue-900">Implante Coclear / Dispositivo Auditivo</p>
+                      {md.cochlearImplant && md.cochlearImplant !== 'Si' && <p className="text-xs text-blue-700 mt-0.5">{md.cochlearImplant}</p>}
+                      <p className="text-[10px] text-blue-600 mt-1 font-medium">Interfiere con collares cervicales e inmovilizadores de cabeza</p>
+                    </div>
+                  </div>
+                )}
+                {hasOcularProsthesis && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                    <Eye className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-indigo-900">Protesis Ocular</p>
+                      {md.ocularProsthesis && md.ocularProsthesis !== 'Si' && <p className="text-xs text-indigo-700 mt-0.5">{md.ocularProsthesis}</p>}
+                      <p className="text-[10px] text-indigo-600 mt-1 font-medium">Interfiere con evaluacion neurologica (reflejos pupilares)</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-between border border-white/20">
             <div className="flex items-center gap-3">
@@ -848,7 +850,7 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
                 ) : (
                   <Siren className="w-5 h-5" />
                 )}
-                <span>{isHolding ? 'Mantén presionado...' : '🚨 Enviar Alerta de Emergencia'}</span>
+                <span>{isHolding ? 'Mantén presionado…' : '🚨 Enviar Alerta de Emergencia'}</span>
               </button>
               {isHolding && holdProgress < 100 && (
                 <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
@@ -941,23 +943,25 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">¿Qué está pasando? (opcional)</label>
+                <label htmlFor="alert-comment" className="block text-sm font-medium text-gray-700 mb-1">¿Qué está pasando? (opcional)</label>
                 <textarea
+                  id="alert-comment"
                   value={alertComment}
                   onChange={(e) => setAlertComment(e.target.value)}
                   rows={2}
-                  placeholder="Ej: Me siento mal, necesito ayuda..."
+                  placeholder="Ej: Me siento mal, necesito ayuda…"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-all resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="alert-location" className="block text-sm font-medium text-gray-700 mb-1">
                   {geolocationError ? 'Ubicación aproximada (obligatorio)' : 'Ubicación aproximada (opcional)'}
                 </label>
                 <div className="flex gap-2">
-                  <MapPin className="w-5 h-5 text-gray-400 mt-3 flex-shrink-0" />
+                  <MapPin className="w-5 h-5 text-gray-400 mt-3 flex-shrink-0" aria-hidden="true" />
                   <input
+                    id="alert-location"
                     type="text"
                     value={alertLocation}
                     onChange={(e) => setAlertLocation(e.target.value)}
@@ -1001,22 +1005,24 @@ export default function OwnerView({ medicalData: md, contacts, vehicles = [], us
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Origen</label>
+                <label htmlFor="route-origin" className="block text-sm font-medium text-gray-700 mb-1">Origen</label>
                 <input
+                  id="route-origin"
                   type="text"
                   value={routeOrigin}
                   onChange={(e) => setRouteOrigin(e.target.value)}
-                  placeholder="Ej: Casa, Oficina..."
+                  placeholder="Ej: Casa, Oficina…"
                   className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                <label htmlFor="route-destination" className="block text-sm font-medium text-gray-700 mb-1">Destino</label>
                 <input
+                  id="route-destination"
                   type="text"
                   value={routeDestination}
                   onChange={(e) => setRouteDestination(e.target.value)}
-                  placeholder="Ej: Casa, Gimnasio..."
+                  placeholder="Ej: Casa, Gimnasio…"
                   className="w-full h-12 px-4 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                 />
               </div>

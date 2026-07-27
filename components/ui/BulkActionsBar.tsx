@@ -43,6 +43,7 @@ export default function BulkActionsBar({ selectedCount, onAssign, onSuspend, onR
         </button>
         <button
           onClick={onClear}
+          aria-label="Limpiar selección"
           className="p-1.5 text-gray-500 hover:text-gray-300 transition-colors"
         >
           <X className="w-4 h-4" />

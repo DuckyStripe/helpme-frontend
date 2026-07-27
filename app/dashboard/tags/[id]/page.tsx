@@ -8,6 +8,7 @@ import type { User, TagStatus, EmergencyContact } from '@/types';
 import { type PlanType, PLAN_LABELS, PLAN_COLORS } from '@/lib/plans';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatusBadge from '@/components/ui/StatusBadge';
+import Modal from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/Skeleton';
 import {
   ArrowLeft, Copy, ExternalLink, Ban, Play, Shield, Unlock,
@@ -40,6 +41,7 @@ export default function TagDetailPage() {
   const [scans, setScans] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmAction, setConfirmAction] = useState<'suspend' | 'resume' | null>(null);
 
   useEffect(() => {
     loadData();
@@ -77,24 +79,26 @@ export default function TagDetailPage() {
   }
 
   async function handleSuspend() {
-    if (!confirm('¿Dar de baja este tag? Esta acción no se puede deshacer.')) return;
     try {
       await tagsApi.suspend(id);
       toast.success('Tag suspendido');
       loadData();
     } catch (err: any) {
       toast.error(err.message || 'Error al suspender tag');
+    } finally {
+      setConfirmAction(null);
     }
   }
 
   async function handleResume() {
-    if (!confirm('¿Reanudar este tag? El tag volverá a estar activo.')) return;
     try {
       await tagsApi.resume(id);
       toast.success('Tag reanudado');
       loadData();
     } catch (err: any) {
       toast.error(err.message || 'Error al reanudar tag');
+    } finally {
+      setConfirmAction(null);
     }
   }
 
@@ -149,9 +153,10 @@ export default function TagDetailPage() {
         <div className="flex items-center gap-4 min-w-0">
           <button
             onClick={() => router.back()}
-            className="p-2 text-gray-500 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors shrink-0"
+            aria-label="Volver"
+            className="p-2 text-gray-500 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           </button>
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-gray-100">Detalle del Tag</h1>
@@ -242,7 +247,7 @@ export default function TagDetailPage() {
             )}
             {tag.status !== 'SUSPENDED' && isAdmin && (
               <button
-                onClick={handleSuspend}
+                onClick={() => setConfirmAction('suspend')}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-red-500/10 text-red-400 font-medium rounded-lg hover:bg-red-500/20 transition-colors"
               >
                 <Ban className="w-4 h-4" />
@@ -251,7 +256,7 @@ export default function TagDetailPage() {
             )}
             {tag.status === 'SUSPENDED' && isAdmin && (
               <button
-                onClick={handleResume}
+                onClick={() => setConfirmAction('resume')}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-emerald-500/10 text-emerald-400 font-medium rounded-lg hover:bg-emerald-500/20 transition-colors"
               >
                 <Play className="w-4 h-4" />
@@ -484,7 +489,10 @@ export default function TagDetailPage() {
                   </td>
                   <td className="px-6 py-3 text-gray-400 flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-gray-500" />
-                    {alert.location?.address || `${alert.location?.lat?.toFixed(2)}, ${alert.location?.lng?.toFixed(2)}` || 'N/A'}
+                    {alert.location?.address
+                      || (alert.location?.lat != null && alert.location?.lng != null
+                        ? `${alert.location.lat.toFixed(2)}, ${alert.location.lng.toFixed(2)}`
+                        : 'N/A')}
                   </td>
                 </tr>
               ))}
@@ -494,6 +502,37 @@ export default function TagDetailPage() {
         )}
       </div>
       )}
+
+      <Modal
+        isOpen={confirmAction !== null}
+        onClose={() => setConfirmAction(null)}
+        title={confirmAction === 'suspend' ? 'Dar de baja tag' : 'Reanudar tag'}
+        size="sm"
+      >
+        <p className="text-sm text-gray-300 mb-6">
+          {confirmAction === 'suspend'
+            ? '¿Dar de baja este tag? Esta acción no se puede deshacer.'
+            : '¿Reanudar este tag? El tag volverá a estar activo.'}
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setConfirmAction(null)}
+            className="flex-1 py-2.5 px-4 bg-gray-700/50 text-gray-300 font-medium rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={confirmAction === 'suspend' ? handleSuspend : handleResume}
+            className={`flex-1 py-2.5 px-4 font-medium rounded-lg transition-colors ${
+              confirmAction === 'suspend'
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }`}
+          >
+            {confirmAction === 'suspend' ? 'Suspender Tag' : 'Reanudar Tag'}
+          </button>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }

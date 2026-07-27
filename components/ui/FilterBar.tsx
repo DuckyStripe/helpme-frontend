@@ -62,7 +62,9 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por UUID..."
+            placeholder="Buscar por UUID…"
+            aria-label="Buscar por UUID"
+            autoComplete="off"
             className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50"
           />
         </div>
@@ -92,8 +94,9 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
       {open && (
         <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Estado</label>
+            <label htmlFor="filter-status" className="block text-xs text-gray-500 mb-1">Estado</label>
             <select
+              id="filter-status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
@@ -106,8 +109,9 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Asignado a</label>
+            <label htmlFor="filter-seller" className="block text-xs text-gray-500 mb-1">Asignado a</label>
             <select
+              id="filter-seller"
               value={sellerId}
               onChange={(e) => setSellerId(e.target.value)}
               className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
@@ -122,8 +126,9 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Plan</label>
+            <label htmlFor="filter-plan" className="block text-xs text-gray-500 mb-1">Plan</label>
             <select
+              id="filter-plan"
               value={plan}
               onChange={(e) => setPlan(e.target.value)}
               className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
@@ -135,8 +140,9 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Desde</label>
+            <label htmlFor="filter-date-from" className="block text-xs text-gray-500 mb-1">Desde</label>
             <input
+              id="filter-date-from"
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
@@ -144,8 +150,9 @@ export default function FilterBar({ onFilterChange, sellers = [], adminId, admin
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Hasta</label>
+            <label htmlFor="filter-date-to" className="block text-xs text-gray-500 mb-1">Hasta</label>
             <input
+              id="filter-date-to"
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}

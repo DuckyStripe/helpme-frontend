@@ -56,6 +56,9 @@ export default function TagsPage() {
   const [sendInstructionsPhone, setSendInstructionsPhone] = useState('');
   const [sendingInstructions, setSendingInstructions] = useState(false);
 
+  const [confirmSuspendId, setConfirmSuspendId] = useState<string | null>(null);
+  const [confirmBulkSuspend, setConfirmBulkSuspend] = useState(false);
+
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,6 +203,8 @@ export default function TagsPage() {
       loadTags();
     } catch (err: any) {
       toast.error(err.message || 'Error al suspender tag');
+    } finally {
+      setConfirmSuspendId(null);
     }
   }
 
@@ -250,6 +255,8 @@ export default function TagsPage() {
       loadTags();
     } catch (err: any) {
       toast.error(err.message || 'Error al suspender tags');
+    } finally {
+      setConfirmBulkSuspend(false);
     }
   }
 
@@ -311,7 +318,7 @@ export default function TagsPage() {
   }
 
   function shortUuid(uuid: string) {
-    return `${uuid.substring(0, 8)}...${uuid.substring(uuid.length - 4)}`;
+    return `${uuid.substring(0, 8)}…${uuid.substring(uuid.length - 4)}`;
   }
 
   if (loading && !user) return <PageLoader />;
@@ -427,7 +434,7 @@ export default function TagsPage() {
           <BulkActionsBar
             selectedCount={selected.size}
             onAssign={() => setShowAssign(true)}
-            onSuspend={handleBulkSuspend}
+            onSuspend={() => setConfirmBulkSuspend(true)}
             onResume={handleBulkResume}
             onClear={() => setSelected(new Set())}
           />
@@ -465,6 +472,9 @@ export default function TagsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <span className="flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> Teléfono</span>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5"><UserMinus className="w-3.5 h-3.5" /> Dueño</span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
                   {isAdmin && (
@@ -512,6 +522,7 @@ export default function TagsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400">{tag.ownerPhone || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-400">{tag.ownerName || '—'}</td>
                     <td className="px-4 py-3">
                       {tag.plan ? (
                         <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full ${PLAN_COLORS[tag.plan as PlanType]?.bg || 'bg-gray-100'} ${PLAN_COLORS[tag.plan as PlanType]?.text || 'text-gray-700'}`}>
@@ -533,6 +544,7 @@ export default function TagsPage() {
                           onClick={() => copyLink(tag.uuid)}
                           className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
                           title="Copiar URL para NFC"
+                          aria-label="Copiar URL para NFC"
                         >
                           <Copy className="w-3.5 h-3.5" />
                           <span className="hidden lg:inline">Copiar URL</span>
@@ -542,6 +554,7 @@ export default function TagsPage() {
                             onClick={() => openSendInstructions(tag)}
                             className="p-1.5 text-gray-500 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors"
                             title="Enviar instrucciones por WhatsApp"
+                            aria-label="Enviar instrucciones por WhatsApp"
                           >
                             <MessageCircle className="w-3.5 h-3.5" />
                           </button>
@@ -551,6 +564,7 @@ export default function TagsPage() {
                           target="_blank"
                           className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
                           title="Ver tag"
+                          aria-label="Ver tag"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
@@ -559,6 +573,7 @@ export default function TagsPage() {
                             onClick={() => openChangePlan(tag)}
                             className="p-1.5 text-gray-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
                             title="Cambiar plan"
+                            aria-label="Cambiar plan"
                           >
                             <CreditCard className="w-3.5 h-3.5" />
                           </button>
@@ -568,15 +583,17 @@ export default function TagsPage() {
                             onClick={() => handleUnlockPin(tag.id)}
                             className="p-1.5 text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                             title="Desbloquear PIN"
+                            aria-label="Desbloquear PIN"
                           >
                             <Unlock className="w-3.5 h-3.5" />
                           </button>
                         )}
                         {isAdmin && tag.status !== 'SUSPENDED' && (
                           <button
-                            onClick={() => handleSuspend(tag.id)}
+                            onClick={() => setConfirmSuspendId(tag.id)}
                             className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Suspender"
+                            aria-label="Suspender"
                           >
                             <Ban className="w-3.5 h-3.5" />
                           </button>
@@ -586,6 +603,7 @@ export default function TagsPage() {
                             onClick={() => handleResume(tag.id)}
                             className="p-1.5 text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
                             title="Reanudar"
+                            aria-label="Reanudar"
                           >
                             <Play className="w-3.5 h-3.5" />
                           </button>
@@ -634,7 +652,8 @@ export default function TagsPage() {
                 Teléfono del destinatario <span className="text-gray-500">(opcional)</span>
               </label>
               <input
-                type="text"
+                type="tel"
+                inputMode="numeric"
                 maxLength={10}
                 placeholder="10 dígitos, ej: 5512345678"
                 value={createOwnerPhone}
@@ -748,7 +767,7 @@ export default function TagsPage() {
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
               {changingPlan ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-              {changingPlan ? 'Cambiando...' : 'Cambiar Plan'}
+              {changingPlan ? 'Cambiando…' : 'Cambiar Plan'}
             </button>
           </div>
         </div>
@@ -764,7 +783,8 @@ export default function TagsPage() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono del destinatario</label>
             <input
-              type="text"
+              type="tel"
+              inputMode="numeric"
               maxLength={10}
               placeholder="10 dígitos, ej: 5512345678"
               value={sendInstructionsPhone}
@@ -786,7 +806,53 @@ export default function TagsPage() {
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-600 text-white font-medium rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
             >
               {sendingInstructions ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
-              {sendingInstructions ? 'Enviando...' : 'Enviar instrucciones'}
+              {sendingInstructions ? 'Enviando…' : 'Enviar instrucciones'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!confirmSuspendId} onClose={() => setConfirmSuspendId(null)} title="Suspender Tag" size="sm">
+        <div className="text-center">
+          <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+            <Ban className="w-6 h-6 text-red-400" />
+          </div>
+          <p className="text-gray-300 mb-6">¿Suspender este tag?</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setConfirmSuspendId(null)}
+              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => confirmSuspendId && handleSuspend(confirmSuspendId)}
+              className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Suspender
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={confirmBulkSuspend} onClose={() => setConfirmBulkSuspend(false)} title="Suspender Tags" size="sm">
+        <div className="text-center">
+          <div className="mx-auto w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+            <Ban className="w-6 h-6 text-red-400" />
+          </div>
+          <p className="text-gray-300 mb-6">¿Suspender {selected.size} tag{selected.size > 1 ? 's' : ''}?</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setConfirmBulkSuspend(false)}
+              className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-700/50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleBulkSuspend}
+              className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Suspender
             </button>
           </div>
         </div>

@@ -217,7 +217,7 @@ export default function AdminsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar administrador..."
+            placeholder="Buscar administrador…"
             className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           />
         </div>
@@ -284,6 +284,7 @@ export default function AdminsPage() {
                     }}
                     className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                     title="Editar"
+                    aria-label="Editar"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -296,6 +297,7 @@ export default function AdminsPage() {
                     }}
                     className="p-2 text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                     title="Resetear contraseña"
+                    aria-label="Restablecer contraseña"
                   >
                     <Key className="w-4 h-4" />
                   </button>
@@ -307,6 +309,7 @@ export default function AdminsPage() {
                     disabled={admins.length <= 1}
                     className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
                     title={admins.length <= 1 ? 'No se puede eliminar el último administrador' : 'Eliminar'}
+                    aria-label={admins.length <= 1 ? 'No se puede eliminar el último administrador' : 'Eliminar'}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -326,6 +329,7 @@ export default function AdminsPage() {
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
+              autoComplete="name"
               className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Nombre completo"
             />
@@ -336,6 +340,7 @@ export default function AdminsPage() {
               type="email"
               value={formEmail}
               onChange={(e) => setFormEmail(e.target.value)}
+              autoComplete="email"
               className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="email@ejemplo.com"
             />
@@ -346,6 +351,7 @@ export default function AdminsPage() {
               type="password"
               value={formPassword}
               onChange={(e) => setFormPassword(e.target.value)}
+              autoComplete="new-password"
               className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               placeholder="Mínimo 6 caracteres"
             />

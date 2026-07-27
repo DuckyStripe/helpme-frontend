@@ -28,6 +28,7 @@ export interface Tag {
   pinAttempts?: number;
   instructionsSentAt?: string;
   ownerPhone?: string;
+  ownerName?: string;
   createdAt: string;
   updatedAt: string;
 }

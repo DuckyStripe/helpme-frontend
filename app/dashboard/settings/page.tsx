@@ -185,6 +185,7 @@ export default function SettingsPage() {
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
                 placeholder="https://openwa.codelabs.com.mx"
+                autoComplete="off"
                 className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               />
             </div>
@@ -196,6 +197,7 @@ export default function SettingsPage() {
                 value={sessionId}
                 onChange={(e) => setSessionId(e.target.value)}
                 placeholder="73fc17b3-1aa1-426a-89a1-fe7655cd9a7f"
+                autoComplete="off"
                 className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
               />
             </div>
@@ -215,13 +217,14 @@ export default function SettingsPage() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder={hasApiKey ? 'Dejar vacío para no cambiarla' : 'Requerida por OpenWA para enviar mensajes'}
+                  autoComplete="off"
                   className="w-full px-4 py-2.5 pr-11 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                  tabIndex={-1}
+                  aria-label={showApiKey ? 'Ocultar clave' : 'Mostrar clave'}
                 >
                   {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -239,7 +242,7 @@ export default function SettingsPage() {
                     title="Revelar la API Key guardada en la base de datos"
                   >
                     {revealingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
-                    {revealingKey ? 'Obteniendo...' : 'Revelar guardada'}
+                    {revealingKey ? 'Obteniendo…' : 'Revelar guardada'}
                   </button>
                 )}
                 <button
@@ -250,7 +253,7 @@ export default function SettingsPage() {
                   title="Generar nueva API Key desde el portal de OpenWA"
                 >
                   {generatingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
-                  {generatingKey ? 'Generando...' : 'Generar desde portal'}
+                  {generatingKey ? 'Generando…' : 'Generar desde portal'}
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1.5">

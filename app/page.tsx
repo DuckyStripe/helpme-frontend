@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { isAuthenticated } from '@/lib/api';
 import {
   Shield,
@@ -40,7 +41,7 @@ function FloatingWhatsAppButton() {
       href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300"
+      className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 hover:scale-105 transition-[transform,background-color] duration-200 focus:outline-none focus:ring-4 focus:ring-green-300"
       aria-label="Contactar por WhatsApp"
     >
       <MessageCircle className="w-7 h-7 text-white" />
@@ -146,7 +147,7 @@ function HeroSection() {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 hover:scale-105 transition-all duration-200 shadow-lg shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+          className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 hover:scale-105 transition-[transform,background-color] duration-200 shadow-lg shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
         >
           <MessageCircle className="w-5 h-5" />
           Quiero mi HelpMe
@@ -354,7 +355,7 @@ function HowItWorksSection() {
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
               )}
-              <div className="relative bg-white border border-gray-200 rounded-2xl p-8 text-center hover:shadow-lg hover:border-red-200 transition-all duration-300">
+              <div className="relative bg-white border border-gray-200 rounded-2xl p-8 text-center hover:shadow-lg hover:border-red-200 transition-[box-shadow,border-color] duration-300">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-red-600 rounded-xl mb-6">
                   <span className="text-lg font-bold text-white">{step.number}</span>
                 </div>
@@ -459,7 +460,7 @@ function BenefitsSection() {
           {benefits.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-red-600/50 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300"
+              className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-red-600/50 hover:shadow-lg hover:shadow-red-600/10 transition-[box-shadow,border-color] duration-300"
             >
               <div className="inline-flex items-center justify-center w-12 h-12 bg-red-600/20 rounded-xl mb-4">
                 <Icon className="w-6 h-6 text-red-500" />
@@ -610,7 +611,7 @@ function PricingSection() {
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, quiero el Plan ${plan.name} 🏍️`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`block w-full py-3.5 font-bold text-center text-lg rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 ${
+                className={`block w-full py-3.5 font-bold text-center text-lg rounded-xl transition-[transform,background-color] duration-200 focus:outline-none focus:ring-4 ${
                   plan.popular
                     ? 'bg-white text-red-600 hover:bg-gray-100 hover:scale-105 focus:ring-white/50'
                     : 'bg-red-600 text-white hover:bg-red-700 hover:scale-105 focus:ring-red-400'
@@ -768,7 +769,7 @@ function FinalCTASection() {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 hover:scale-105 transition-all duration-200 shadow-lg shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+          className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 hover:scale-105 transition-[transform,background-color] duration-200 shadow-lg shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
         >
           <MessageCircle className="w-5 h-5" />
           Quiero mi HelpMe ahora
@@ -779,8 +780,6 @@ function FinalCTASection() {
 }
 
 function Footer() {
-  const router = useRouter();
-
   return (
     <footer className="bg-gray-950 border-t border-gray-800 py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -807,12 +806,12 @@ function Footer() {
           <p className="text-sm text-gray-500">
             © {new Date().getFullYear()} HelpMe · Todos los derechos reservados · CDMX
           </p>
-          <button
-            onClick={() => router.push('/login')}
+          <Link
+            href="/login"
             className="text-sm text-gray-500 hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
           >
             Acceso Vendedores / Admin
-          </button>
+          </Link>
         </div>
       </div>
     </footer>

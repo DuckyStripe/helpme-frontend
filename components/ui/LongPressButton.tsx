@@ -19,7 +19,7 @@ export default function LongPressButton({
   disabled = false,
   loading = false,
   label = 'Mantener presionado para alertar',
-  countdownLabel = 'Enviando alerta...',
+  countdownLabel = 'Enviando alerta…',
   className = '',
 }: LongPressButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
@@ -103,6 +103,7 @@ export default function LongPressButton({
     <button
       type="button"
       disabled={disabled || loading}
+      aria-label={completed ? 'Alerta enviada' : label}
       style={{ touchAction: 'none' }}
       onPointerDown={(e) => {
         e.preventDefault();
@@ -111,7 +112,18 @@ export default function LongPressButton({
       onPointerUp={cancelPress}
       onPointerLeave={cancelPress}
       onPointerCancel={cancelPress}
-      className={`relative w-full flex items-center justify-center gap-3 font-bold py-4 px-5 rounded-2xl shadow-lg active:scale-95 transition-all select-none ${
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+          e.preventDefault();
+          startPress();
+        }
+      }}
+      onKeyUp={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          cancelPress();
+        }
+      }}
+      className={`relative w-full flex items-center justify-center gap-3 font-bold py-4 px-5 rounded-2xl shadow-lg active:scale-95 transition-transform select-none ${
         completed
           ? 'bg-green-600 text-white shadow-green-600/30'
           : disabled || loading
@@ -157,7 +169,7 @@ export default function LongPressButton({
 
       <div className="text-left relative z-10">
         <p className="text-sm font-bold">
-          {completed ? 'Alerta enviada' : loading ? 'Enviando...' : isPressed ? countdownLabel : label}
+          {completed ? 'Alerta enviada' : loading ? 'Enviando…' : isPressed ? countdownLabel : label}
         </p>
         {!completed && !isPressed && !loading && (
           <p className="text-xs font-normal opacity-90">3 segundos para confirmar</p>

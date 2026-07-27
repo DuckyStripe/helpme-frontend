@@ -26,11 +26,12 @@ export default function ActivationChart({ data, period }: ActivationChartProps) 
             <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
               <div className="relative w-full flex justify-center">
                 <div
-                  className="w-full max-w-[24px] bg-red-500/20 rounded-t-sm group-hover:bg-red-500/40 transition-colors"
+                  tabIndex={0}
+                  className="w-full max-w-[24px] bg-red-500/20 rounded-t-sm group-hover:bg-red-500/40 focus-visible:bg-red-500/40 transition-colors focus-visible:outline-none"
                   style={{ height: `${Math.max(height, 4)}%` }}
                 />
                 {d.count > 0 && (
-                  <div className="absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-gray-300 whitespace-nowrap bg-gray-700 px-2 py-0.5 rounded">
+                  <div className="absolute -top-6 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-xs text-gray-300 whitespace-nowrap bg-gray-700 px-2 py-0.5 rounded">
                     {d.count}
                   </div>
                 )}
