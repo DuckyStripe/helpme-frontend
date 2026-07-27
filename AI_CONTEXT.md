@@ -66,7 +66,7 @@ helpme-frontend/
 │   ├── dashboard/
 │   │   └── DashboardLayout.tsx   # Layout con sidebar
 │   ├── ui/                       # Componentes reutilizables
-│   │   ├── ActivationChart.tsx
+│   │   ├── TrendChart.tsx
 │   │   ├── BulkActionsBar.tsx
 │   │   ├── EmptyState.tsx
 │   │   ├── FilterBar.tsx
@@ -208,8 +208,8 @@ helpme-frontend/
    - totalTags, totalSellers, totalScans
    - statusCounts (VIRGIN, ACTIVE, SUSPENDED, INCOMPLETE)
    - recentScans, recentActivations
-   - activationSeries (para gráfico)
-4. Componente ActivationChart renderiza serie temporal
+   - activationSeries, scanSeries (para gráficos)
+4. Componente TrendChart renderiza cada serie temporal
 ```
 
 ### Lógica Crítica: Control de Acceso por Rol

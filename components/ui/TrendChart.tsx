@@ -1,11 +1,12 @@
 'use client';
 
-interface ActivationChartProps {
+interface TrendChartProps {
+  title: string;
   data: Array<{ date: string; count: number }>;
   period: '7d' | '30d' | '90d';
 }
 
-export default function ActivationChart({ data, period }: ActivationChartProps) {
+export default function TrendChart({ title, data, period }: TrendChartProps) {
   if (!data.length) return null;
 
   const maxCount = Math.max(...data.map(d => d.count), 1);
@@ -13,7 +14,7 @@ export default function ActivationChart({ data, period }: ActivationChartProps) 
 
   return (
     <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6">
-      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">Activaciones por día</h3>
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">{title}</h3>
       <div className="flex items-end gap-1 h-40">
         {displayData.map((d, i) => {
           const height = (d.count / maxCount) * 100;

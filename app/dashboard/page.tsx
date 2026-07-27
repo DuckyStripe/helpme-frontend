@@ -8,7 +8,9 @@ import { toast } from '@/lib/toast';
 import type { User } from '@/types';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/ui/StatCard';
-import ActivationChart from '@/components/ui/ActivationChart';
+import TrendChart from '@/components/ui/TrendChart';
+import StatusDonut from '@/components/ui/StatusDonut';
+import SellerBarChart from '@/components/ui/SellerBarChart';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { CardSkeleton, PageLoader } from '@/components/ui/Skeleton';
 import {
@@ -86,32 +88,49 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Distribución de estados + comparativa de vendedores */}
+      {metrics && (
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">Distribución de tags por estado</h3>
+            <StatusDonut statusCounts={sc} />
+          </div>
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">Tags por vendedor (top 6)</h3>
+            <SellerBarChart sellers={metrics.sellersWithMetrics || []} />
+          </div>
+        </div>
+      )}
+
       {/* Chart + Quick Actions */}
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           {metrics ? (
-            <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Escaneos</h3>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{metrics.totalScans}</p>
-                </div>
-                <div className="flex bg-gray-100 dark:bg-gray-700/50 rounded-lg p-0.5">
-                  {(['7d', '30d', '90d'] as const).map(p => (
-                    <button
-                      key={p}
-                      onClick={() => setPeriod(p)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                        period === p ? 'bg-red-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                      }`}
-                    >
-                      {p === '7d' ? '7 días' : p === '30d' ? '30 días' : '3 meses'}
-                    </button>
-                  ))}
+            <>
+              <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6 pb-0">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Escaneos</h3>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{metrics.totalScans}</p>
+                  </div>
+                  <div className="flex bg-gray-100 dark:bg-gray-700/50 rounded-lg p-0.5">
+                    {(['7d', '30d', '90d'] as const).map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setPeriod(p)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                          period === p ? 'bg-red-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                        }`}
+                      >
+                        {p === '7d' ? '7 días' : p === '30d' ? '30 días' : '3 meses'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <ActivationChart data={metrics.activationSeries || []} period={period} />
-            </div>
+              <TrendChart title="Escaneos por día" data={metrics.scanSeries || []} period={period} />
+              <TrendChart title="Activaciones por día" data={metrics.activationSeries || []} period={period} />
+            </>
           ) : (
             <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6">
               <div className="animate-pulse h-52 bg-gray-100 dark:bg-gray-700/50 rounded-lg" />
@@ -265,7 +284,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-6 mt-8">
+      <div className="grid lg:grid-cols-3 gap-6 mt-8">
         {/* Ranking de vendedores */}
         <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50 flex items-center justify-between">
@@ -324,6 +343,34 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Top tags escaneados */}
+        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <QrCode className="w-4 h-4" />
+              Top tags escaneados
+            </h3>
+          </div>
+          {!metrics?.topScannedTags?.length ? (
+            <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin escaneos en el periodo</div>
+          ) : (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700/30">
+              {metrics.topScannedTags.map((t: any, i: number) => (
+                <div key={t.tagUuid} className="px-6 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xs text-gray-400 dark:text-gray-600 w-4">{i + 1}</span>
+                    <div className="min-w-0">
+                      <p className="font-mono text-xs text-gray-700 dark:text-gray-300 truncate">{t.tagUuid.substring(0, 12)}…</p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-600 truncate">{t.sellerName}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-800 dark:text-gray-200 font-medium ml-4">{t.scanCount}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Seguridad y operación */}
@@ -332,6 +379,94 @@ export default function DashboardPage() {
           <StatCard label="Tags bloqueados por PIN" value={metrics.security.lockedTags} icon={Lock} color="red" />
           <StatCard label="Tags deshabilitados" value={metrics.security.disabledTags} icon={Ban} color="gray" />
           <StatCard label="Contactos sin verificar" value={metrics.security.unverifiedContacts} icon={ShieldAlert} color="amber" />
+        </div>
+      )}
+
+      {/* Alertas de emergencia y rutas monitoreadas */}
+      {metrics?.alerts && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          <StatCard
+            label={`Alertas enviadas (${period})`}
+            value={metrics.alerts.total}
+            icon={ShieldAlert}
+            color="red"
+          />
+          <StatCard
+            label="Envíos fallidos"
+            value={metrics.alerts.failCount}
+            icon={Ban}
+            color={metrics.alerts.failCount > 0 ? 'red' : 'gray'}
+          />
+          <StatCard
+            label="Viajes activos (RouteTrip)"
+            value={metrics.routeTrips?.active ?? 0}
+            icon={Activity}
+            color="blue"
+          />
+          <StatCard
+            label="Viajes vencidos sin confirmar"
+            value={metrics.routeTrips?.overdueActive ?? 0}
+            icon={Clock}
+            color={(metrics.routeTrips?.overdueActive ?? 0) > 0 ? 'red' : 'emerald'}
+          />
+        </div>
+      )}
+
+      {/* Planes y vehículos */}
+      {metrics?.planCounts && (
+        <div className="grid lg:grid-cols-3 gap-6 mt-8">
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Tags por plan
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-200 dark:divide-gray-700/30">
+              {(['PRINCIPAL', 'PRO', 'ULTRA'] as const).map(plan => (
+                <div key={plan} className="px-6 py-3 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{plan}</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-200 font-medium">{metrics.planCounts[plan] || 0}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Vehículos por tipo ({metrics.vehicles?.total || 0} total)</h3>
+            </div>
+            {!metrics.vehicles?.byType?.length ? (
+              <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin vehículos registrados</div>
+            ) : (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700/30">
+                {metrics.vehicles.byType.map((v: any) => (
+                  <div key={v.type} className="px-6 py-3 flex items-center justify-between">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{v.type}</span>
+                    <span className="text-sm text-gray-800 dark:text-gray-200 font-medium">{v.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Vehículos por aseguradora</h3>
+            </div>
+            {!metrics.vehicles?.byInsurer?.length ? (
+              <div className="px-6 py-8 text-center text-gray-500 text-sm">Sin aseguradoras vinculadas</div>
+            ) : (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700/30">
+                {metrics.vehicles.byInsurer.map((v: any, i: number) => (
+                  <div key={i} className="px-6 py-3 flex items-center justify-between">
+                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{v.insurerName}</span>
+                    <span className="text-sm text-gray-800 dark:text-gray-200 font-medium ml-4">{v.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </DashboardLayout>
