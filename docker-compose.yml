@@ -4,7 +4,7 @@ services:
       context: .
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    mem_limit: 512m
+    mem_limit: 128m
     ports:
       - "3000:3000"
     environment:
