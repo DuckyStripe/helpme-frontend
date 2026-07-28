@@ -1,64 +1,34 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import QRCode from 'qrcode';
-import { authApi, settingsApi, type WhatsappStatus } from '@/lib/api';
+import { authApi, settingsApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { User } from '@/types';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import MessageTemplatesSection from '@/components/dashboard/MessageTemplatesSection';
 import { PageLoader } from '@/components/ui/Skeleton';
-import { MessageCircle, Loader2, CheckCircle2, LogOut, QrCode } from 'lucide-react';
-
-const POLL_INTERVAL_MS = 3000;
-
-const STATUS_LABEL: Record<WhatsappStatus, string> = {
-  starting: 'Iniciando…',
-  qr: 'Esperando escaneo del QR',
-  authenticated: 'Autenticado, sincronizando…',
-  ready: 'Conectado',
-  disconnected: 'Desconectado',
-};
+import { MessageCircle, Loader2, Save, Eye, EyeOff, CheckCircle2, Wifi, AlertTriangle, KeyRound } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [status, setStatus] = useState<WhatsappStatus>('starting');
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const pollStatus = useCallback(async () => {
-    try {
-      const data = await settingsApi.getWhatsappStatus();
-      setStatus(data.status);
-
-      if (data.status === 'qr' && data.hasQr) {
-        try {
-          const { qr } = await settingsApi.getWhatsappQr();
-          const dataUrl = await QRCode.toDataURL(qr, { width: 280, margin: 1 });
-          setQrDataUrl(dataUrl);
-        } catch {
-          // El QR pudo haber rotado entre el status check y este fetch; se reintenta en el próximo poll.
-        }
-      } else {
-        setQrDataUrl(null);
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'No se pudo obtener el estado de WhatsApp');
-    } finally {
-      pollTimer.current = setTimeout(pollStatus, POLL_INTERVAL_MS);
-    }
-  }, []);
+  const [baseUrl, setBaseUrl] = useState('');
+  const [sessionId, setSessionId] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [generatingKey, setGeneratingKey] = useState(false);
+  const [revealingKey, setRevealingKey] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     checkAuth();
-    return () => {
-      if (pollTimer.current) clearTimeout(pollTimer.current);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -70,25 +40,110 @@ export default function SettingsPage() {
         return;
       }
       setUser(meData.user);
-      setLoading(false);
-      pollStatus();
+      loadSettings();
     } catch {
       router.push('/login');
     }
   }
 
-  async function handleLogout() {
-    if (!confirm('¿Cerrar la sesión de WhatsApp? Habrá que escanear un nuevo QR para volver a vincularla.')) return;
-    setLoggingOut(true);
+  async function loadSettings() {
+    setLoading(true);
     try {
-      await settingsApi.logoutWhatsapp();
-      toast.success('Sesión de WhatsApp cerrada');
-      setQrDataUrl(null);
+      const data = await settingsApi.getOpenwa();
+      setBaseUrl(data.baseUrl || '');
+      setSessionId(data.sessionId || '');
+      setHasApiKey(data.hasApiKey);
+      setUpdatedAt(data.updatedAt);
     } catch (err: any) {
-      toast.error(err.message || 'No se pudo cerrar la sesión');
+      toast.error(err.message || 'Error al cargar la configuración');
     } finally {
-      setLoggingOut(false);
+      setLoading(false);
     }
+  }
+
+  async function handleSave() {
+    if (!baseUrl.trim() || !sessionId.trim()) {
+      toast.error('La URL base y el ID de sesión son obligatorios');
+      return;
+    }
+    if (!hasApiKey && !apiKey.trim()) {
+      toast.error('La API Key es obligatoria para poder enviar alertas');
+      return;
+    }
+    setSaving(true);
+    setTestResult(null);
+    try {
+      const data = await settingsApi.updateOpenwa({
+        baseUrl: baseUrl.trim(),
+        sessionId: sessionId.trim(),
+        apiKey: apiKey.trim() || undefined,
+      });
+      setHasApiKey(data.hasApiKey);
+      setUpdatedAt(data.updatedAt);
+      setApiKey('');
+      toast.success('Configuración de OpenWA actualizada');
+    } catch (err: any) {
+      toast.error(err.message || 'Error al guardar la configuración');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleTest() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await settingsApi.testOpenwa();
+      setTestResult(result);
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message || 'No se pudo probar la conexión' });
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  async function handleGenerateKey() {
+    setGeneratingKey(true);
+    setTestResult(null);
+    try {
+      const result = await settingsApi.generateOpenwaKey();
+      if (result.ok && result.apiKey) {
+        setApiKey(result.apiKey);
+        setTestResult({ ok: true, message: 'Nueva API Key generada. Guárdala inmediatamente antes de cambiar de página.' });
+      } else {
+        setTestResult({ ok: false, message: result.message || 'No se pudo generar la API Key' });
+      }
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message || 'No se pudo generar la API Key' });
+    } finally {
+      setGeneratingKey(false);
+    }
+  }
+
+  async function handleRevealKey() {
+    setRevealingKey(true);
+    setTestResult(null);
+    try {
+      const result = await settingsApi.revealOpenwaKey();
+      if (result.ok && result.apiKey) {
+        setApiKey(result.apiKey);
+        setShowApiKey(true);
+        setTestResult({ ok: true, message: 'API Key obtenida. Cópiala ahora.' });
+      } else {
+        setTestResult({ ok: false, message: result.message || 'No hay API Key configurada' });
+      }
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message || 'No se pudo obtener la API Key' });
+    } finally {
+      setRevealingKey(false);
+    }
+  }
+
+  function formatDate(dateStr: string | null) {
+    if (!dateStr) return 'Nunca';
+    return new Date(dateStr).toLocaleString('es-MX', {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
   }
 
   if (loading && !user) return <PageLoader />;
@@ -109,66 +164,144 @@ export default function SettingsPage() {
             <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Sesión de WhatsApp</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Sesión de WhatsApp (OpenWA)</h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              El backend envía las alertas de emergencia usando esta sesión de WhatsApp Web. La
-              sesión vive en el propio servidor y sobrevive a reinicios; solo hace falta re-escanear
-              el QR si se cierra sesión desde el teléfono o desde aquí.
+              El backend envía las alertas de emergencia usando esta sesión. Si la sesión se cae o
+              se reemplaza el número, cambia el ID aquí — se aplica de inmediato, sin necesidad de
+              hacer rebuild.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-4">
-          <span
-            className={`w-2.5 h-2.5 rounded-full ${
-              status === 'ready'
-                ? 'bg-green-500'
-                : status === 'qr'
-                  ? 'bg-amber-500'
-                  : status === 'disconnected'
-                    ? 'bg-red-500'
-                    : 'bg-gray-400'
-            }`}
-          />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{STATUS_LABEL[status]}</span>
-        </div>
-
-        {status === 'ready' && (
-          <div className="flex flex-col items-start gap-4">
-            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 bg-green-600/10 border border-green-600/30 rounded-lg px-3 py-2">
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-              <span>WhatsApp conectado y listo para enviar alertas.</span>
-            </div>
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-            >
-              {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-              Cerrar sesión
-            </button>
+        {loading ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
           </div>
-        )}
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">URL base de OpenWA</label>
+              <input
+                type="text"
+                value={baseUrl}
+                onChange={(e) => setBaseUrl(e.target.value)}
+                placeholder="https://openwa.codelabs.com.mx"
+                autoComplete="off"
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              />
+            </div>
 
-        {status !== 'ready' && (
-          <div className="flex flex-col items-center gap-4 py-4">
-            {qrDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={qrDataUrl} alt="QR de WhatsApp" width={280} height={280} className="rounded-lg border border-gray-200 dark:border-gray-700" />
-            ) : (
-              <div className="w-[280px] h-[280px] flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 text-gray-400">
-                {status === 'starting' || status === 'authenticated' ? (
-                  <Loader2 className="w-8 h-8 animate-spin" />
-                ) : (
-                  <QrCode className="w-8 h-8" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">ID de sesión</label>
+              <input
+                type="text"
+                value={sessionId}
+                onChange={(e) => setSessionId(e.target.value)}
+                placeholder="73fc17b3-1aa1-426a-89a1-fe7655cd9a7f"
+                autoComplete="off"
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                API Key <span className="text-red-600 dark:text-red-400">*</span>
+                {hasApiKey && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-normal">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> configurada
+                  </span>
                 )}
-                <span className="text-xs">{STATUS_LABEL[status]}</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder={hasApiKey ? 'Dejar vacío para no cambiarla' : 'Requerida por OpenWA para enviar mensajes'}
+                  autoComplete="off"
+                  className="w-full px-4 py-2.5 pr-11 bg-white dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  aria-label={showApiKey ? 'Ocultar clave' : 'Mostrar clave'}
+                >
+                  {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5">
+                <p className="text-xs text-gray-500">
+                  Obligatoria: OpenWA requiere esta key en cada llamada.
+                </p>
+                {hasApiKey && (
+                  <button
+                    type="button"
+                    onClick={handleRevealKey}
+                    disabled={revealingKey}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Revelar la API Key guardada en la base de datos"
+                  >
+                    {revealingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+                    {revealingKey ? 'Obteniendo…' : 'Revelar guardada'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleGenerateKey}
+                  disabled={generatingKey || !hasApiKey}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Generar nueva API Key desde el portal de OpenWA"
+                >
+                  {generatingKey ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
+                  {generatingKey ? 'Generando…' : 'Generar desde portal'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1.5">
+                Obligatoria: OpenWA requiere esta key en cada llamada (además de la URL base y el ID
+                de sesión). Por seguridad nunca se muestra una vez guardada; deja el campo vacío en
+                futuras ediciones para conservar la que ya está configurada.
+              </p>
+            </div>
+
+            {testResult && (
+              <div
+                className={`rounded-lg p-3 flex items-start gap-2 text-sm ${
+                  testResult.ok
+                    ? 'bg-green-600/10 border border-green-600/30 text-green-700 dark:text-green-400'
+                    : 'bg-red-600/10 border border-red-600/30 text-red-700 dark:text-red-400'
+                }`}
+              >
+                {testResult.ok ? (
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                )}
+                <span>{testResult.message}</span>
               </div>
             )}
-            <p className="text-xs text-gray-500 text-center max-w-sm">
-              Abre WhatsApp en el teléfono que enviará las alertas → Dispositivos vinculados → Vincular
-              un dispositivo, y escanea este código.
-            </p>
+
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-gray-500">Última actualización: {formatDate(updatedAt)}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={handleTest}
+                  disabled={testing}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                  Probar conexión
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
